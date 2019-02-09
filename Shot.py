@@ -6,6 +6,7 @@ class Shot:
     contourArea: int
     image: any
     image_timestamp: any
+    Contours = []
 
     def FromFile(self, path: str):
         self = Shot()
@@ -31,3 +32,40 @@ class Shot:
         #plt.title('shot.show_plt')
         img = cv2.cvtColor(self.image_contours, cv2.COLOR_BGR2RGB)
         plt.imshow(img, interpolation="bilinear")
+
+    def DrawContours(self):
+        cv2.drawContours(self.image_contours,
+                         self.Contours, -1, (0, 255, 255), 1)
+        for c in self.Contours[0:2]:
+            area = int(cv2.contourArea(c) / 100)
+            print('Contour: {}'.format(area))
+
+            (x, y, w, h) = cv2.boundingRect(c)
+            cv2.rectangle(self.image_contours, (x, y),
+                          (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(self.image_contours, str(
+                area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
+    def MagnifyMotion(self):
+        if len(self.Contours) == 0:
+            return
+
+        counts = 1
+        margin = 5
+        zoom = 2
+
+        for c in self.Contours[0:counts]:
+            (x, y, w, h) = cv2.boundingRect(c)
+            img = self.image_color
+            motion_area = img[y:(y+h), x:(x+w)]
+            img_xmax = len(img[0])
+            img_ymax = len(img)
+            motion_area = cv2.resize(
+                motion_area, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
+            y_max = img_ymax-margin
+            y_min = y_max - zoom*h
+            x_max = img_xmax-margin
+            x_min = x_max - zoom*w
+            self.image_contours[y_min:y_max, x_min:x_max] = motion_area
+            cv2.rectangle(self.image_contours, (x_min, y_min),
+                          (x_max, y_max), (127, 127, 127), 2)

@@ -8,13 +8,13 @@ shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
 
 shots.CalcContours()
 
-shots.delta12.DrawContours(shots.shot1)
-shots.delta12.DrawContours(shots.shot2)
-shots.delta23.DrawContours(shots.shot3)
+shots.shot1.DrawContours()
+shots.shot2.DrawContours()
+shots.shot3.DrawContours()
 
-shots.delta12.MagnifyMotion(shots.shot1)
-shots.delta12.MagnifyMotion(shots.shot2)
-shots.delta23.MagnifyMotion(shots.shot3)
+shots.shot1.MagnifyMotion()
+shots.shot2.MagnifyMotion()
+shots.shot3.MagnifyMotion()
 
 plt.figure(figsize=(12, 6.025))
 gs1 = gridspec.GridSpec(2, 3, left=0, right=1, top=1,
