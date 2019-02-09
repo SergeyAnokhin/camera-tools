@@ -13,6 +13,7 @@ class Shot:
         print('Open file: {}'.format(self.filename))
         self.image = cv2.imread(self.filename, cv2.IMREAD_GRAYSCALE)
         self.image_color = cv2.imread(self.filename, cv2.IMREAD_COLOR)
+        self.image_contours = self.image_color.copy()
         if len(self.image) == 0:
             raise ValueError('cant load: {}'.format(self.filename))
         self.image_timestamp = self.image[:22, :230]
@@ -28,5 +29,5 @@ class Shot:
     def show_plt(self):
         plt.axis("off")
         #plt.title('shot.show_plt')
-        img = cv2.cvtColor(self.image_color, cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(self.image_contours, cv2.COLOR_BGR2RGB)
         plt.imshow(img, interpolation="bilinear")
