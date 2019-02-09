@@ -5,6 +5,9 @@ import matplotlib.gridspec as gridspec
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Cat_nomotionsnap')
 shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Sergey_trash_motioninplace')
+
+shots.CalcContours()
+
 shots.delta12.DrawContours(shots.shot1)
 shots.delta12.DrawContours(shots.shot2)
 shots.delta23.DrawContours(shots.shot3)

@@ -11,7 +11,7 @@ class ShotDelta:
         self.shot2 = shot2
         self.Delta = cv2.absdiff(self.shot1.image, self.shot2.image)
 
-    def GetCountours(self):
+    def CalcCountours(self):
         self.GaussianBlur = cv2.GaussianBlur(self.Delta, (5, 5), 0)
         ret, self.Threshold = cv2.threshold(
             self.GaussianBlur, 40, 255, cv2.THRESH_BINARY)
@@ -30,7 +30,7 @@ class ShotDelta:
         return self.Contours
 
     def DrawContours(self, shot: Shot):
-        self.GetCountours()
+        self.CalcCountours()
         cv2.drawContours(shot.image_contours,
                          self.Contours, -1, (0, 255, 255), 1)
         for c in self.Contours[0:2]:
@@ -44,7 +44,6 @@ class ShotDelta:
                 area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
     def MagnifyMotion(self, shot: Shot):
-        self.GetCountours()
         if len(self.Contours) == 0:
             return
 
