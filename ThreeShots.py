@@ -31,11 +31,11 @@ class ThreeShots:
         self.delta23.CalcCountours()
         self.delta31.CalcCountours()
 
-        print('S= Shot1 Contours')
+        #print('S= Shot1 Contours')
         self.shot1.Contours = self.removeEmptyContours(self.delta12, True, False, True)
-        print('S= Shot2 Contours')
+        #print('S= Shot2 Contours')
         self.shot2.Contours = self.removeEmptyContours(self.delta12, True, True, False)
-        print('S= Shot3 Contours')
+        #print('S= Shot3 Contours')
         self.shot3.Contours = self.removeEmptyContours(self.delta23, False, True, True)
 
     def removeEmptyContours(self, delta: ShotDelta, diff12 = True, diff23 = False, diff31 = True):
@@ -48,17 +48,17 @@ class ThreeShots:
             max12 = np.amax(rect12)
             max23 = np.amax(rect23)
             max31 = np.amax(rect31)
-            print('Max delta Contour ({}): 1-2:{} 2-3:{} 3-1:{}'
-                .format(cv2.contourArea(c), max12, max23, max31))
+            # print('Max delta Contour ({}): 1-2:{} 2-3:{} 3-1:{}'
+            #     .format(cv2.contourArea(c), max12, max23, max31))
             if ((max12 > 0 and diff12) or (max12 >= 0 and not diff12)) \
                 and \
                 ((max23 > 0 and diff23) or (max23 >= 0 and not diff23)) \
                 and \
                 ((max31 > 0 and diff31) or (max31 >= 0 and not diff31)):
                 new_contours.append(c)
-                if max12 > 0 and max23 > 0 and max31 > 0:
-                    print('!!! Motion in same place : velocity = 0')
-            else:
-                print('remove contour')
+                # if max12 > 0 and max23 > 0 and max31 > 0:
+                #     print('!!! Motion in same place : velocity = 0')
+            # else:
+            #     print('remove contour')
 
         return new_contours

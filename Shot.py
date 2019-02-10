@@ -38,7 +38,7 @@ class Shot:
                          self.Contours, -1, (0, 255, 255), 1)
         for c in self.Contours[0:2]:
             area = int(cv2.contourArea(c) / 100)
-            print('Contour: {}'.format(area))
+            #print('Contour: {}'.format(area))
 
             (x, y, w, h) = cv2.boundingRect(c)
             cv2.rectangle(self.image_contours, (x, y),
@@ -60,12 +60,26 @@ class Shot:
             motion_area = img[y:(y+h), x:(x+w)]
             img_xmax = len(img[0])
             img_ymax = len(img)
+
             motion_area = cv2.resize(
                 motion_area, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
             y_max = img_ymax-margin
             y_min = y_max - zoom*h
             x_max = img_xmax-margin
             x_min = x_max - zoom*w
+
+            if y_min < margin or x_min < margin:
+                continue # can fit, too large
+
             self.image_contours[y_min:y_max, x_min:x_max] = motion_area
             cv2.rectangle(self.image_contours, (x_min, y_min),
                           (x_max, y_max), (127, 127, 127), 2)
+
+    def CalcHaarBody(self):
+        cascadePath = "cascade\\haarcascade_frontalface_alt.xml"
+        cascade = cv2.CascadeClassifier(cascadePath)
+        objects = cascade.detectMultiScale(self.image, scaleFactor=1.1, minNeighbors=1, minSize=(30, 30))
+        #print('=HAAR=: Detected bodies : {}'.format(len(objects)))
+        for (x, y, w, h) in objects:
+            #crop = image[y: y + h, x: x + w]
+            cv2.rectangle(self.image_contours,(x,y),(x+w,y+h),(255,0,0),2)
