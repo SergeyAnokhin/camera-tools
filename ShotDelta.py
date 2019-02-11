@@ -16,7 +16,7 @@ class ShotDelta:
         ret, self.Threshold = cv2.threshold(
             self.GaussianBlur, 40, 255, cv2.THRESH_BINARY)
         self.Dilate = cv2.dilate(self.Threshold, np.ones((10, 10), np.uint8))
-        img, cnts, h = cv2.findContours(
+        cnts, h = cv2.findContours(
             self.Dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         self.Contours = sorted(
             cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
