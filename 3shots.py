@@ -15,15 +15,12 @@ shots = ThreeShots.FromDir(None, 'Foscam\\Day_sergey_buggy')
 # shots.shot2.CalcHaarBody()
 # shots.shot3.CalcHaarBody()
 
-yoloResult = yolo.ProcessImage(shots.shot1)
-yolo.drawRegions(shots.shot1.image_contours, yoloResult)
-
-# yolo.ProcessImage(shots.shot2)
-# yolo.drawRegions(shots.shot2)
-
-# yolo.ProcessImage(shots.shot3)
-# yolo.drawRegions(shots.shot3)
-
+yoloResult1 = yolo.ProcessImage(shots.shot1)
+yolo.drawRegions(shots.shot1.image_contours, yoloResult1)
+yoloResult2 = yolo.ProcessImage(shots.shot2)
+yolo.drawRegions(shots.shot2.image_contours, yoloResult2)
+yoloResult3 = yolo.ProcessImage(shots.shot3)
+yolo.drawRegions(shots.shot3.image_contours, yoloResult3)
 
 shots.CalcContours()
 

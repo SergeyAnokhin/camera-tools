@@ -25,12 +25,12 @@ class YoloContext:
             dtype="uint8")
 
         # derive the paths to the YOLO weights and model configuration
-        weightsPath = os.path.sep.join([yoloName, "model.weights"])
-        configPath = os.path.sep.join([yoloName, "model.cfg"])
+        self.weightsPath = os.path.sep.join([yoloName, "model.weights"])
+        self.configPath = os.path.sep.join([yoloName, "model.cfg"])
 
-        print("[INFO] loading YOLO from disk... : ", weightsPath)
+        print("[INFO] loading YOLO from disk... : ", self.weightsPath)
         start = time.time()
-        self.net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+        self.net = cv2.dnn.readNetFromDarknet(self.configPath, self.weightsPath)
         print("[INFO] Load YOLO took {:.6f} seconds".format(time.time() - start))
 
         # determine only the *output* layer names that we need from YOLO
@@ -38,6 +38,7 @@ class YoloContext:
         self.layers = [self.layers[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
 
     def ProcessImage(self, shot: Shot):
+
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
@@ -70,7 +71,6 @@ class YoloContext:
                 # filter out weak predictions by ensuring the detected
                 # probability is greater than the minimum probability
                 if confidence > self.confidence:
-                    print('Confidence: ', classID, '=>', confidence)
                     # scale the bounding box coordinates back relative to the
                     # size of the image, keeping in mind that YOLO actually
                     # returns the center (x, y)-coordinates of the bounding
@@ -90,11 +90,7 @@ class YoloContext:
                     result.classIDs.append(classID)
 
         # apply non-maxima suppression to suppress weak, overlapping bounding
-        # boxes
-        print('Boxes : ', len(result.boxes))
-        print('result.confidences : ', len(result.confidences))
         result.idxs = cv2.dnn.NMSBoxes(result.boxes, result.confidences, self.confidence, self.threshold)
-        print('result.idxs : ', len(result.idxs))
 
         return result
 
@@ -105,7 +101,7 @@ class YoloContext:
 
         # loop over the indexes we are keeping
         for i in yoloResult.idxs.flatten():
-            print('paint triangle')
+            #print('paint triangle')
             # extract the bounding box coordinates
             (x, y) = (yoloResult.boxes[i][0], yoloResult.boxes[i][1])
             (w, h) = (yoloResult.boxes[i][2], yoloResult.boxes[i][3])
@@ -114,5 +110,6 @@ class YoloContext:
             color = [int(c) for c in self.COLORS[yoloResult.classIDs[i]]]
             cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
             text = "{}: {:.4f}".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i])
+            print("[YOLO] Found: ", text)
             cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
