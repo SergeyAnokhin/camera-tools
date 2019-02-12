@@ -85,4 +85,3 @@ class Shot:
             #crop = image[y: y + h, x: x + w]
             cv2.rectangle(self.image_contours,(x,y),(x+w,y+h),(255,0,0),2)
 
-    def CalcObjectDetectionYolo(self, yoloContext: YoloContext):

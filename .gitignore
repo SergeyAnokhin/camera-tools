@@ -103,3 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 /yolo-object-detection/yolo-coco/yolov3.weights
+
+yolo-object-detection/yolo-coco/model.weights
