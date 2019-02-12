@@ -3,19 +3,20 @@ from YoloContext import YoloContext
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-yolo = YoloContext('yolo-object-detection\\yolo-coco')
+#yolo = YoloContext('yolo-object-detection\\yolo-coco')
+yolo = YoloContext('yolo-object-detection\\yolov3-tiny')
 
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Cat_nomotionsnap')
-shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
+#shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Sergey_trash_motioninplace')
-#shots = ThreeShots.FromDir(None, 'Foscam\\Day_sergey_buggy')
+shots = ThreeShots.FromDir(None, 'Foscam\\Day_sergey_buggy')
 
 # shots.shot1.CalcHaarBody()
 # shots.shot2.CalcHaarBody()
 # shots.shot3.CalcHaarBody()
 
 yoloResult = yolo.ProcessImage(shots.shot1)
-yolo.drawRegions(shots.shot1.image, yoloResult)
+yolo.drawRegions(shots.shot1.image_contours, yoloResult)
 
 # yolo.ProcessImage(shots.shot2)
 # yolo.drawRegions(shots.shot2)
