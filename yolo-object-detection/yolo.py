@@ -1,5 +1,7 @@
 # USAGE
 # python yolo.py --image images/baggage_claim.jpg --yolo yolo-coco
+# python yolo.py --image images/baggage_claim.jpg --yolo yolov3-tiny
+# python yolo.py --image ../Foscam/Day_Lilia_Gate/Snap_20190206-090254-0.jpg --yolo yolo-coco
 
 # Download weights : https://pjreddie.com/darknet/yolo/
 # install OpenCV : pip install opencv-contrib-python
