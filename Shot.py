@@ -19,7 +19,7 @@ class Shot:
         if len(self.image) == 0:
             raise ValueError('cant load: {}'.format(self.filename))
         self.image_timestamp = self.image[:22, :230]
-        self.image[:22, :230] = 0
+        self.image[:22, :230] = 0 # remove timestamp
         
         return self
 

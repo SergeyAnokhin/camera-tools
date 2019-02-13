@@ -39,14 +39,14 @@ class YoloContext:
         self.layers = self.net.getLayerNames()
         self.layers = [self.layers[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
 
-    def ProcessImage(self, shot: Shot):
+    def ProcessShot(self, shot: Shot):
 
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
+        print("[YOLO] start detect objects on: {}".format(shot.filename))
         image = shot.image_color
         blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
-        print("[YOLO] start detect objects on: {}".format(shot.filename))
         self.net.setInput(blob)
         start = time.time()
         layerOutputs = self.net.forward(self.layers)
