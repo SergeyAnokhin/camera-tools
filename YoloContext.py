@@ -13,8 +13,8 @@ class YoloResult:
         self.confidences = []
 
 class YoloContext:
-    confidence = 0.5
-    threshold = 0.3
+    confidence = 0.0001
+    threshold = 0
 
     def __init__(self, yoloName: str):
         # load the COCO class labels our YOLO model was trained on
