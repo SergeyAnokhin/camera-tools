@@ -5,10 +5,12 @@ import numpy as np
 import Shot
 
 class YoloResult:
-    idxs = []
-    boxes = []
-    classIDs = []
-    confidences = []
+
+    def __init__(self):
+        self.idxs = []
+        self.boxes = []
+        self.classIDs = []
+        self.confidences = []
 
 class YoloContext:
     confidence = 0.5

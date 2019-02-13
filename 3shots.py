@@ -3,8 +3,8 @@ from YoloContext import YoloContext
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-#yolo = YoloContext('yolo-object-detection\\yolo-coco')
-yolo = YoloContext('yolo-object-detection\\yolov3-tiny')
+yolo = YoloContext('yolo-object-detection\\yolo-coco')
+#yolo = YoloContext('yolo-object-detection\\yolov3-tiny')
 
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Cat_nomotionsnap')
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
@@ -15,12 +15,12 @@ shots = ThreeShots.FromDir(None, 'Foscam\\Day_sergey_buggy')
 # shots.shot2.CalcHaarBody()
 # shots.shot3.CalcHaarBody()
 
-yoloResult1 = yolo.ProcessImage(shots.shot1)
-yolo.drawRegions(shots.shot1.image_contours, yoloResult1)
-yoloResult2 = yolo.ProcessImage(shots.shot2)
-yolo.drawRegions(shots.shot2.image_contours, yoloResult2)
-yoloResult3 = yolo.ProcessImage(shots.shot3)
-yolo.drawRegions(shots.shot3.image_contours, yoloResult3)
+yoloResult = yolo.ProcessImage(shots.shot1)
+yolo.drawRegions(shots.shot1.image_contours, yoloResult)
+yoloResult = yolo.ProcessImage(shots.shot2)
+yolo.drawRegions(shots.shot2.image_contours, yoloResult)
+yoloResult = yolo.ProcessImage(shots.shot3)
+yolo.drawRegions(shots.shot3.image_contours, yoloResult)
 
 shots.CalcContours()
 
