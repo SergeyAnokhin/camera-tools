@@ -12,7 +12,7 @@ class Shot:
     def FromFile(self, path: str):
         self = Shot()
         self.filename = path
-        print('Open file: {}'.format(self.filename))
+        print('[SHOT] Open file: {}'.format(self.filename))
         self.image = cv2.imread(self.filename, cv2.IMREAD_GRAYSCALE)
         self.image_color = cv2.imread(self.filename, cv2.IMREAD_COLOR)
         self.image_contours = self.image_color.copy()
@@ -43,9 +43,9 @@ class Shot:
 
             (x, y, w, h) = cv2.boundingRect(c)
             cv2.rectangle(self.image_contours, (x, y),
-                          (x + w, y + h), (0, 255, 0), 2)
+                          (x + w, y + h), (0, 255, 0), 1, 8)
             cv2.putText(self.image_contours, str(
-                area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
     def MagnifyMotion(self):
         if len(self.Contours) == 0:

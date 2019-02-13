@@ -30,10 +30,10 @@ class YoloContext:
         self.weightsPath = os.path.sep.join([yoloName, "model.weights"])
         self.configPath = os.path.sep.join([yoloName, "model.cfg"])
 
-        print("[INFO] loading YOLO from disk... : ", self.weightsPath)
+        print("[YOLO] loading weights from disk... : ", self.weightsPath)
         start = time.time()
         self.net = cv2.dnn.readNetFromDarknet(self.configPath, self.weightsPath)
-        print("[INFO] Load YOLO took {:.6f} seconds".format(time.time() - start))
+        print("[YOLO] Load took {:.3f} seconds".format(time.time() - start))
 
         # determine only the *output* layer names that we need from YOLO
         self.layers = self.net.getLayerNames()
@@ -46,11 +46,11 @@ class YoloContext:
         # associated probabilities
         image = shot.image_color
         blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
-        print("[INFO] YOLO start detect objects on: {}".format(shot.filename))
+        print("[YOLO] start detect objects on: {}".format(shot.filename))
         self.net.setInput(blob)
         start = time.time()
         layerOutputs = self.net.forward(self.layers)
-        print("[INFO] detection took {:.6f} seconds".format(time.time() - start))
+        print("[YOLO] detection took {:.3f} seconds".format(time.time() - start))
 
         return self.ProcessLayerOutputs(layerOutputs, image.shape[:2])
 

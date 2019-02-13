@@ -3,8 +3,8 @@ from YoloContext import YoloContext
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-yolo = YoloContext('yolo-object-detection\\yolo-coco')
-#yolo = YoloContext('yolo-object-detection\\yolov3-tiny')
+#yolo = YoloContext('yolo-object-detection\\yolo-coco')
+yolo = YoloContext('yolo-object-detection\\yolov3-tiny')
 
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Cat_nomotionsnap')
 #shots = ThreeShots.FromDir(None, 'Foscam\\Day_Lilia_Gate')
