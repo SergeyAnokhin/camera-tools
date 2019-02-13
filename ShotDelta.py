@@ -21,9 +21,8 @@ class ShotDelta:
         self.Contours = sorted(
             cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
 
-        areas = [str(cv2.contourArea(c)) for c in self.Contours]
-        totalArea = sum(cv2.contourArea(c) for c in self.Contours)
-
+        # areas = [str(cv2.contourArea(c)) for c in self.Contours]
+        # totalArea = sum(cv2.contourArea(c) for c in self.Contours)
         # print('D= Contours found : {}. Total contours area : {}'.format(
         #     len(self.Contours), totalArea))
         # print('D= Contours area: ', ", ".join(areas))

@@ -45,7 +45,7 @@ class Shot:
             cv2.rectangle(self.image_contours, (x, y),
                           (x + w, y + h), (0, 255, 0), 1, 8)
             cv2.putText(self.image_contours, str(
-                area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+                area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
 
     def MagnifyMotion(self):
         if len(self.Contours) == 0:
