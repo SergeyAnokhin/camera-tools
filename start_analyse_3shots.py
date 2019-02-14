@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-sys.path.insert(0, 'helpers')
+sys.path.insert(0, 'Common')
 
 from GmailContext import GmailContext
 from ThreeShots import ThreeShots

@@ -108,3 +108,4 @@ yolo-object-detection/yolo-coco/model.weights
 *.weights
 secret_config.json
 temp/*
+*secret*.json
