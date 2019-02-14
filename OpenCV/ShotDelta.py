@@ -1,5 +1,5 @@
 import cv2
-import Shot
+from OpenCV.Shot import Shot
 import numpy as np
 
 

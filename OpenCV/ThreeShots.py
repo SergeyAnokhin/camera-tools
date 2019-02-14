@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from Shot import Shot
-from ShotDelta import ShotDelta
+from OpenCV.Shot import Shot
+from OpenCV.ShotDelta import ShotDelta
 
 class ThreeShots:
     shot1: Shot

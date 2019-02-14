@@ -4,8 +4,8 @@ import os
 import sys
 from email.parser import HeaderParser
 import email.header
-from SecretConfig import SecretConfig
-from CommonHelper import CommonHelper
+from Common.SecretConfig import SecretConfig
+from Common.CommonHelper import CommonHelper
 
 class GmailContext():
 

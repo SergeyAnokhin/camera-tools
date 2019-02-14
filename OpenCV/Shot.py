@@ -1,8 +1,7 @@
 import cv2
 import datetime
 import matplotlib.pyplot as plt
-from YoloContext import YoloContext
-from CommonHelper import CommonHelper
+from Common.CommonHelper import CommonHelper
 
 class Shot:
     filename = ''

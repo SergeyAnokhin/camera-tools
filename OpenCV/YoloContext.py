@@ -2,7 +2,7 @@ import cv2
 import time
 import os
 import numpy as np
-import Shot
+from OpenCV.Shot import Shot
 
 class YoloResult:
 

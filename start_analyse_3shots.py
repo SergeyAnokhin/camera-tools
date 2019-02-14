@@ -1,12 +1,9 @@
 import sys
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-
-sys.path.insert(0, 'Common')
-
-from GmailContext import GmailContext
-from ThreeShots import ThreeShots
-from YoloContext import YoloContext
+from Common.GmailContext import GmailContext
+from OpenCV.ThreeShots import ThreeShots
+from OpenCV.YoloContext import YoloContext
 
 
 temp = 'temp'
