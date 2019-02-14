@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\FoscamPTZ\\FI9828P_00626E68890F",
+    "path_to": "\\\\diskstation\\CameraArchive\\FoscamPTZ",
+    "sensor": {
+        "is_external": true,
+        "unit": "bytes",
+        "id": "FoscamCameraArchiveFI9828P_00626E68890F",
+        "type": "CameraArchive",
+        "device": "Foscam FI9828P",
+        "display": "Foscam(.) BackWall"
+    },
+    "position": {
+        "floor": -1,
+        "room": "BackWall",
+        "detail": "under the roof"
+    },
+    "camera": "FoscamPTZ"
+}

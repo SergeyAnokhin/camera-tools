@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\Foscam\\FI9805W_C4D6553DECE1",
+    "path_to": "\\\\diskstation\\CameraArchive\\Foscam",
+    "sensor": {
+        "is_external": true,
+        "unit": "bytes",
+        "id": "FoscamCameraArchiveFI9805W_C4D6553DECE1",
+        "type": "CameraArchive",
+        "device": "Foscam FI9805W",
+        "display": "Foscam(.) FrontWall"
+    },
+    "position": {
+        "floor": -1,
+        "room": "FrontWall",
+        "detail": "under the roof"
+    },
+    "camera": "Foscam"
+}

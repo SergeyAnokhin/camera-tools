@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\FoscamPlay\\FI9816P_00626E827A94",
+    "path_to": "\\\\diskstation\\CameraArchive\\FoscamPlay",
+    "sensor": {
+        "is_external": false,
+        "unit": "bytes",
+        "id": "FoscamCameraArchiveFI9816P_00626E827A94",
+        "type": "CameraArchive",
+        "device": "Foscam FI9816P",
+        "display": "Play(1) Ceiling"
+    },
+    "position": {
+        "floor": 1,
+        "room": "Play",
+        "detail": "above the window"
+    },
+    "camera": "FoscamPlay"
+}

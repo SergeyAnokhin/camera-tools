@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\FoscamHut\\FI9800P_00626E870C7B",
+    "path_to": "\\\\diskstation\\CameraArchive\\FoscamHut",
+    "sensor": {
+        "is_external": true,
+        "unit": "bytes",
+        "id": "FoscamCameraArchiveFI9800P_00626E870C7B",
+        "type": "CameraArchive",
+        "device": "Foscam FI9800P",
+        "display": "Foscam(.) Hut"
+    },
+    "position": {
+        "floor": -1,
+        "room": "Hut",
+        "detail": "Hut roof"
+    },
+    "camera": "FoscamHut"
+}

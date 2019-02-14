@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\DLinkFranck",
+    "path_to": "\\\\diskstation\\CameraArchive\\DLinkFranck",
+    "sensor": {
+        "is_external": false,
+        "unit": "bytes",
+        "id": "DLinkCameraArchiveDCS-932L-2",
+        "type": "CameraArchive",
+        "device": "DLink DCS-932L",
+        "display": "WoodSouth(2) Ceiling"
+    },
+    "position": {
+        "floor": 2,
+        "room": "WoodSouth",
+        "detail": "Ceiling"
+    },
+    "camera": "DLinkFranck"
+}

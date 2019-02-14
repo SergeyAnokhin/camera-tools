@@ -1,8 +1,13 @@
+import sys
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+sys.path.insert(0, 'helpers')
+
 from GmailContext import GmailContext
 from ThreeShots import ThreeShots
 from YoloContext import YoloContext
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
+
 
 temp = 'temp'
 # # Snap_20190214-080859-0.jpg => MDAlarm_20190214-080859.jpg

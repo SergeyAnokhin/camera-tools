@@ -1,0 +1,18 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\DLinkCharles",
+    "path_to": "\\\\diskstation\\CameraArchive\\DLinkCharles",
+    "sensor": {
+        "is_external": false,
+        "unit": "bytes",
+        "id": "DLinkCameraArchiveDCS-932L-1",
+        "type": "CameraArchive",
+        "device": "DLink DCS-932L",
+        "display": "White(2) Bed"
+    },
+    "position": {
+        "floor": 2,
+        "room": "White",
+        "detail": "near bed"
+    },
+    "camera": "DLinkCharles"
+}

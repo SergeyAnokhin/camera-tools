@@ -1,0 +1,19 @@
+{
+    "path_from": "C:\\inetpub\\ftproot\\Camera\\Konx\\video\\KonxHD",
+    "path_to": "\\\\diskstation\\CameraArchive\\KonxHD",
+    "ignore_dir": ["thumbs"],
+    "sensor": {
+        "is_external": true,
+        "unit": "bytes",
+        "id": "KonxHdCameraArchiveKW01Gen2iSpy",
+        "type": "CameraArchive",
+        "device": "Konx KW01 gen2 (iSpy)",
+        "display": "Gate(.) Pylon"
+    },
+    "position": {
+        "floor": -1,
+        "room": "Gate",
+        "detail": "Pylon"
+    },
+    "camera": "KonxHD"
+}
