@@ -1,6 +1,8 @@
 import os
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from Shot import Shot
 from ShotDelta import ShotDelta
 
@@ -62,3 +64,16 @@ class ThreeShots:
             #     print('remove contour')
 
         return new_contours
+
+    def CreateWindow(self):
+        plt.figure(figsize=(12, 6.025))
+        self.gs1 = gridspec.GridSpec(2, 3, left=0, right=1, top=1,
+                        bottom=0, wspace=0, hspace=0)
+
+    def Show(self):
+        plt.tight_layout()
+        plt.margins(0)
+        plt.show()
+
+    def Save(self, filename:  str):
+        plt.savefig(filename, transparent = True, bbox_inches = 'tight', pad_inches = 0)
