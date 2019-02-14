@@ -75,5 +75,7 @@ class ThreeShots:
         plt.margins(0)
         plt.show()
 
-    def Save(self, filename:  str):
-        plt.savefig(filename, transparent = True, bbox_inches = 'tight', pad_inches = 0)
+    def Save(self, filenamePattern:  str):
+        filename = filenamePattern.format(self.shot1.datetime)
+        print("[3SHOTS] Save figure to: " + filename)
+        plt.savefig(filename, bbox_inches = 'tight', pad_inches = 0)

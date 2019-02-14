@@ -1,6 +1,8 @@
 import cv2
+import datetime
 import matplotlib.pyplot as plt
 from YoloContext import YoloContext
+from CommonHelper import CommonHelper
 
 class Shot:
     filename = ''
@@ -8,6 +10,8 @@ class Shot:
     image: any
     image_timestamp: any
     Contours = []
+    datetime: datetime
+    helper = CommonHelper()
 
     def FromFile(self, path: str):
         self = Shot()
@@ -21,6 +25,8 @@ class Shot:
         self.image_timestamp = self.image[:22, :230]
         self.image[:22, :230] = 0 # remove timestamp
         
+        self.datetime = self.helper.get_datetime(self.filename)
+
         return self
 
     def show_cv(self):

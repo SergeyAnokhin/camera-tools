@@ -2,14 +2,17 @@ import email
 import getpass, imaplib
 import os
 import sys
+from email.parser import HeaderParser
+import email.header
 from SecretConfig import SecretConfig
-
+from CommonHelper import CommonHelper
 
 class GmailContext():
 
     def __init__(self):
         self.config = SecretConfig()
         self.config.fromJsonFile()
+        self.helper = CommonHelper()
 
     def Connect(self):
         self.imapSession = imaplib.IMAP4_SSL('imap.gmail.com')
@@ -23,7 +26,7 @@ class GmailContext():
         self.imapSession.close()
         self.imapSession.logout()
 
-    def GetLastMailAtachments(self, imap_folder:  str, output_dir: str):
+    def GetLastMail(self, imap_folder:  str):
         self.imapSession.select(imap_folder)
         typ, data = self.imapSession.search(None, 'ALL')
         if typ != 'OK':
@@ -33,7 +36,6 @@ class GmailContext():
         # Iterating over all emails
         msgId = data[0].split()[-1]
         #for msgId in data[0].split(): 
-        print('MsgId: ', msgId)
         typ, messageParts = self.imapSession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
             print ('Error fetching mail.')
@@ -41,16 +43,26 @@ class GmailContext():
 
         emailBody = messageParts[0][1].decode('utf-8')
         mail = email.message_from_string(emailBody)
+        subject, _ = email.header.decode_header(mail['subject'])[0]
+        print("[MAIL] #{} | {}".format(msgId, subject))
 
+        return mail
+
+    # filePattern : /path_to_file/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg
+    def SaveAttachments(self, mail, filePattern: str):
+        index = 0
         for part in mail.walk():
             if(part.get_content_maintype() != 'image'):
                 continue
             fileName = part.get_filename()
 
             if bool(fileName):
-                filePath = os.path.join(output_dir, fileName)
+                dt = self.helper.get_datetime(fileName)
+                filePath = filePattern.format(dt, index)
+                #filePath = os.path.join(output_dir, fileName)
                 if not os.path.isfile(filePath) :
                     print (filePath)
                     fp = open(filePath, 'wb')
                     fp.write(part.get_payload(decode=True))
                     fp.close()
+            index += 1

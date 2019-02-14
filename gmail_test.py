@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 temp = 'temp'
+# # Snap_20190214-080859-0.jpg => MDAlarm_20190214-080859.jpg
 # gmail = GmailContext()
 # gmail.Connect()
-# gmail.GetLastMailAtachments('camera/foscam', attachments_path)
+# mail = gmail.GetLastMail('camera/foscam')
+# gmail.SaveAttachments(mail, temp + '/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg')
 # gmail.Disconnect()
 
 #yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
@@ -42,5 +44,5 @@ shots.shot3.show_plt()
 plt.subplot(shots.gs1[:2,:2]) # 
 shots.shot2.show_plt()
 
+shots.Save(temp + '/MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg')
 shots.Show()
-shots.Save(os.path.join(temp, 'result.jpg'))
