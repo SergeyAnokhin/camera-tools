@@ -40,6 +40,8 @@ class CameraArchiveHelper:
     def load_configs(self, dir, listConfig = []):
         configs = []
         for file in os.listdir(dir):
+            if not file.startswith('camera-'):
+                continue 
             config = CameraArchiveConfig()
             config.fromJsonFile(os.path.join(dir, file))    
             if len(listConfig) == 0 or config.camera in listConfig:

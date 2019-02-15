@@ -23,4 +23,6 @@ shots.yoloContext = yolo
 shots.Process(temp)
 
 ### 3. Copy to archive
+# convert Shot => FileArchiveInfo
+
 ### 4. Send data to Elasticsearch
