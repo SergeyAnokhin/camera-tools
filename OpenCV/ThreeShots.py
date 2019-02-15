@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from OpenCV.Shot import Shot
 from OpenCV.ShotDelta import ShotDelta
+from OpenCV.YoloContext import YoloContext
 
 class ThreeShots:
     shot1: Shot
@@ -13,6 +14,7 @@ class ThreeShots:
     delta12: ShotDelta
     delta23: ShotDelta
     delta31: ShotDelta
+    yoloContext: YoloContext
 
     def FromDir(self, dir: str):
         shots = ThreeShots()
@@ -27,6 +29,36 @@ class ThreeShots:
         shots.delta31 = ShotDelta(shots.shot3, shots.shot1)
 
         return shots
+
+    def Process(self, output_dir: str):
+        yoloResult = self.yoloContext.ProcessShot(self.shot1)
+        self.yoloContext.drawRegions(self.shot1.image_contours, yoloResult)
+        yoloResult = self.yoloContext.ProcessShot(self.shot2)
+        self.yoloContext.drawRegions(self.shot2.image_contours, yoloResult)
+        yoloResult = self.yoloContext.ProcessShot(self.shot3)
+        self.yoloContext.drawRegions(self.shot3.image_contours, yoloResult)
+
+        self.CalcContours()
+
+        self.shot1.DrawContours()
+        self.shot2.DrawContours()
+        self.shot3.DrawContours()
+
+        self.shot1.MagnifyMotion()
+        self.shot2.MagnifyMotion()
+        self.shot3.MagnifyMotion()
+
+        self.CreateWindow()
+
+        plt.subplot(self.gs1[2])
+        self.shot1.show_plt()
+        plt.subplot(self.gs1[5])
+        self.shot3.show_plt()
+        plt.subplot(self.gs1[:2,:2]) # 
+        self.shot2.show_plt()
+
+        self.Save(os.path.join(output_dir, '/MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
+        self.Show()
 
     def CalcContours(self):
         self.delta12.CalcCountours()

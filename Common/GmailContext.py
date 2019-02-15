@@ -14,6 +14,12 @@ class GmailContext():
         self.config.fromJsonFile()
         self.helper = CommonHelper()
 
+    def DownoadLastAttachments(self, imap_folder: str, temp: str):
+        Connect()
+        GetLastMail(imap_folder)
+        SaveAttachments(mail, temp + '/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg')
+        Disconnect()
+
     def Connect(self):
         self.imapSession = imaplib.IMAP4_SSL('imap.gmail.com')
         typ, accountDetails = self.imapSession.login(self.config.username, self.config.password)
@@ -34,7 +40,9 @@ class GmailContext():
                 raise
 
         # Iterating over all emails
-        msgId = data[0].split()[-1]
+        ids = data[0].split()
+        print('[MAIL] Found "{}" mails in "{}"'.format(len(ids), imap_folder))
+        msgId = ids[-1]
         #for msgId in data[0].split(): 
         typ, messageParts = self.imapSession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
@@ -61,8 +69,10 @@ class GmailContext():
                 filePath = filePattern.format(dt, index)
                 #filePath = os.path.join(output_dir, fileName)
                 if not os.path.isfile(filePath) :
-                    print (filePath)
+                    print ('[MAIL] Save mail attachment to: ', filePath)
                     fp = open(filePath, 'wb')
                     fp.write(part.get_payload(decode=True))
                     fp.close()
+                else:
+                    print ('[MAIL] Attachment already exists: ', filePath)
             index += 1
