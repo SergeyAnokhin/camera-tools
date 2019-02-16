@@ -1,5 +1,7 @@
 class AnalyseResult:
     images: []
+    objects: str
+    day_time: str # night, day, mi_day
 
 class ImageAnalyseResult:
     contours: []
@@ -8,8 +10,8 @@ class ImageAnalyseResult:
 class ContourAnalyseResult:
     area: int
     center_coordinate: []
+    direction: float
 
-class ObjectAnalyseResult:
+class ObjectAnalyseResult(ContourAnalyseResult):
     label: str
-    center_coordinate: []
     confidence: int
