@@ -2,9 +2,9 @@ import json
 
 
 class SecretConfig:
-    usermane: str
-    password: str
-    filename = 'secret_config.json'
+    gmail_usermane: str
+    gmail_password: str
+    filename = 'configs/secret.json'
         
     def fromJsonFile(self):
         with open(self.filename, "r") as read_file:

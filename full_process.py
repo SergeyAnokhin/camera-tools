@@ -14,8 +14,8 @@ imap_folder = 'camera/foscam'
 camera = 'Foscam'
 
 ### 1. Download Mail From GMail
-gmail = GmailContext()
-gmail.DownoadLastAttachments(imap_folder, temp)
+# gmail = GmailContext()
+# gmail.DownoadLastAttachments(imap_folder, temp)
 
 ### 2. Analyse shots
 yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')

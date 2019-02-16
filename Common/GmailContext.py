@@ -15,14 +15,15 @@ class GmailContext():
         self.helper = CommonHelper()
 
     def DownoadLastAttachments(self, imap_folder: str, temp: str):
-        Connect()
-        GetLastMail(imap_folder)
-        SaveAttachments(mail, temp + '/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg')
-        Disconnect()
+        self.Connect()
+        mail = self.GetLastMail(imap_folder)
+        os.makedirs(temp, exist_ok=True)
+        self.SaveAttachments(mail, temp + '/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg')
+        self.Disconnect()
 
     def Connect(self):
         self.imapSession = imaplib.IMAP4_SSL('imap.gmail.com')
-        typ, accountDetails = self.imapSession.login(self.config.username, self.config.password)
+        typ, accountDetails = self.imapSession.login(self.config.gmail_username, self.config.gmail_password)
         if typ != 'OK':
             print ('Not able to sign in!')
             raise
@@ -36,13 +37,13 @@ class GmailContext():
         self.imapSession.select(imap_folder)
         typ, data = self.imapSession.search(None, 'ALL')
         if typ != 'OK':
-                print ('Error searching Inbox.')
-                raise
+            print ('Error searching Inbox.')
+            raise
 
         # Iterating over all emails
         ids = data[0].split()
-        print('[MAIL] Found "{}" mails in "{}"'.format(len(ids), imap_folder))
-        msgId = ids[-1]
+        print('[MAIL] Found {} mails in "{}"'.format(len(ids), imap_folder))
+        msgId = ids[-1].decode('utf-8')
         #for msgId in data[0].split(): 
         typ, messageParts = self.imapSession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
@@ -52,7 +53,7 @@ class GmailContext():
         emailBody = messageParts[0][1].decode('utf-8')
         mail = email.message_from_string(emailBody)
         subject, _ = email.header.decode_header(mail['subject'])[0]
-        print("[MAIL] #{} | {}".format(msgId, subject))
+        print("[MAIL] #{} | {}".format(msgId, subject.decode('utf-8')))
 
         return mail
 

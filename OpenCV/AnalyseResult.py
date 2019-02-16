@@ -2,7 +2,7 @@ class AnalyseResult:
     images: []
 
 class ImageAnalyseResult:
-    contours: ContourAnalyseResult[]
+    contours: []
     objects: []
 
 class ContourAnalyseResult:
