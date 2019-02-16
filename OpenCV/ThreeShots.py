@@ -111,3 +111,6 @@ class ThreeShots:
         filename = filenamePattern.format(self.shot1.datetime)
         print("[3SHOTS] Save figure to: " + filename)
         plt.savefig(filename, bbox_inches = 'tight', pad_inches = 0)
+
+    def GetAnalyseResults(self):
+        return None
