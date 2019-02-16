@@ -103,7 +103,7 @@ class ThreeShots:
                         bottom=0, wspace=0, hspace=0)
 
     def Show(self):
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.margins(0)
         plt.show()
 
