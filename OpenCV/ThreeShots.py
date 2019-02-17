@@ -6,6 +6,8 @@ import matplotlib.gridspec as gridspec
 from OpenCV.Shot import Shot
 from OpenCV.ShotDelta import ShotDelta
 from OpenCV.YoloContext import YoloContext
+from OpenCV.AnalyseResult import AnalyseResult, ImageAnalyseResult, ContourAnalyseResult, ObjectAnalyseResult
+
 
 class ThreeShots:
     shot1: Shot
@@ -31,7 +33,7 @@ class ThreeShots:
 
         return shots
 
-    def Process(self, output_dir: str):
+    def Analyse(self, output_dir: str):
         self.yoloContext.ProcessShot(self.shot1)
         self.yoloContext.ProcessShot(self.shot2)
         self.yoloContext.ProcessShot(self.shot3)
@@ -52,11 +54,13 @@ class ThreeShots:
         self.shot1.show_plt()
         plt.subplot(self.gs1[5])
         self.shot3.show_plt()
-        plt.subplot(self.gs1[:2,:2]) # 
+        plt.subplot(self.gs1[:2, :2])
         self.shot2.show_plt()
 
-        self.Save(os.path.join(output_dir, '/MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
+        self.Save(os.path.join(
+            output_dir, '/MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
         self.Show()
+        return AnalyseResult()
 
     def CalcContours(self):
         self.delta12.CalcCountours()
@@ -64,13 +68,16 @@ class ThreeShots:
         self.delta31.CalcCountours()
 
         #print('S= Shot1 Contours')
-        self.shot1.Contours = self.removeEmptyContours(self.delta12, True, False, True)
+        self.shot1.Contours = self.removeEmptyContours(
+            self.delta12, True, False, True)
         #print('S= Shot2 Contours')
-        self.shot2.Contours = self.removeEmptyContours(self.delta12, True, True, False)
+        self.shot2.Contours = self.removeEmptyContours(
+            self.delta12, True, True, False)
         #print('S= Shot3 Contours')
-        self.shot3.Contours = self.removeEmptyContours(self.delta23, False, True, True)
+        self.shot3.Contours = self.removeEmptyContours(
+            self.delta23, False, True, True)
 
-    def removeEmptyContours(self, delta: ShotDelta, diff12 = True, diff23 = False, diff31 = True):
+    def removeEmptyContours(self, delta: ShotDelta, diff12=True, diff23=False, diff31=True):
         new_contours = []
         for c in delta.Contours:
             (x, y, w, h) = cv2.boundingRect(c)
@@ -86,7 +93,7 @@ class ThreeShots:
                 and \
                 ((max23 > 0 and diff23) or (max23 >= 0 and not diff23)) \
                 and \
-                ((max31 > 0 and diff31) or (max31 >= 0 and not diff31)):
+                    ((max31 > 0 and diff31) or (max31 >= 0 and not diff31)):
                 new_contours.append(c)
                 # if max12 > 0 and max23 > 0 and max31 > 0:
                 #     print('!!! Motion in same place : velocity = 0')
@@ -98,7 +105,7 @@ class ThreeShots:
     def CreateWindow(self):
         plt.figure(figsize=(12, 6.025))
         self.gs1 = gridspec.GridSpec(2, 3, left=0, right=1, top=1,
-                        bottom=0, wspace=0, hspace=0)
+                                     bottom=0, wspace=0, hspace=0)
 
     def Show(self):
         # plt.tight_layout()
@@ -108,8 +115,4 @@ class ThreeShots:
     def Save(self, filenamePattern:  str):
         filename = filenamePattern.format(self.shot1.datetime)
         print("[3SHOTS] Save figure to: " + filename)
-        plt.savefig(filename, bbox_inches = 'tight', pad_inches = 0)
-
-    def GetAnalyseResults(self):
-        results = AnalyseResult()
-        return None
+        plt.savefig(filename, bbox_inches='tight', pad_inches=0)

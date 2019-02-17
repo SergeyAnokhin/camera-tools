@@ -22,8 +22,7 @@ camera = 'Foscam'
 yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
 shots = ThreeShots.FromDir(None, temp)
 shots.yoloContext = yolo
-shots.Process(temp)
-analyseData = shots.GetAnalyseResults()
+analyseData = shots.Analyse(temp)
 
 ### 3. Send mail with analyse and log
 #gmail.SendMailWithAnalayse(analyseData)
