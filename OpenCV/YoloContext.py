@@ -53,7 +53,8 @@ class YoloContext:
         layerOutputs = self.net.forward(self.layers)
         print("[YOLO] detection took {:.3f} seconds".format(time.time() - start))
 
-        return self.ProcessLayerOutputs(layerOutputs, image.shape[:2])
+        shot.YoloResult = self.ProcessLayerOutputs(layerOutputs, image.shape[:2])
+        self.drawRegions(shot)
 
     def ProcessLayerOutputs(self, layerOutputs, imageShape):
         (H, W) = imageShape
@@ -97,7 +98,10 @@ class YoloContext:
 
         return result
 
-    def drawRegions(self, image, yoloResult: YoloResult):
+    def drawRegions(self, shot: Shot):
+        image = shot.image_contours
+        yoloResult = shot.YoloResult
+
         # ensure at least one detection exists
         if len(yoloResult.idxs) == 0:
             return

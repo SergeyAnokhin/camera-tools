@@ -15,6 +15,7 @@ class ThreeShots:
     delta23: ShotDelta
     delta31: ShotDelta
     yoloContext: YoloContext
+    yoloResults: []
 
     def FromDir(self, dir: str):
         shots = ThreeShots()
@@ -31,12 +32,9 @@ class ThreeShots:
         return shots
 
     def Process(self, output_dir: str):
-        yoloResult = self.yoloContext.ProcessShot(self.shot1)
-        self.yoloContext.drawRegions(self.shot1.image_contours, yoloResult)
-        yoloResult = self.yoloContext.ProcessShot(self.shot2)
-        self.yoloContext.drawRegions(self.shot2.image_contours, yoloResult)
-        yoloResult = self.yoloContext.ProcessShot(self.shot3)
-        self.yoloContext.drawRegions(self.shot3.image_contours, yoloResult)
+        self.yoloContext.ProcessShot(self.shot1)
+        self.yoloContext.ProcessShot(self.shot2)
+        self.yoloContext.ProcessShot(self.shot3)
 
         self.CalcContours()
 
@@ -113,4 +111,5 @@ class ThreeShots:
         plt.savefig(filename, bbox_inches = 'tight', pad_inches = 0)
 
     def GetAnalyseResults(self):
+        results = AnalyseResult()
         return None

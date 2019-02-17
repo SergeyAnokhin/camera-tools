@@ -9,6 +9,7 @@ class Shot:
     image: any
     image_timestamp: any
     Contours = []
+    YoloResult = []
     datetime: datetime
     helper = CommonHelper()
 

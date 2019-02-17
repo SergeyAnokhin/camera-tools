@@ -2,6 +2,7 @@ class AnalyseResult:
     images: []
     objects: str
     day_time: str # night, day, mi_day
+    is_false_alert: bool
 
 class ImageAnalyseResult:
     contours: []
