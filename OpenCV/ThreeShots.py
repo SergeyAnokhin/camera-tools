@@ -58,7 +58,7 @@ class ThreeShots:
         self.shot2.show_plt()
 
         self.Save(os.path.join(
-            output_dir, '/MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
+            output_dir, 'MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
         self.Show()
         return AnalyseResult()
 

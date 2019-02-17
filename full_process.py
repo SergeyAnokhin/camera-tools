@@ -18,8 +18,8 @@ camera = 'Foscam'
 # gmail.DownoadLastAttachments(imap_folder, temp)
 
 ### 2. Analyse shots
-#yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
-yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
+yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
+#yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
 shots = ThreeShots.FromDir(None, temp)
 shots.yoloContext = yolo
 analyseData = shots.Analyse(temp)
