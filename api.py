@@ -23,15 +23,25 @@ camera = 'Foscam'
 
 app = Flask(__name__)
 print('start: {}'.format(datetime.datetime.now()))
-# app.run(host='127.0.0.1', port=99)
-yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
-#yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
+if __name__ == "__main__":
+    print('app.run @ 5000')
+    app.run(host='192.168.1.31', port=5000)
+#yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
+yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def health():
     return 'OK'
 
-@app.route('/analyse')
+@app.route('/test1', methods=['GET'])
+def test1():
+    return 'OK'
+
+@app.route('/test2', methods=['GET'])
+def test2():
+    return 'OK'
+
+@app.route('/analyse', methods=['GET'])
 def analyse():
     ### 1. Download Mail From GMail
     gmail = GmailContext()
