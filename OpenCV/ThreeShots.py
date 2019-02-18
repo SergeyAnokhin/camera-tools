@@ -33,7 +33,7 @@ class ThreeShots:
 
         return shots
 
-    def Analyse(self, output_dir: str):
+    def Analyse(self):
         self.yoloContext.ProcessShot(self.shot1)
         self.yoloContext.ProcessShot(self.shot2)
         self.yoloContext.ProcessShot(self.shot3)
@@ -57,9 +57,6 @@ class ThreeShots:
         plt.subplot(self.gs1[:2, :2])
         self.shot2.show_plt()
 
-        self.Save(os.path.join(
-            output_dir, 'MDAlarm_{:%Y%m%d-%H%M%S}-cts.jpg'))
-        self.Show()
         return AnalyseResult()
 
     def CalcContours(self):
@@ -113,6 +110,6 @@ class ThreeShots:
         plt.show()
 
     def Save(self, filenamePattern:  str):
-        filename = filenamePattern.format(self.shot1.datetime)
-        print("[3SHOTS] Save figure to: " + filename)
-        plt.savefig(filename, bbox_inches='tight', pad_inches=0)
+        self.output_filename = filenamePattern.format(self.shot1.datetime)
+        print("[3SHOTS] Save figure to: " + self.output_filename)
+        plt.savefig(self.output_filename, bbox_inches='tight', pad_inches=0)

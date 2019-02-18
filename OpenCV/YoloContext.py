@@ -120,6 +120,3 @@ class YoloContext:
             text = "{}: {:.1f}".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i])
             cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
-
-    def GetImageAnalyseResult:
-        pass
