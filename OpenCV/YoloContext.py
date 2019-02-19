@@ -14,8 +14,8 @@ class YoloResult:
         self.confidences = []
 
 class YoloContext:
-    confidence = 0.1
-    threshold = 0.1
+    confidence = 0.4
+    threshold = 0.3
 
     def __init__(self, yoloName: str):
         # load the COCO class labels our YOLO model was trained on
@@ -31,10 +31,12 @@ class YoloContext:
         self.weightsPath = os.path.sep.join([yoloName, "model.weights"])
         self.configPath = os.path.sep.join([yoloName, "model.cfg"])
 
-        print("[YOLO] loading weights from disk... : ", self.weightsPath)
+        print("[YOLO][INIT] loading weights from disk... : ", self.weightsPath)
         start = time.time()
         self.net = cv2.dnn.readNetFromDarknet(self.configPath, self.weightsPath)
-        print("[YOLO] Load took {:.3f} seconds".format(time.time() - start))
+        print("[YOLO][INIT] Load took {:.3f} seconds".format(time.time() - start))
+        print("[YOLO][INIT] Confidence: ", self.confidence)
+        print("[YOLO][INIT] Threshold: ", self.threshold)
 
         # determine only the *output* layer names that we need from YOLO
         self.layers = self.net.getLayerNames()
