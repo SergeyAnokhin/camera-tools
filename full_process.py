@@ -12,7 +12,7 @@ from OpenCV.ThreeShots import ThreeShots
 from OpenCV.YoloContext import YoloContext
 
 #temp = 'temp'
-temp = '../camera-OpenCV-data/Camera/Foscam/Night_Sergey_stay_Box_gate'
+temp = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_simple'
 imap_folder = 'camera/foscam'
 camera = 'Foscam'
 #os.removedirs(temp)

@@ -127,13 +127,13 @@ class YoloContext:
 
     def CalcImageAnalyseResult(self, shot: Shot):
         # ensure at least one detection exists
-        if len(shot.yoloResult.idxs) == 0:
+        if len(shot.YoloResult.idxs) == 0:
             return
 
         # loop over the indexes we are keeping
-        for i in shot.yoloResult.idxs.flatten():
-            (x, y) = (shot.yoloResult.boxes[i][0], shot.yoloResult.boxes[i][1])
-            (w, h) = (shot.yoloResult.boxes[i][2], shot.yoloResult.boxes[i][3])
+        for i in shot.YoloResult.idxs.flatten():
+            (x, y) = (shot.YoloResult.boxes[i][0], shot.YoloResult.boxes[i][1])
+            (w, h) = (shot.YoloResult.boxes[i][2], shot.YoloResult.boxes[i][3])
 
             (center_x, center_y) = (x + w//2,y + h//2)
             
@@ -141,7 +141,7 @@ class YoloContext:
             obj.area = w * h
             obj.profile_proportion = h / w
             obj.center_coordinate = [center_x, center_y]
-            obj.confidence = shot.yoloResult.confidences[i]
-            obj.label = self.LABELS[shot.yoloResult.classIDs[i]]
+            obj.confidence = shot.YoloResult.confidences[i]
+            obj.label = self.LABELS[shot.YoloResult.classIDs[i]]
 
             shot.imageAnalyseResult.objects.append(obj)
