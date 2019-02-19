@@ -2,6 +2,7 @@ import cv2
 import datetime
 import matplotlib.pyplot as plt
 from Common.CommonHelper import CommonHelper
+from OpenCV.AnalyseResult import ImageAnalyseResult
 
 class Shot:
     filename = ''
@@ -12,6 +13,7 @@ class Shot:
     YoloResult = []
     datetime: datetime
     helper = CommonHelper()
+    imageAnalyseResult = ImageAnalyseResult()
 
     def FromFile(self, path: str):
         self = Shot()

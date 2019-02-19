@@ -4,6 +4,7 @@ import time
 import os
 import numpy as np
 from OpenCV.Shot import Shot
+from OpenCV.AnalyseResult import ImageAnalyseResult, ObjectAnalyseResult
 
 class YoloResult:
 
@@ -57,6 +58,7 @@ class YoloContext:
 
         shot.YoloResult = self.ProcessLayerOutputs(layerOutputs, image.shape[:2])
         self.drawRegions(shot)
+        self.CalcImageAnalyseResult(shot)
 
     def ProcessLayerOutputs(self, layerOutputs, imageShape):
         (H, W) = imageShape
@@ -122,3 +124,24 @@ class YoloContext:
             text = "{}: {:.1f}".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i])
             cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
+
+    def CalcImageAnalyseResult(self, shot: Shot):
+        # ensure at least one detection exists
+        if len(shot.yoloResult.idxs) == 0:
+            return
+
+        # loop over the indexes we are keeping
+        for i in shot.yoloResult.idxs.flatten():
+            (x, y) = (shot.yoloResult.boxes[i][0], shot.yoloResult.boxes[i][1])
+            (w, h) = (shot.yoloResult.boxes[i][2], shot.yoloResult.boxes[i][3])
+
+            (center_x, center_y) = (x + w//2,y + h//2)
+            
+            obj = ObjectAnalyseResult()
+            obj.area = w * h
+            obj.profile_proportion = h / w
+            obj.center_coordinate = [center_x, center_y]
+            obj.confidence = shot.yoloResult.confidences[i]
+            obj.label = self.LABELS[shot.yoloResult.classIDs[i]]
+
+            shot.imageAnalyseResult.objects.append(obj)

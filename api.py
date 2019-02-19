@@ -59,7 +59,7 @@ def analyse():
     ### 3. Send mail with analyse and log
     imap = ImapGmailHelper()
     mail_subject = "{} @{:%H:%M} motion detected".format(camera, shots.shot1.datetime)
-    imap.send_mail(mail_subject, "(log must be here)", [shots.output_filename])
+    imap.send_mail(mail_subject, analyseData.GetMailBody(), [shots.output_filename])
     return 'OK'
 
 # @app.route('/fit', methods=['POST'])
