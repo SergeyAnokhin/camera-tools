@@ -31,5 +31,5 @@ class YoloTest(unittest.TestCase):
         self.assertIsNotNone(analyseData)
 
 
-if __name__ == '__main__':
-    unittest.main()
+# if __name__ == '__main__':
+#     unittest.main()
