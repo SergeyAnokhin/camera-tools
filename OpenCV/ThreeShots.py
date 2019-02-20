@@ -57,7 +57,13 @@ class ThreeShots:
         plt.subplot(self.gs1[:2, :2])
         self.shot2.show_plt()
 
-        return AnalyseResult()
+        result = AnalyseResult()
+        result.images.append(self.shot1.imageAnalyseResult)
+        result.images.append(self.shot2.imageAnalyseResult)
+        result.images.append(self.shot3.imageAnalyseResult)
+        result.is_false_alert = False
+        result.objects = "TBD"
+        return result
 
     def CalcContours(self):
         self.delta12.CalcCountours()
