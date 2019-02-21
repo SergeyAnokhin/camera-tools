@@ -2,6 +2,7 @@ import unittest
 import json
 import threading
 import logging
+import jsonpickle
 from pprint import pprint
 from datetime import datetime
 from OpenCV.ThreeShots import ThreeShots
@@ -25,8 +26,12 @@ class YoloTest(unittest.TestCase):
         shots.yoloContext = self.yolo
         analyseData = shots.Analyse()
         #shots.Show()
-        self.log.info(json.dumps(analyseData.__dict__, indent=4))
+        self.log.info(analyseData)
         self.assertIsNotNone(analyseData)
+        self.log.info(analyseData.images)
+        self.assertIsNotNone(analyseData.images)
+        self.log.info(analyseData.images[0])
+        self.assertIsNotNone(analyseData.images[0].objects)
 
 
 # if __name__ == '__main__':

@@ -122,8 +122,6 @@ class YoloContext:
             # draw a bounding box rectangle and label on the image
             color = [int(c) for c in self.COLORS[yoloResult.classIDs[i]]]
             cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-            self.log.debug("Found: =={}==: {:.1f}%".format(
-                self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i]))
             text = "{}: {:.1f}".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i])
             cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
@@ -146,5 +144,6 @@ class YoloContext:
             obj.center_coordinate = [center_x, center_y]
             obj.confidence = shot.YoloResult.confidences[i]
             obj.label = self.LABELS[shot.YoloResult.classIDs[i]]
+            self.log.info(obj)
 
             shot.imageAnalyseResult.objects.append(obj)
