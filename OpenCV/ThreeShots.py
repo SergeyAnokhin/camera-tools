@@ -1,5 +1,6 @@
 import os
 import cv2
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -17,10 +18,11 @@ class ThreeShots:
     delta23: ShotDelta
     delta31: ShotDelta
     yoloContext: YoloContext
-    yoloResults: []
+    yoloResults = []
 
     def FromDir(self, dir: str):
         shots = ThreeShots()
+        shots.log = logging.getLogger("3SHOTS")
         files = os.listdir(dir)
 
         shots.shot1 = Shot.FromFile(None, os.path.join(dir, files[0]))
@@ -117,5 +119,5 @@ class ThreeShots:
 
     def Save(self, filenamePattern:  str):
         self.output_filename = filenamePattern.format(self.shot1.datetime)
-        print("[3SHOTS] Save figure to: " + self.output_filename)
+        self.log.info("Save figure to: " + self.output_filename)
         plt.savefig(self.output_filename, bbox_inches='tight', pad_inches=0)

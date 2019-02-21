@@ -15,19 +15,17 @@ class YoloTest(unittest.TestCase):
         super(YoloTest, self).__init__(*args, **kwargs)
         logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', 
             level=logging.DEBUG, datefmt='%H:%M:%S')
-        self.logger = logging.getLogger("TEST")
-        self.logger.info('start: %s', datetime.now())
+        self.log = logging.getLogger("TEST")
+        self.log.info('start %s: %s', __name__, datetime.now())
         self.yolo = YoloContext(self.yoloPath)
 
     def test_day_lilia_simple(self):
-        print('start: {}'.format(datetime.now()))
         temp = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_simple'
         shots = ThreeShots.FromDir(None, temp)
         shots.yoloContext = self.yolo
         analyseData = shots.Analyse()
         #shots.Show()
-        print(json.dumps(analyseData.__dict__, indent=4))
-        pprint(analyseData.__dict__, indent=4)
+        self.log.info(json.dumps(analyseData.__dict__, indent=4))
         self.assertIsNotNone(analyseData)
 
 

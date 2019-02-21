@@ -2,6 +2,7 @@ import email
 import getpass, imaplib
 import os
 import sys
+import logging
 from email.parser import HeaderParser
 import email.header
 from Common.SecretConfig import SecretConfig
@@ -10,6 +11,7 @@ from Common.CommonHelper import CommonHelper
 class GmailContext():
 
     def __init__(self):
+        self.log = logging.getLogger('IMAP')
         self.config = SecretConfig()
         self.config.fromJsonFile()
         self.helper = CommonHelper()
@@ -27,7 +29,7 @@ class GmailContext():
         if typ != 'OK':
             print ('Not able to sign in!')
             raise
-        print('[MAIL] Connection: ', accountDetails)
+        self.log.debug('Connection: ', accountDetails)
 
     def Disconnect(self):
         self.imapSession.close()
@@ -42,7 +44,7 @@ class GmailContext():
 
         # Iterating over all emails
         ids = data[0].split()
-        print('[MAIL] Found {} mails in "{}"'.format(len(ids), imap_folder))
+        self.log.debug('Found {} mails in "{}"'.format(len(ids), imap_folder))
         msgId = ids[-1].decode('utf-8')
         #for msgId in data[0].split(): 
         typ, messageParts = self.imapSession.fetch(msgId, '(RFC822)')
@@ -53,7 +55,7 @@ class GmailContext():
         emailBody = messageParts[0][1].decode('utf-8')
         mail = email.message_from_string(emailBody)
         subject, _ = email.header.decode_header(mail['subject'])[0]
-        print("[MAIL] #{} | {}".format(msgId, subject.decode('utf-8')))
+        self.log.info("#{} | {}".format(msgId, subject.decode('utf-8')))
 
         return mail
 
@@ -70,10 +72,10 @@ class GmailContext():
                 filePath = filePattern.format(dt, index)
                 #filePath = os.path.join(output_dir, fileName)
                 if not os.path.isfile(filePath) :
-                    print ('[MAIL] Save mail attachment to: ', filePath)
+                    self.log.info('Save mail attachment to: ', filePath)
                     fp = open(filePath, 'wb')
                     fp.write(part.get_payload(decode=True))
                     fp.close()
                 else:
-                    print ('[MAIL] Attachment already exists: ', filePath)
+                    self.log.info('[MAIL] Attachment already exists: ', filePath)
             index += 1

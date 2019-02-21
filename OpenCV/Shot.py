@@ -1,5 +1,6 @@
 import cv2
 import datetime
+import logging
 import matplotlib.pyplot as plt
 from Common.CommonHelper import CommonHelper
 from OpenCV.AnalyseResult import ImageAnalyseResult
@@ -17,8 +18,9 @@ class Shot:
 
     def FromFile(self, path: str):
         self = Shot()
+        self.log = logging.getLogger("SHOT")
         self.filename = path
-        print('[SHOT] Open file: {}'.format(self.filename))
+        self.log.info('Open file: {}'.format(self.filename))
         self.image = cv2.imread(self.filename, cv2.IMREAD_GRAYSCALE)
         self.image_color = cv2.imread(self.filename, cv2.IMREAD_COLOR)
         self.image_contours = self.image_color.copy()

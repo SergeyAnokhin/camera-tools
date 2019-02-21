@@ -2,6 +2,7 @@
 import cv2
 import time
 import os
+import logging
 import numpy as np
 from OpenCV.Shot import Shot
 from OpenCV.AnalyseResult import ImageAnalyseResult, ObjectAnalyseResult
@@ -19,6 +20,7 @@ class YoloContext:
     threshold = 0.3
 
     def __init__(self, yoloName: str):
+        self.log = logging.getLogger('YOLO')
         # load the COCO class labels our YOLO model was trained on
         labelsPath = os.path.sep.join([yoloName, "names.txt"])
         self.LABELS = open(labelsPath).read().strip().split("\n")
@@ -32,12 +34,12 @@ class YoloContext:
         self.weightsPath = os.path.sep.join([yoloName, "model.weights"])
         self.configPath = os.path.sep.join([yoloName, "model.cfg"])
 
-        print("[YOLO][INIT] loading weights from disk... : ", self.weightsPath)
+        self.log.debug("[INIT] loading weights from disk... : " + self.weightsPath)
         start = time.time()
         self.net = cv2.dnn.readNetFromDarknet(self.configPath, self.weightsPath)
-        print("[YOLO][INIT] Load took {:.3f} seconds".format(time.time() - start))
-        print("[YOLO][INIT] Confidence: ", self.confidence)
-        print("[YOLO][INIT] Threshold: ", self.threshold)
+        self.log.debug("[INIT] Load took {:.3f} seconds".format(time.time() - start))
+        self.log.debug("[INIT] Confidence: %s", self.confidence)
+        self.log.debug("[INIT] Threshold: %s", self.threshold)
 
         # determine only the *output* layer names that we need from YOLO
         self.layers = self.net.getLayerNames()
@@ -48,13 +50,13 @@ class YoloContext:
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
-        print("[YOLO] start detect objects on: {}".format(shot.filename))
+        self.log.debug("start detect objects on: {}".format(shot.filename))
         image = shot.image_color
         blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
         self.net.setInput(blob)
         start = time.time()
         layerOutputs = self.net.forward(self.layers)
-        print("[YOLO] detection took {:.3f} seconds".format(time.time() - start))
+        self.log.debug("detection took {:.3f} seconds".format(time.time() - start))
 
         shot.YoloResult = self.ProcessLayerOutputs(layerOutputs, image.shape[:2])
         self.drawRegions(shot)
@@ -120,7 +122,8 @@ class YoloContext:
             # draw a bounding box rectangle and label on the image
             color = [int(c) for c in self.COLORS[yoloResult.classIDs[i]]]
             cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-            print("[YOLO] Found: =={}==: {:.1f}%".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i]))
+            self.log.debug("Found: =={}==: {:.1f}%".format(
+                self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i]))
             text = "{}: {:.1f}".format(self.LABELS[yoloResult.classIDs[i]], yoloResult.confidences[i])
             cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
