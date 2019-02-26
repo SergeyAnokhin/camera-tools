@@ -1,4 +1,17 @@
 import json
+import datetime
+import decimal
+from Common.CommonHelper import CommonHelper
+
+
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        print("type: ", type(obj))
+        if hasattr(obj,'reprJSON'):
+            return obj.reprJSON()
+        else:
+            return json.JSONEncoder.default(self, obj)
+
 
 class ImageAnalyseResult:
     contours = []
@@ -14,11 +27,22 @@ class ImageAnalyseResult:
             result += " {}:{:.3f}".format(obj.label, obj.confidence)
         return result
 
+    def reprJSON(self):
+        d = self.__dict__
+        d["contours"] = self.contours
+        d["objects"] = self.objects
+        return d
+
+
 class ContourAnalyseResult:
     area = 0
     profile_proportion =  0.0
     center_coordinate = []
-    direction: float
+    direction = 0.0
+
+    def reprJSON(self):
+        d = self.__dict__
+        return d
 
 class ObjectAnalyseResult(ContourAnalyseResult):
     label = ""
@@ -33,6 +57,10 @@ class AnalyseResult:
     day_time: str # night, day, mi_day
     is_false_alert: bool
     directions = []
+    helper = CommonHelper()
+
+    def toJson(self):
+        return json.dumps(self.reprJSON(), cls=ComplexEncoder, indent=4)
 
     def __repr__(self):
         self.objects = self.GetAllObjectsLabels()
@@ -41,12 +69,10 @@ class AnalyseResult:
         # dict['directions'] = self.directions.toString()
         return json.dumps(self.__dict__, default= self.dumper, indent=4)
 
-    def dumper(self, obj):
-        print("JSON : ", type(obj))
-        try:
-            return obj.toJSON()
-        except:
-            return obj.__dict__
+    def reprJSON(self):
+        d = self.__dict__
+        d["images"] = self.images
+        return d
 
     def GetAllObjectsLabels(self):
         labels = []
