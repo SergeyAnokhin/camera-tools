@@ -18,11 +18,11 @@ class CommonHelper:
         seconds = int(re_groups.group(6))
         return datetime.datetime(year, month, day, hour, minute, seconds)
 
-    # def toJson(self, obj):
-    #     return json.dumps(self.__dict__, default= self.dumper, indent=4)
-    # def dumper(self, obj):
-    #     print("JSON : ", type(obj))
-    #     try:
-    #         return obj.toJSON()
-    #     except:
-    #         return obj.__dict__
+
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        #print("type: ", type(obj))
+        if hasattr(obj,'reprJSON'):
+            return obj.reprJSON()
+        else:
+            return json.JSONEncoder.default(self, obj)

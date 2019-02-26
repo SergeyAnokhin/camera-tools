@@ -1,16 +1,7 @@
 import json
 import datetime
 import decimal
-from Common.CommonHelper import CommonHelper
-
-
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj):
-        print("type: ", type(obj))
-        if hasattr(obj,'reprJSON'):
-            return obj.reprJSON()
-        else:
-            return json.JSONEncoder.default(self, obj)
+from Common.CommonHelper import CommonHelper, ComplexEncoder
 
 
 class ImageAnalyseResult:
@@ -64,14 +55,12 @@ class AnalyseResult:
 
     def __repr__(self):
         self.objects = self.GetAllObjectsLabels()
-        # dict = self.__dict__.copy()
-        # dict['images'] = self.images.toString()
-        # dict['directions'] = self.directions.toString()
-        return json.dumps(self.__dict__, default= self.dumper, indent=4)
+        return self.objects
 
     def reprJSON(self):
         d = self.__dict__
         d["images"] = self.images
+        d["directions"] = self.directions
         return d
 
     def GetAllObjectsLabels(self):

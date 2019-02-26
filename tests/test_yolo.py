@@ -1,3 +1,6 @@
+# run with :
+# python -m unittest tests.test_yolo
+# python -m unittest discover     
 import unittest
 import json
 import threading
@@ -29,14 +32,10 @@ class YoloTest(unittest.TestCase):
         self.log.info(analyseData.toJson())
 
         #shots.Show()
-        #self.log.info(analyseData.toJson())
-        # self.log.info(analyseData)
-        # self.assertIsNotNone(analyseData)
-        # self.log.info(analyseData.images)
-        # self.assertIsNotNone(analyseData.images)
-        # self.log.info(analyseData.images[0])
-        # self.assertIsNotNone(analyseData.images[0].objects)
+        self.assertIsNotNone(analyseData)
+        self.assertIsNotNone(analyseData.images)
+        self.assertIsNotNone(analyseData.images[0].objects)
 
 
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
