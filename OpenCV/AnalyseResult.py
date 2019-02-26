@@ -5,8 +5,10 @@ from Common.CommonHelper import CommonHelper, ComplexEncoder
 
 
 class ImageAnalyseResult:
-    contours = []
-    objects = []
+
+    def __init__(self):
+        self.contours = []
+        self.objects = []
 
     def __repr__(self):
         #return json.dumps(self.__dict__, indent=4)
@@ -26,10 +28,12 @@ class ImageAnalyseResult:
 
 
 class ContourAnalyseResult:
-    area = 0
-    profile_proportion =  0.0
-    center_coordinate = []
-    direction = 0.0
+
+    def __init__(self):
+        self.area = 0
+        self.profile_proportion =  0.0
+        self.center_coordinate = []
+        self.direction = 0.0
 
     def reprJSON(self):
         d = self.__dict__
@@ -40,15 +44,16 @@ class ObjectAnalyseResult(ContourAnalyseResult):
     confidence = 0.0
 
     def __repr__(self):
-        return "[Object] {}:{:.3f}".format(self.label, self.confidence)
+        return "[Object] __{}__: {:.3f}".format(self.label, self.confidence)
 
 class AnalyseResult:
-    images = []
-    objects: str
-    day_time: str # night, day, mi_day
-    is_false_alert: bool
-    directions = []
-    helper = CommonHelper()
+
+    def __init__(self):
+        self.images = []
+        self.objects: str
+        self.day_time: str # night, day, mi_day
+        self.is_false_alert: bool
+        self.directions = []
 
     def toJson(self):
         return json.dumps(self.reprJSON(), cls=ComplexEncoder, indent=4)

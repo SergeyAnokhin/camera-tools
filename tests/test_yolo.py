@@ -35,6 +35,11 @@ class YoloTest(unittest.TestCase):
         self.assertIsNotNone(analyseData)
         self.assertIsNotNone(analyseData.images)
         self.assertIsNotNone(analyseData.images[0].objects)
+        self.assertEqual(1, len(analyseData.images[0].objects))
+        self.assertEqual("person", analyseData.images[0].objects[0].label)
+        self.assertEqual(1, len(analyseData.images[1].objects))
+        self.assertEqual("person", analyseData.images[1].objects[0].label)
+        self.assertEqual("person", analyseData.images[2].objects[0].label)
 
 
 if __name__ == '__main__':

@@ -131,6 +131,7 @@ class YoloContext:
         if len(shot.YoloResult.idxs) == 0:
             return
 
+        shot.imageAnalyseResult = ImageAnalyseResult()
         # loop over the indexes we are keeping
         for i in shot.YoloResult.idxs.flatten():
             (x, y) = (shot.YoloResult.boxes[i][0], shot.YoloResult.boxes[i][1])
@@ -140,9 +141,9 @@ class YoloContext:
             
             obj = ObjectAnalyseResult()
             obj.area = w * h
-            obj.profile_proportion = h / w
+            obj.profile_proportion = round(h / w, 2)
             obj.center_coordinate = [center_x, center_y]
-            obj.confidence = shot.YoloResult.confidences[i]
+            obj.confidence = round(shot.YoloResult.confidences[i], 2)
             obj.label = self.LABELS[shot.YoloResult.classIDs[i]]
             self.log.info(obj)
 
