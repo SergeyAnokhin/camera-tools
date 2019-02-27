@@ -1,0 +1,2 @@
+class ShotsGroup:
+    pass
