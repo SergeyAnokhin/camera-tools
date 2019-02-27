@@ -82,6 +82,10 @@ class ThreeShots:
         self.shot3.Contours = self.removeEmptyContours(
             self.delta23, False, True, True)
 
+        self.shot1.CalcContoursAnalyseResult()
+        self.shot2.CalcContoursAnalyseResult()
+        self.shot3.CalcContoursAnalyseResult()
+
     def removeEmptyContours(self, delta: ShotDelta, diff12=True, diff23=False, diff31=True):
         new_contours = []
         for c in delta.Contours:

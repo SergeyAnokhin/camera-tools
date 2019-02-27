@@ -64,16 +64,17 @@ class AnalyseResult:
 
     def reprJSON(self):
         d = self.__dict__
+        d["objects"] = self.GetAllObjectsLabels()
         d["images"] = self.images
         d["directions"] = self.directions
         return d
 
     def GetAllObjectsLabels(self):
-        labels = []
+        labels = set()
         for img in self.images:
             for obj in img.objects:
-                labels.append(obj.label)
-        return " ".join(list(set(labels))) # unique
+                labels.add(obj.label)
+        return " ".join(labels)
 
     def GetMailBody(self):
         return "(log must be here)"

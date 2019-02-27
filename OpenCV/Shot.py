@@ -3,7 +3,7 @@ import datetime
 import logging
 import matplotlib.pyplot as plt
 from Common.CommonHelper import CommonHelper
-from OpenCV.AnalyseResult import ImageAnalyseResult
+from OpenCV.AnalyseResult import ImageAnalyseResult, ContourAnalyseResult
 
 class Shot:
     filename = ''
@@ -94,4 +94,21 @@ class Shot:
         for (x, y, w, h) in objects:
             #crop = image[y: y + h, x: x + w]
             cv2.rectangle(self.image_contours,(x,y),(x+w,y+h),(255,0,0),2)
+
+    def CalcContoursAnalyseResult(self):
+        self.imageAnalyseResult.contours = []
+
+        for c in self.Contours:
+
+            area = int(cv2.contourArea(c))
+            #print('Contour: {}'.format(area))
+
+            (x, y, w, h) = cv2.boundingRect(c)
+            (center_x, center_y) = (x + w//2,y + h//2)
+
+            result = ContourAnalyseResult()
+            result.area = area
+            result.profile_proportion = round(h / w, 2)
+            result.center_coordinate = [center_x, center_y]
+            self.imageAnalyseResult.contours.append(result)
 
