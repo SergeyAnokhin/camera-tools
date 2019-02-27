@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 import decimal
 from Common.CommonHelper import CommonHelper, ComplexEncoder
 
@@ -39,6 +39,9 @@ class ContourAnalyseResult:
         d = self.__dict__
         return d
 
+    def __repr__(self):
+        return "a:{}/p:{}@[{center[0]},{center[1]}]".format(self.area, self.profile_proportion, center =self.center_coordinate)
+
 class ObjectAnalyseResult(ContourAnalyseResult):
     label = ""
     confidence = 0.0
@@ -54,6 +57,7 @@ class AnalyseResult:
         self.day_time: str # night, day, mi_day
         self.is_false_alert: bool
         self.directions = []
+        self.processing_time = f"{datetime.now():%Y-%m-%d %H:%M:%S}"
 
     def toJson(self):
         return json.dumps(self.reprJSON(), cls=ComplexEncoder, indent=4)
@@ -77,7 +81,8 @@ class AnalyseResult:
         return " ".join(labels)
 
     def GetMailBody(self):
-        return "(log must be here)"
+        return self.toJson()
 
-    def GetMailSubject(self):
-        return "(subject must be here)"
+    def GetMailSubject(self, camera: str, time: datetime):
+        self.objects = self.GetAllObjectsLabels()
+        return "{} @{:%H:%M} | {}".format(camera, time, self.objects)

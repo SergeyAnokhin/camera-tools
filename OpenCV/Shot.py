@@ -112,3 +112,5 @@ class Shot:
             result.center_coordinate = [center_x, center_y]
             self.imageAnalyseResult.contours.append(result)
 
+        #reprs = [str(x) for x in self.imageAnalyseResult.contours]
+        #self.log.debug("Contours: " + (" ".join(reprs)))

@@ -32,7 +32,10 @@ shots.Show()
 
 ### 3. Send mail with analyse and log
 # imap = ImapGmailHelper()
-# mail_subject = "{} @{:%H:%M} motion detected".format(camera, shots.shot1.datetime)
+mail_subject = analyseData.GetMailSubject(camera, shots.shot1.datetime)
+mail_body = analyseData.GetMailBody()
+print(mail_subject)
+print(mail_body)
 # imap.send_mail(mail_subject, "(log must be here)", [shots.output_filename])
 
 ### 4. Copy to archive & Send data to Elasticsearch
