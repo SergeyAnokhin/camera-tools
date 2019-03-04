@@ -10,7 +10,7 @@ from Archiver.CameraArchiveHelper import CameraArchiveHelper
 
 helper = CameraArchiveHelper()
 # ['FoscamHut', 'FoscamPTZ', 'Foscam', 'FoscamPlay', 'DLinkCharles', 'DLinkFranck', 'KonxHD']
-configs = helper.load_configs('..\configs', ['KonxHD'])
+configs = helper.load_configs('configs', ['KonxHD'])
 
 for config in configs:
     print('#################################################')

@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-from elasticsearch import Elasticsearch
 from Archiver.FileArchive import FileArchive
 from Common.ElasticSearchHelper import ElasticSearchHelper
 from Archiver.CameraArchiveConfig import CameraArchiveConfig

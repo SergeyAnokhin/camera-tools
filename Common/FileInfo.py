@@ -56,3 +56,18 @@ class FileInfo:
     def size_human(self):
         size = self.size()
         return self.helper.size_human(size)
+
+    '''
+    //diskstation/CameraArchive/Foscam :
+    //diskstation/CameraArchive/Foscam/2016-07-26/record/alarm_20160404_010956.mkv => /2016-07-26/record/alarm_20160404_010956.mkv
+    '''
+    def get_path_relative(self, dir_base: str):
+        return self.path.replace(dir_base, '')
+
+    '''
+    //diskstation/CameraArchive/Foscam :
+    //diskstation/CameraArchive/Foscam/2016-07-26/record/alarm_20160404_010956.mkv => /2016-07-26/record
+    '''
+    def get_dir_relative(self, dir_base: str):
+        path_relative = self.get_path_relative(dir_base)
+        return os.path.dirname(path_relative)

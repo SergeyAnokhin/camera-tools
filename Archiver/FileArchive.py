@@ -1,12 +1,12 @@
 import os
 import re
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
-from Archiver.FileArchiveInfo import FileArchiveInfo
+from Common.FileInfo import FileInfo
 
 
 class FileArchive:
-    frm: FileArchiveInfo
-    to: FileArchiveInfo
+    frm: FileInfo
+    to: FileInfo
 
     def __init__(self, config: CameraArchiveConfig, root = '', filename = ''):
         self.config = config
@@ -14,12 +14,12 @@ class FileArchive:
             return
 
         full_filename = os.path.join(root, filename)
-        self.frm = FileArchiveInfo(config, config.path_from, full_filename)
+        self.frm = FileInfo(full_filename)
 
         full_filename = self.get_full_filename_to()
-        self.to = FileArchiveInfo(config, config.path_to, full_filename)
+        self.to = FileInfo(full_filename)
 
-    def force_values(self, to: FileArchiveInfo, frm: FileArchiveInfo):
+    def force_values(self, to: FileInfo, frm: FileInfo):
         self.frm = frm
         self.to = to
 
