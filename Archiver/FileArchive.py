@@ -1,7 +1,7 @@
 import os
 import re
-from CameraArchiveConfig import CameraArchiveConfig
-from FileArchiveInfo import FileArchiveInfo
+from Archiver.CameraArchiveConfig import CameraArchiveConfig
+from Archiver.FileArchiveInfo import FileArchiveInfo
 
 
 class FileArchive:

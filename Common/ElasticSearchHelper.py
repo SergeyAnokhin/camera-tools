@@ -1,9 +1,10 @@
 import json
 from elasticsearch import Elasticsearch
+from Common.FileInfo import FileInfo
 
 class ElasticSearchHelper:
 
-    def report_to_elastic(self, file: FileArchive):
+    def report_to_elastic(self, file: FileInfo):
         config = file.config
         fullfilename_ftp = file.to.path.replace("\\\\diskstation", '').replace('\\', '/')
 

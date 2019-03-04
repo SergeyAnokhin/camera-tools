@@ -16,4 +16,4 @@ for config in configs:
     print('#################################################')
     print(config)
     files = helper.get_files(config)
-    helper.move_files(files)
+    # helper.move_files(files)
