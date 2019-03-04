@@ -16,4 +16,8 @@ for config in configs:
     print('#################################################')
     print(config)
     files = helper.get_files(config)
+<<<<<<< HEAD
     helper.move_files(files, config)
+=======
+    helper.move_files(files)
+>>>>>>> add stat

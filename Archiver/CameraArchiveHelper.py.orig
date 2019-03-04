@@ -59,8 +59,12 @@ class CameraArchiveHelper:
                     print('{} files moved: {}. Total {}'.format(files_moved, ext_stat, common.size_human(bytes_moved)))
                     files_moved = 0
                     bytes_moved = 0
+<<<<<<< HEAD
+                print('{} => {}'.format(dir_relative_frm, dir_relative_to))
+=======
                     exts = {}
-                print('{} => {}'.format(dir_relative_frm, dir_relative_frm))
+                print('{} => {}'.format(file.frm.dir_relative, file.to.dir_relative))
+>>>>>>> add stat
 
             files_moved += 1
             bytes_moved += file.frm.size()
@@ -74,12 +78,16 @@ class CameraArchiveHelper:
             shutil.move(file.frm.path, file.to.path)
             elastic.report_to_elastic(file)
 
+<<<<<<< HEAD
+            last_file_dir_relative_to = dir_relative_to
+=======
             ext = file.to.get_extension()
             if ext not in exts:
                 exts[ext] = 0
             exts[ext] += 1
 
-            last_file_dir_relative_to = dir_relative_frm
+            last_file_dir_relative_to = file.to.dir_relative
+>>>>>>> add stat
             #break
 
         ext_stat = ' '.join(["{}:{}".format(k.upper(), exts[k]) for k in exts])
