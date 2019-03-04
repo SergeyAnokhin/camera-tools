@@ -24,7 +24,7 @@ class CameraArchiveHelper:
     def get_files(self, config):
         files = []
         for root, dirnames, filenames in os.walk(config.path_from):
-            if self.dir_to_ignore(root, config.ignore_dir):
+            if hasattr(config, 'ignore_dir') and self.dir_to_ignore(root, config.ignore_dir):
                 print('Ignore:', root)
                 continue
             for filename in filenames: #fnmatch.filter(filenames, '*.c'):
@@ -56,11 +56,11 @@ class CameraArchiveHelper:
             if last_file_dir_relative_to != dir_relative_to:
                 if last_file_dir_relative_to != '':
                     ext_stat = ' '.join(["{}:{}".format(k.upper(), exts[k]) for k in exts])
-                    print('{} files moved: {}. Total {}'.format(files_moved, ext_stat, common.size_human(bytes_moved)))
+                    print('\t{} files moved: {}. Total {}'.format(files_moved, ext_stat, common.size_human(bytes_moved)))
                     files_moved = 0
                     bytes_moved = 0
                     exts = {}
-                print('{} => {}'.format(dir_relative_frm, dir_relative_frm))
+                print('{} => {}'.format(dir_relative_frm, dir_relative_to))
 
             files_moved += 1
             bytes_moved += file.frm.size()
@@ -79,11 +79,11 @@ class CameraArchiveHelper:
                 exts[ext] = 0
             exts[ext] += 1
 
-            last_file_dir_relative_to = dir_relative_frm
+            last_file_dir_relative_to = dir_relative_to
             #break
 
         ext_stat = ' '.join(["{}:{}".format(k.upper(), exts[k]) for k in exts])
-        print('{} files moved: {}. Total {}'.format(files_moved, ext_stat, common.size_human(bytes_moved)))
+        print('\t{} files moved: {}. Total {}'.format(files_moved, ext_stat, common.size_human(bytes_moved)))
         files_moved = 0
         bytes_moved = 0
         print ('########################################################')
