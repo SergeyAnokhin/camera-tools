@@ -3,6 +3,7 @@ from flask import request
 import datetime
 import os
 import shutil
+import threading
 from Common.GmailContext import GmailContext
 from Common.ImapGmailHelper import ImapGmailHelper
 from OpenCV.ThreeShots import ThreeShots
@@ -28,6 +29,7 @@ if __name__ == "__main__":
     app.run(host='192.168.1.31', port=5000)
 #yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
 yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
+lock = threading.Lock()
 
 @app.route('/', methods=['GET'])
 def health():
@@ -43,6 +45,8 @@ def test2():
 
 @app.route('/analyse', methods=['GET'])
 def analyse():
+    lock.acquire()
+
     ### 1. Download Mail From GMail
     gmail = GmailContext()
     if os.path.exists(temp):
@@ -60,6 +64,7 @@ def analyse():
     imap = ImapGmailHelper()
     mail_subject = "{} @{:%H:%M} motion detected".format(camera, shots.shot1.datetime)
     imap.send_mail(mail_subject, analyseData.GetMailBody(), [shots.output_filename])
+    lock.release()
     return 'OK'
 
 # @app.route('/fit', methods=['POST'])
