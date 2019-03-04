@@ -42,7 +42,7 @@ class CameraArchiveHelper:
                 return True
         return False
 
-    def move_files(self, files):
+    def move_files(self, files, config):
         common = CommonHelper()
         elastic = ElasticSearchHelper()
 
@@ -50,12 +50,14 @@ class CameraArchiveHelper:
         bytes_moved = 0
         files_moved = 0
         for file in files:
-            if last_file_dir_relative_to != file.to.dir_relative:
+            dir_relative_to = file.to.get_dir_relative(config.path_to)
+            dir_relative_frm = file.frm.get_dir_relative(config.path_from)
+            if last_file_dir_relative_to != dir_relative_to:
                 if last_file_dir_relative_to != '':
                     print('{} files moved. Total {}'.format(files_moved, common.size_human(bytes_moved)))
                     files_moved = 0
                     bytes_moved = 0
-                print('{} => {}'.format(file.frm.dir_relative, file.to.dir_relative))
+                print('{} => {}'.format(dir_relative_frm, dir_relative_to))
 
             files_moved += 1
             bytes_moved += file.frm.size()
@@ -69,7 +71,7 @@ class CameraArchiveHelper:
             shutil.move(file.frm.path, file.to.path)
             elastic.report_to_elastic(file)
 
-            last_file_dir_relative_to = file.to.dir_relative
+            last_file_dir_relative_to = dir_relative_to
             #break
 
         print('{} files moved. Total {}'.format(files_moved, common.size_human(bytes_moved)))
