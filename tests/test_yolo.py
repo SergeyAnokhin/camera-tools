@@ -41,6 +41,20 @@ class YoloTest(unittest.TestCase):
         self.assertEqual("person", analyseData.images[1].objects[0].label)
         self.assertEqual("person", analyseData.images[2].objects[0].label)
 
+    def test_Day_BigMagnify_treesMotion(self):
+        temp = '../camera-OpenCV-data/Camera/Foscam/Day_BigMagnify_treesMotion'
+        shots = ThreeShots.FromDir(None, temp)
+        shots.yoloContext = self.yolo
+        analyseData = shots.Analyse()
+
+        self.log.info("[x, y, w, h] = " + " ".join([str(d) for d in shots.shot1.magnifiedRegion]))
+        self.log.info("[x, y, w, h] = " + " ".join([str(d) for d in shots.shot2.magnifiedRegion]))
+        self.log.info("[x, y, w, h] = " + " ".join([str(d) for d in shots.shot3.magnifiedRegion]))
+
+        #shots.Show()
+        self.assertEqual(0, len(shots.shot1.magnifiedRegion))
+        self.assertEqual(0, len(shots.shot2.magnifiedRegion))
+        self.assertEqual(0, len(shots.shot3.magnifiedRegion))
 
 if __name__ == '__main__':
     unittest.main()

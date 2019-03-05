@@ -15,6 +15,7 @@ class Shot:
     datetime: datetime
     helper = CommonHelper()
     imageAnalyseResult = ImageAnalyseResult()
+    magnifiedRegion = []
 
     def FromFile(self, path: str):
         self = Shot()
@@ -67,6 +68,10 @@ class Shot:
 
         for c in self.Contours[0:counts]:
             (x, y, w, h) = cv2.boundingRect(c)
+            if sqrt(w*w + h*h) > 150:
+                return
+
+            self.magnifiedRegion = [x, y, w, h]
             img = self.image_color
             motion_area = img[y:(y+h), x:(x+w)]
             img_xmax = len(img[0])
