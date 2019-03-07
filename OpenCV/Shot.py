@@ -1,5 +1,6 @@
 import cv2
 import datetime
+import math
 import logging
 import matplotlib.pyplot as plt
 from Common.CommonHelper import CommonHelper
@@ -68,7 +69,7 @@ class Shot:
 
         for c in self.Contours[0:counts]:
             (x, y, w, h) = cv2.boundingRect(c)
-            if sqrt(w*w + h*h) > 150:
+            if math.sqrt(w*w + h*h) > 150:
                 return
 
             self.magnifiedRegion = [x, y, w, h]
