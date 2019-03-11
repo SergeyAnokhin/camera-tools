@@ -19,7 +19,7 @@ class ImapShotsProvider:
 
     def CleanFolder(self):
         for filename in os.listdir(self.tempFolder):
-            os.unlink(filename)
+            os.unlink(os.path.join(self.tempFolder, filename))
 
     def GetShots(self, imap_folder):
         self.Connect()
@@ -32,6 +32,7 @@ class ImapShotsProvider:
     # filePattern : /path_to_file/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg
     def SaveAttachments(self, mail, filePattern: str):
         index = 0
+        result = []
         for part in mail.walk():
             if(part.get_content_maintype() != 'image'):
                 continue
@@ -39,14 +40,15 @@ class ImapShotsProvider:
 
             if bool(fileName):
                 memShot = CamShot(fileName)
-                dt = memShot.GetDatetime(fileName)
+                dt = memShot.GetDatetime()
                 shot = CamShot(filePattern.format(dt, index))
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:
                     self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
-                yield shot
+                result.append(shot)
             index += 1
+        return result
 
     def GetLastMail(self, imap_folder: str):
         self.imapSession.select(imap_folder)
