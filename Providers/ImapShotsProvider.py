@@ -15,6 +15,11 @@ class ImapShotsProvider:
         self.config = SecretConfig()
         self.config.fromJsonFile()
         self.tempFolder = tempFolder
+        self.CleanFolder()
+
+    def CleanFolder(self):
+        for filename in os.listdir(self.tempFolder):
+            os.unlink(filename)
 
     def GetShots(self, imap_folder):
         self.Connect()
@@ -39,7 +44,7 @@ class ImapShotsProvider:
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:
-                    self.log.info('[MAIL] Attachment already exists: ' + shot.fullname)
+                    self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
                 yield shot
             index += 1
 
@@ -47,17 +52,17 @@ class ImapShotsProvider:
         self.imapSession.select(imap_folder)
         typ, data = self.imapSession.search(None, 'ALL')
         if typ != 'OK':
-            self.log.error('Error searching in imap folder: ' + imap_folder)
+            self.log.error(f'Error searching in imap folder: {imap_folder}')
             raise ValueError('Error searching in imap folder: ' + imap_folder)
 
         # Iterating over all emails
         ids = data[0].split()
-        self.log.debug('Found {} mails in "{}"'.format(len(ids), imap_folder))
+        self.log.debug(f'Found {len(ids)} mails in "{imap_folder}"')
         msgId = ids[-1].decode('utf-8')
         #for msgId in data[0].split(): 
         typ, messageParts = self.imapSession.fetch(msgId, '(RFC822)')
         if typ != 'OK':
-            self.log.error('Error fetching mail: ' + msgId)
+            self.log.error(f'Error fetching mail: {msgId}')
             raise ValueError('Error fetching mail: ' + msgId)
 
         emailBody = messageParts[0][1].decode('utf-8')
@@ -73,7 +78,7 @@ class ImapShotsProvider:
             self.log.debug('Not able to sign in!')
             print ('Not able to sign in!')
             raise ConnectionError('imap.gmail.com')
-        self.log.debug('Connection: ' + accountDetails)
+        self.log.debug(f'Connection: {accountDetails}')
 
     def Disconnect(self):
         self.imapSession.close()
