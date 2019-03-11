@@ -2,10 +2,12 @@ import json
 
 
 class SecretConfig:
-    gmail_usermane: str
-    gmail_password: str
     filename = 'configs/secret.json'
-        
+
+    def __init__(self):
+        self.gmail_usermane = ""
+        self.gmail_password = ""
+
     def fromJsonFile(self):
         with open(self.filename, "r") as read_file:
             self.__dict__ = json.load(read_file)

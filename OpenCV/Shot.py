@@ -69,7 +69,7 @@ class Shot:
 
         for c in self.Contours[0:counts]:
             (x, y, w, h) = cv2.boundingRect(c)
-            if math.sqrt(w*w + h*h) > 150:
+            if math.sqrt(w*w + h*h) > 200:
                 return
 
             self.magnifiedRegion = [x, y, w, h]
