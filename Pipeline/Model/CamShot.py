@@ -1,7 +1,7 @@
 import re, datetime
-from Pipeline.Model.FileCamShot import FileCamShot
+from Pipeline.Model.FileImage import FileImage
 
-class CamShot(FileCamShot):
+class CamShot(FileImage):
     
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)

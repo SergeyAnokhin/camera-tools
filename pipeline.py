@@ -14,12 +14,12 @@ imap_folder = 'camera/foscam'
 imap = ImapShotsProvider(temp)
 shotsImap = imap.GetShots(imap_folder);
 
-directory = DirectoryShotsProvider()
-shotsDir = directory.GetShots(shotsImap)
+# directory = DirectoryShotsProvider()
+# shotsDir = directory.GetShots(shotsImap)
 
 # # 2. Create Pipeline
 pipeline = ShotsPipeline()
-pipeline.shots = [shotsImap[:], shotsDir[:]]
+pipeline.shots = [shotsImap[:]] # , shotsDir[:]
 
 # # 3. Add Processors
 # # proceccor : Analyse() GetJsonResult() Draw()  
