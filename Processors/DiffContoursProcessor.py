@@ -14,7 +14,8 @@ class DiffContoursProcessor:
         for i in range(size):
             next_index = (i+1) if i < (size-1) else 0  ### => (0,1) (1,2) (2,0)
             deltaShot = CamShot(self.Shots[i].fullname)
-            deltaShot.LoadImage(cv2.absdiff(self.Shots[i].image, self.Shots[next_index].image))
+            diff = cv2.absdiff(self.Shots[i].image, self.Shots[next_index].image)
+            deltaShot.LoadImage(diff)
             deltas.append(deltaShot)
         return deltas
 

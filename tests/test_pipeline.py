@@ -37,3 +37,5 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
         result[0].Show()
+        result[1].Show()
+        result[2].Show()

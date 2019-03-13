@@ -5,14 +5,14 @@ import matplotlib.gridspec as gridspec
 
 
 class FileImage:
+    image = []
 
     def __init__(self, fullname: str):
         self.fullname = fullname
         self.local = pytz.timezone("Europe/Paris")
         self.filename = os.path.basename(fullname)
         self.dir = os.path.dirname(fullname)
-        self.log = logging.getLogger('SHOT')
-        self.image = None
+        self.log = logging.getLogger('IMG')
 
     def Exist(self):
         return os.path.isfile(self.fullname)
@@ -23,10 +23,17 @@ class FileImage:
         fp.write(content)
         fp.close()
 
-    def LoadImage(self, image = None):
-        self.image = image
-        if self.image == None:
+    def LoadImage(self, image = []):
+        if len(image) != 0:
+            self.image = image
+            return
+
+        if len(self.image) == 0:
+            self.log.info(f"Load image from: {self.fullname}")
             self.image = mpimg.imread(self.fullname)
+            return
+
+        self.log.error(f"Cant load image nor from input parameter not from file: {self.fullname}")
 
     def Show(self):
         plt.figure(figsize=(8, 6.025))

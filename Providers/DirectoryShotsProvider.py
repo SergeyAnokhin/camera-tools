@@ -15,4 +15,6 @@ class DirectoryShotsProvider:
         return self
 
     def GetShots(self, dateTime):
+        for s in self.Shots:
+            s.LoadImage()
         return self.Shots
