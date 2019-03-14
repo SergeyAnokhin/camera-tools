@@ -1,4 +1,4 @@
-import re, datetime
+import re, datetime, cv2
 from Pipeline.Model.FileImage import FileImage
 
 class CamShot(FileImage):
@@ -19,3 +19,6 @@ class CamShot(FileImage):
         minute = int(re_groups.group(5))
         seconds = int(re_groups.group(6))
         return datetime.datetime(year, month, day, hour, minute, seconds)
+
+    def GrayImage(self):
+        return cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
