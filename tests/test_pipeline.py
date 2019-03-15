@@ -3,6 +3,7 @@
 # python -m unittest discover     
 import unittest, datetime, logging
 import numpy as np
+import pprint as pp
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
@@ -37,9 +38,7 @@ class TestPipeline(unittest.TestCase):
         target = DiffContoursProcessor()
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
-        result[0].Show()
-        self.log.info(np.size(result[0].image))
-        self.log.info(np.size(result[0].image, 0))
-        self.log.info(np.size(result[0].image, 1))
+        # result[0].Shot.Show()
+        pp.pprint(result[0].Summary)
         # result[1].Show()
         # result[2].Show()
