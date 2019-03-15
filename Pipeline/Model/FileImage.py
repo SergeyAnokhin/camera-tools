@@ -16,6 +16,7 @@ class FileImage:
         self.fullname = fullname
         self.filename = os.path.basename(fullname)
         self.dir = os.path.dirname(fullname)
+        self.image = []
 
     def Exist(self):
         return os.path.isfile(self.fullname)

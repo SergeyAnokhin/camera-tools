@@ -8,18 +8,50 @@ class DiffCamShot:
         self.log = logging.getLogger("PROC:DIFF")
         self.shot = shot
         self.shots = shots
+        self.analyseData = {}
 
     def Process(self):
-        deltaShot = CamShot()
         mask1 = self.DiffMask(self.shots[0])
         mask2 = self.DiffMask(self.shots[1])
-        mask = mask1.copy()
-        for x in range(len(mask1)):
-            for y in range(len(mask1[x])):
-                mask[x, y] = min(mask1[x, y], mask2[x, y])
 
-        deltaShot.SetImage(mask)
-        return deltaShot
+        maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2)
+        maskMin = self.Merge(mask1, mask2, lambda x, y: min(x, y))
+        cntsMean = self.ContoursByMask(maskMean)
+        cntsMin = self.ContoursByMask(maskMin)
+
+        cntShot = self.shot.Copy();
+        self.DrawContours(cntShot, cntsMean, color=(0, 180, 180))
+        self.DrawContours(cntShot, cntsMin, thickness=1)
+        self.DrawBoxes(cntShot, cntsMin)
+
+        return cntShot
+
+    def ContoursByMask(self, mask):
+        cnts, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = sorted(cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
+        areas = [str(cv2.contourArea(c)) for c in cnts]
+        totalArea = sum(cv2.contourArea(c) for c in cnts)
+        self.log.debug(f'D= Contours found : {len(cnts)}. Total contours area : {totalArea}')
+        self.log.debug("D= Contours area: {}".format(", ".join(areas)))
+        return cnts
+
+    def Merge(self, arr1, arr2, func):
+        result = arr1.copy()
+        for x in range(len(arr1)):
+            for y in range(len(arr1[x])):
+                result[x, y] = func(arr1[x, y], arr2[x, y])
+        return result
+
+
+    def DrawContours(self, shot, contours, color=(0, 255, 255), thickness=1):
+        cv2.drawContours(shot.image, contours, -1, color, thickness)
+
+    def DrawBoxes(self, shot, contours):
+        for c in contours:
+            area = int(cv2.contourArea(c) // 100)
+            (x, y, w, h) = cv2.boundingRect(c)
+            cv2.rectangle(shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
+            cv2.putText(shot.image, str(area), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
 
     def DiffMask(self, withshot):
         absdiff     = cv2.absdiff(self.shot.GrayImage(), withshot.GrayImage())
@@ -46,21 +78,3 @@ class DiffContoursProcessor:
             delta = diff.Process()
             deltas.append(delta)
         return deltas
-
-    # def CalcCountours(self):
-    #     self.Delta = cv2.absdiff(self.shot1.image, self.shot2.image)
-    #     self.GaussianBlur = cv2.GaussianBlur(self.Delta, (5, 5), 0)
-    #     ret, self.Threshold = cv2.threshold(
-    #         self.GaussianBlur, 40, 255, cv2.THRESH_BINARY)
-    #     self.Dilate = cv2.dilate(self.Threshold, np.ones((10, 10), np.uint8))
-    #     cnts, h = cv2.findContours(
-    #         self.Dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    #     self.Contours = sorted(
-    #         cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
-
-    #     # areas = [str(cv2.contourArea(c)) for c in self.Contours]
-    #     # totalArea = sum(cv2.contourArea(c) for c in self.Contours)
-    #     # print('D= Contours found : {}. Total contours area : {}'.format(
-    #     #     len(self.Contours), totalArea))
-    #     # print('D= Contours area: ', ", ".join(areas))
-    #     return self.Contours

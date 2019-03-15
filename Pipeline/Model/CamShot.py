@@ -22,3 +22,10 @@ class CamShot(FileImage):
 
     def GrayImage(self):
         return cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+
+    def Copy(self):
+        copy = CamShot(self.fullname)
+        if len(self.image) != 0:
+            copy.image = self.image.copy()
+        return copy
+
