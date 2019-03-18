@@ -1,4 +1,4 @@
-import cv2, logging, itertools, os, time
+import cv2, logging, itertools, os, time, cv2
 import numpy as np
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
@@ -6,8 +6,10 @@ from Pipeline.Model.ProcessingResult import ProcessingResult
 
 class YoloDetection:
 
-    def __init__(self, detection):
+    def __init__(self, detection, shot: CamShot):
         self.detection = detection
+        self.shot = shot
+        (self.ImageHeight, self.ImageWidth) = self.shot.image.shape[:2]
 
     def GetClassId(self):
         scores = self.detection[5:]
@@ -18,55 +20,45 @@ class YoloDetection:
         classID = np.argmax(scores)
         return scores[classID]
 
+    def GetBoxCoordinates(self):
+        # scale the bounding box coordinates back relative to the
+        # size of the image, keeping in mind that YOLO actually
+        # returns the center (x, y)-coordinates of the bounding
+        # box followed by the boxes' width and height
+        box = self.detection[0:4] \
+                    * np.array([self.ImageWidth, self.ImageHeight, self.ImageWidth, self.ImageHeight])
+        (centerX, centerY, width, height) = box.astype("int")
+
+        # use the center (x, y)-coordinates to derive the top and
+        # and left corner of the bounding box
+        x = int(centerX - (width / 2))
+        y = int(centerY - (height / 2))
+        return (x, y, int(width), int(height))
 
 class YoloCamShot: 
+    detections = []
 
     def __init__(self, shot: CamShot):
         self.shot = shot.Copy()
+        self.log = logging.getLogger(f"PROC:YOLO:{self.shot.filename}")
+        self.boxes = []
 
-    def Detect(self):
-        self.log.debug("start detect objects on: {}".format(self.shot.filename))
+    def Detect(self, net, layers):
+        #self.log.debug("start detect objects on: {}".format(self.shot.filename))
         blob = cv2.dnn.blobFromImage(self.shot.image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
-        self.net.setInput(blob)
+        net.setInput(blob)
         start = time.time()
-        layerOutputs = self.net.forward(self.layers)
+        layerOutputs = net.forward(layers)
         self.log.debug("detection took {:.3f} seconds".format(time.time() - start))
         return layerOutputs
 
-    def ProcessOutput(self, layerOutputs):
-        (H, W) = self.shot.image.shape[:2]
+    def ProcessOutput(self, layerOutputs, minConfidence, threshold):
+        detections = [YoloDetection(d, self.shot) for d in itertools.chain(*layerOutputs)]
+        self.detections = [d for d in detections if d.GetConfidence() > minConfidence]
 
-        for detection in itertools.chain(*layerOutputs):
-            # extract the class ID and confidence (i.e., probability) of the current object detection
-            scores = detection[5:]
-            classID = np.argmax(scores)
-            confidence = scores[classID]
-
-            # filter out weak predictions by ensuring the detected
-            # probability is greater than the minimum probability
-            if confidence <= self.confidence:
-                continue
-
-            # scale the bounding box coordinates back relative to the
-            # size of the image, keeping in mind that YOLO actually
-            # returns the center (x, y)-coordinates of the bounding
-            # box followed by the boxes' width and height
-            box = detection[0:4] * np.array([W, H, W, H])
-            (centerX, centerY, width, height) = box.astype("int")
-
-            # use the center (x, y)-coordinates to derive the top and
-            # and left corner of the bounding box
-            x = int(centerX - (width / 2))
-            y = int(centerY - (height / 2))
-
-            # update our list of bounding box coordinates, confidences,
-            # and class IDs
-            result.boxes.append([x, y, int(width), int(height)])
-            result.confidences.append(float(confidence))
-            result.classIDs.append(classID)
-
-        # apply non-maxima suppression to suppress weak, overlapping bounding
-        result.idxs = cv2.dnn.NMSBoxes(result.boxes, result.confidences, self.confidence, self.threshold)
+        boxes = [d.GetBoxCoordinates() for d in self.detections]
+        confidences = [d.GetConfidence() for d in self.detections]
+        self.idxs = cv2.dnn.NMSBoxes(boxes, confidences, minConfidence, threshold)
 
     def Draw(self):
         pass
@@ -112,7 +104,8 @@ class YoloObjDetectionProcessor:
     def Process(self):
         for shot in self.shots:
             yolo = YoloCamShot(shot)
-            yolo.Detect()
+            layerOutputs = yolo.Detect(self.net, self.layers)
+            yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
 
         return self.Result
 
