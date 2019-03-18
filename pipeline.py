@@ -35,6 +35,7 @@ pipeline.processors.append(diff)
 # tracking = TrackingProcessor(diff, yolo)
 # pipeline.processors.append(tracking)
 
+pipeline.PreLoad()
 pipeline.Process()
 pipeline.Show()
 

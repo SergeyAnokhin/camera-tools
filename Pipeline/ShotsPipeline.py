@@ -6,6 +6,10 @@ class ShotsPipeline:
         self.shots = []
         self.analyseResult = {}
 
+    def PreLoad(self):
+        for processor in self.processors:
+            processor.PreLoad()
+
     def Process(self):
         for processor in self.processors:
             analyseResult = processor.Process(self.shots)

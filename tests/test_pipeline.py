@@ -7,6 +7,7 @@ import pprint as pp
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
+from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 
 class TestPipeline(unittest.TestCase):
 
@@ -38,7 +39,16 @@ class TestPipeline(unittest.TestCase):
         target = DiffContoursProcessor()
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
-        # result[0].Shot.Show()
-        pp.pprint(result[0].Summary)
+        pp.pprint(result[0].Summary, indent=2)
+        result[0].Shot.Show()
         # result[1].Show()
         # result[2].Show()
+
+    def test_YoloObjDetectionProcessor(self):
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        target = YoloObjDetectionProcessor()
+        target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        result = target.Process()
+        pp.pprint(result[0].Summary, indent=2)
+        result[0].Shot.Show()
+
