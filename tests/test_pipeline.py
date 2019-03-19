@@ -40,6 +40,7 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
         pp.pprint(result[0].Summary, indent=2)
+        self.assertEqual(result[0].Summary[0]['label'], 'person')
         result[0].Shot.Show()
         # result[1].Show()
         # result[2].Show()

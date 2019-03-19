@@ -14,7 +14,8 @@ class YoloContext:
             return
 
         labelsPath = os.path.sep.join([self.yoloPath, "names.txt"])
-        self.LABELS = open(labelsPath).read().strip().split("\n")
+        with open(labelsPath) as file:
+            self.LABELS = file.read().strip().split("\n")
         np.random.seed(42)
         self.COLORS = np.random.randint(0, 255, size=(len(self.LABELS), 3), dtype="uint8")
         self.weightsPath = os.path.sep.join([self.yoloPath, "model.weights"])

@@ -5,7 +5,7 @@ import matplotlib.gridspec as gridspec
 
 
 class FileImage:
-    image = []
+    image: []
 
     def __init__(self, fullname: str = None):
         self.log = logging.getLogger('IMG')
@@ -16,7 +16,6 @@ class FileImage:
         self.fullname = fullname
         self.filename = os.path.basename(fullname)
         self.dir = os.path.dirname(fullname)
-        self.image = []
 
     def Exist(self):
         return os.path.isfile(self.fullname)
@@ -33,7 +32,10 @@ class FileImage:
 
     def LoadImage(self):
         self.log.info(f"Load image from: {self.fullname}")
-        self.image = mpimg.imread(self.fullname)
+        #self.image = mpimg.imread(self.fullname)
+        self.image = cv2.imread(self.fullname, cv2.IMREAD_UNCHANGED)
+        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+
 
     def Show(self):
         plt.figure(figsize=(8, 6.025))
