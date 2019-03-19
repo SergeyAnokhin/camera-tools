@@ -16,7 +16,7 @@ class YoloDetection:
     def GetConfidence(self):
         scores = self.detection[5:]
         classID = np.argmax(scores)
-        return scores[classID]
+        return float(scores[classID])
 
     def GetBoxCoordinates(self):
         # scale the bounding box coordinates back relative to the

@@ -49,6 +49,6 @@ class TestPipeline(unittest.TestCase):
         target = YoloObjDetectionProcessor()
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
-        pp.pprint(result[0].Summary, indent=2)
-        result[0].Shot.Show()
+        pp.pprint(result.Summary[0], indent=2)
+        result.Shots[0].Show()
 

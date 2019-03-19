@@ -54,6 +54,7 @@ class YoloCamShot:
             cv2.rectangle(self.shot.image, (x, y), (x + w, y + h), color, 2)
             cv2.putText(self.shot.image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
+        return self.shot
 
     def GetProcessResult(self):
         # ensure at least one detection exists
@@ -65,14 +66,13 @@ class YoloCamShot:
             result = {}
             box = self.ResultsBoxes.boxes[i]
             (x, y, w, h) = box.GetBoxCoordinates()
-
             (center_x, center_y) = (x + w//2,y + h//2)
             
             result['area'] = w * h
             result['profile_proportion'] = round(h / w, 2)
             result['center_coordinate'] = [center_x, center_y]
             result['confidence'] = round(box.GetConfidence(), 2)
-            result['label'] = self.yolo.labels[box.GetClassId()]
+            result['label'] = self.yolo.LABELS[box.GetClassId()]
             results.append(result)
 
         return results
@@ -83,19 +83,23 @@ class YoloObjDetectionProcessor:
     yolo: YoloContext
 
     def __init__(self):
-        self.Result = ProcessingResult()
         self.log = logging.getLogger("PROC:YOLO")
         self.Shots = []
-        self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
+        self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
         self.yolo.PreLoad()
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
 
     def Process(self):
+        result = ProcessingResult()
         for shot in self.Shots:
             yolo = YoloCamShot(shot, self.yolo)
             layerOutputs = yolo.Detect()
             yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
+            shot = yolo.Draw()
+            summary = yolo.GetProcessResult()
+            result.Shots.append(shot)
+            result.Summary.append(summary)
 
-        return self.Result
+        return result
 
