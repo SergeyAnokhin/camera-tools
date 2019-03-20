@@ -71,6 +71,7 @@ class YoloCamShot:
             result['area'] = w * h
             result['profile_proportion'] = round(h / w, 2)
             result['center_coordinate'] = [center_x, center_y]
+            result['size'] = [w, h]
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             results.append(result)
@@ -86,6 +87,7 @@ class YoloObjDetectionProcessor:
         self.log = logging.getLogger("PROC:YOLO")
         self.Shots = []
         self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
+        #self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
         self.yolo.PreLoad()
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)

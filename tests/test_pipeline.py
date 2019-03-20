@@ -55,13 +55,16 @@ class TestPipeline(unittest.TestCase):
         result.Shots[0].Show()
 
     def test_TrackingProcessor(self):
-        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_simple'
         result = {}
         yolo = YoloObjDetectionProcessor()
         target = TrackingProcessor()
-        yolo.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        yolo.Shots = shots
+        target.Shots = shots
         result['YoloObjDetectionProcessor'] = yolo.Process()
         result['TrackingProcessor'] = target.Process(result)
-        pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
-        result.Shots[0].Show()
+        #pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
+        #result.Shots[1].Show()
 
