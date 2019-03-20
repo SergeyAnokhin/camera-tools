@@ -8,6 +8,7 @@ from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
+from Processors.TrackingProcessor import TrackingProcessor
 
 class TestPipeline(unittest.TestCase):
 
@@ -51,5 +52,16 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
         pp.pprint(result.Summary[0], indent=2)
+        result.Shots[0].Show()
+
+    def test_TrackingProcessor(self):
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        result = {}
+        yolo = YoloObjDetectionProcessor()
+        target = TrackingProcessor()
+        yolo.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        result['YoloObjDetectionProcessor'] = yolo.Process()
+        result['TrackingProcessor'] = target.Process(result)
+        pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
         result.Shots[0].Show()
 

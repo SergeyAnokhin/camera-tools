@@ -16,3 +16,6 @@ class TrackingProcessor:
         arr2 = cv2.imread(img2,cv2.IMREAD_GRAYSCALE)
         match = cv2.matchTemplate(arr1, arr2, cv2.TM_CCOEFF_NORMED)
         print(f'TEMP: {img1}=>{img2}:', max(map(max, match)))
+
+    def Process(self):
+        pass
