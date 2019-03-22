@@ -70,8 +70,8 @@ class YoloCamShot:
             
             result['area'] = w * h
             result['profile_proportion'] = round(h / w, 2)
-            result['center_coordinate'] = [center_x, center_y]
-            result['size'] = [w, h]
+            result['center_coordinate'] = (center_x, center_y)
+            result['size'] = (w, h)
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             results.append(result)

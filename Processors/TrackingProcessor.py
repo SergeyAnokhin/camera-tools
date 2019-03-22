@@ -26,11 +26,17 @@ class TrackingProcessor:
         result = ProcessingResult()
         yoloSummary = resultDict['YoloObjDetectionProcessor'].Summary
         for i in range(len(self.Shots)):
-            shot = self.Shots[i]
+            shot = self.Shots[i].Copy()
             print("===", shot.filename, "===")
             summary = yoloSummary[i]
             pp.pprint(summary)
-            (x, y) = summary['center_coordinate']
-            (w, h) = summary['size']
+            for box in summary:
+                (x, y) = box['center_coordinate']
+                (w, h) = box['size']
+                color = 128
+                text = 'box'
+                cv2.rectangle(shot.image, (x, y), (x + w, y + h), color, 2)
+                cv2.putText(shot.image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, color, 2)
             result.Shots.append(shot)
         return result

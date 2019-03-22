@@ -66,5 +66,5 @@ class TestPipeline(unittest.TestCase):
         result['YoloObjDetectionProcessor'] = yolo.Process()
         result['TrackingProcessor'] = target.Process(result)
         #pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
-        #result.Shots[1].Show()
+        result['TrackingProcessor'].Shots[1].Show()
 
