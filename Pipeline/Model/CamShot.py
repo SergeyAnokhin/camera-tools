@@ -1,4 +1,5 @@
 import re, datetime, cv2
+from copy import copy, deepcopy
 from Pipeline.Model.FileImage import FileImage
 
 class CamShot(FileImage):
@@ -26,6 +27,6 @@ class CamShot(FileImage):
     def Copy(self):
         copy = CamShot(self.fullname)
         if len(self.image) != 0:
-            copy.image = self.image.copy()
+            copy.image = deepcopy(self.image)
         return copy
 

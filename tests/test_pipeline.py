@@ -61,10 +61,12 @@ class TestPipeline(unittest.TestCase):
         yolo = YoloObjDetectionProcessor()
         target = TrackingProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        yolo.Shots = shots
+        yolo.Shots = shots.copy()
         target.Shots = shots
         result['YoloObjDetectionProcessor'] = yolo.Process()
         result['TrackingProcessor'] = target.Process(result)
         #pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
+        result['TrackingProcessor'].Shots[0].Show()
         result['TrackingProcessor'].Shots[1].Show()
+        result['TrackingProcessor'].Shots[2].Show()
 

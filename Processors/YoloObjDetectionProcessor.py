@@ -86,8 +86,8 @@ class YoloObjDetectionProcessor:
     def __init__(self):
         self.log = logging.getLogger("PROC:YOLO")
         self.Shots = []
-        self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
-        #self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
+        #self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
+        self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
         self.yolo.PreLoad()
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
