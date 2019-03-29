@@ -33,7 +33,7 @@ class TrackingProcessor:
             shot = self.Shots[i].Copy()
             print("===", shot.filename, "===")
             summary = yoloSummary[i]
-            pp.pprint(summary)
+            #pp.pprint(summary)
             for box_data in summary:
                 (x, y) = box_data['center_coordinate']
                 (w, h) = box_data['size']
@@ -61,11 +61,25 @@ class TrackingProcessor:
 
         return image[(y - h // 2):(y + h // 2),(x - w // 2):(x + w // 2)]
 
-    def CompareBox(self, boxes_last, box):
+    def CompareBox(self, boxes_last, template):
         if len(boxes_last) == 0:
             return
 
         for box_last in boxes_last:
-            match = cv2.matchTemplate(box_last, box, cv2.TM_CCOEFF_NORMED)
-            print(f'TEMP:', max(map(max, match)))
+            box_resized = self.ResizeForBiggerThanTemplate(box_last, template)
+            print(f'Resize: {box_last.shape} => {box_resized.shape}')
+            print(f'Template size: {template.shape}')
+            match = cv2.matchTemplate(box_resized, template, cv2.TM_CCOEFF_NORMED)
+            print(f'==MAX CORR : ==', max(map(max, match)), '==')
         
+    def ResizeForBiggerThanTemplate(self, image, template):
+        print(image.shape)
+        print(image.shape[:])
+        print(image.shape[0:2])
+        factors = [x/y for x, y in zip(template.shape[0:2], image.shape[0:2])]
+        print('>fact: ', factors)
+        zoom = max(factors)
+        zoom = zoom if zoom > 1 else 1
+        print('>Zoom: ', zoom)
+        imageResized = cv2.resize(image, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
+        return imageResized
