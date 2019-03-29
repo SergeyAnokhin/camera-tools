@@ -2,6 +2,11 @@ import cv2, logging
 import pprint as pp
 from Pipeline.Model.ProcessingResult import ProcessingResult
 
+class TrackingBox:
+    def __init__(self):
+        id = 0
+        image = []
+
 class TrackingProcessor:
     Shots: []
 
@@ -29,6 +34,7 @@ class TrackingProcessor:
         boxes_last = []
 
         for i in range(len(self.Shots)):
+            box_index = 0
             boxes_current = []
             shot = self.Shots[i].Copy()
             print("===", shot.filename, "===")
@@ -40,15 +46,18 @@ class TrackingProcessor:
 
                 pos_left_top = (x - w // 2, y - h // 2)
                 pos_right_bottom = (x + w // 2, y + h // 2)
-                box = self.ExtractBox(shot.image, box_data)
+                box = TrackingBox()
+                box.image = self.ExtractBox(shot.image, box_data)
+                box.id = box_index
 
                 color = 128
                 pos_text = (x - w // 2, y - h // 2 - 5)
-                text = 'box'
+                text = f'box: {box_index}'
                 cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 2)
                 cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, color, 2)
                 boxes_current.append(box)
+                box_index += 1
                 self.CompareBox(boxes_last, box)
 
             boxes_last = boxes_current
@@ -61,25 +70,22 @@ class TrackingProcessor:
 
         return image[(y - h // 2):(y + h // 2),(x - w // 2):(x + w // 2)]
 
-    def CompareBox(self, boxes_last, template):
+    def CompareBox(self, boxes_last: [], template: TrackingBox):
         if len(boxes_last) == 0:
             return
 
         for box_last in boxes_last:
-            box_resized = self.ResizeForBiggerThanTemplate(box_last, template)
-            print(f'Resize: {box_last.shape} => {box_resized.shape}')
-            print(f'Template size: {template.shape}')
-            match = cv2.matchTemplate(box_resized, template, cv2.TM_CCOEFF_NORMED)
-            print(f'==MAX CORR : ==', max(map(max, match)), '==')
+            box_resized = self.ResizeForBiggerThanTemplate(box_last.image, template.image)
+            # print(f'Resize: {box_last.shape} => {box_resized.shape}')
+            # print(f'Template size: {template.shape}')
+            match = cv2.matchTemplate(box_resized, template.image, cv2.TM_CCOEFF_NORMED)
+            print(f'==MAX MATCH: {box_last.id} vs {template.id} ==', max(map(max, match)), '==')
         
     def ResizeForBiggerThanTemplate(self, image, template):
-        print(image.shape)
-        print(image.shape[:])
-        print(image.shape[0:2])
         factors = [x/y for x, y in zip(template.shape[0:2], image.shape[0:2])]
-        print('>fact: ', factors)
+        #print('>fact: ', factors)
         zoom = max(factors)
         zoom = zoom if zoom > 1 else 1
-        print('>Zoom: ', zoom)
+        #print('>Zoom: ', zoom)
         imageResized = cv2.resize(image, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
         return imageResized
