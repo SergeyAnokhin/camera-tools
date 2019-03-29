@@ -4,6 +4,7 @@
 import unittest, datetime, logging
 import numpy as np
 import pprint as pp
+from copy import copy, deepcopy
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
@@ -56,12 +57,12 @@ class TestPipeline(unittest.TestCase):
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
-        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_simple'
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
         result = {}
         yolo = YoloObjDetectionProcessor()
         target = TrackingProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        yolo.Shots = shots.copy()
+        yolo.Shots = shots
         target.Shots = shots
         result['YoloObjDetectionProcessor'] = yolo.Process()
         result['TrackingProcessor'] = target.Process(result)
