@@ -44,21 +44,26 @@ class TrackingProcessor:
                 (x, y) = box_data['center_coordinate']
                 (w, h) = box_data['size']
 
-                pos_left_top = (x - w // 2, y - h // 2)
-                pos_right_bottom = (x + w // 2, y + h // 2)
+                box_size = 10
+                pos_left_top = (x - box_size // 2, y - box_size // 2)
+                pos_right_bottom = (x + box_size // 2, y + box_size // 2)
                 box = TrackingBox()
                 box.image = self.ExtractBox(shot.image, box_data)
                 box.id = box_index
+                box.center = (x, y)
 
                 color = 128
-                pos_text = (x - w // 2, y - h // 2 - 5)
+                pos_text = (x, y - 5)
                 text = f'box: {box_index}'
                 cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 2)
                 cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, color, 2)
+
                 boxes_current.append(box)
                 box_index += 1
-                self.CompareBox(boxes_last, box)
+                bestMatched = self.CompareBox(boxes_last, box)
+                if bestMatched != None:
+                    cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),5)
 
             boxes_last = boxes_current
             result.Shots.append(shot)
@@ -74,12 +79,25 @@ class TrackingProcessor:
         if len(boxes_last) == 0:
             return
 
+        coeffs = []
         for box_last in boxes_last:
             box_resized = self.ResizeForBiggerThanTemplate(box_last.image, template.image)
             # print(f'Resize: {box_last.shape} => {box_resized.shape}')
             # print(f'Template size: {template.shape}')
-            match = cv2.matchTemplate(box_resized, template.image, cv2.TM_CCOEFF_NORMED)
-            print(f'==MAX MATCH: {box_last.id} vs {template.id} ==', max(map(max, match)), '==')
+            matchTempArr = cv2.matchTemplate(box_resized, template.image, cv2.TM_CCOEFF_NORMED)
+            matchTemp = max(map(max, matchTempArr))
+
+            hist1 = cv2.calcHist([box_last.image],[0],None,[256],[0,256])
+            hist2 = cv2.calcHist([template.image],[0],None,[256],[0,256])
+            hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+
+            compCoeff = matchTemp * 0.2 + hist * 0.8
+            print(f'==MAX MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
+            coeffs.append(compCoeff)
+
+        maxValue = max(coeffs)
+        maxIndex = coeffs.index(maxValue)
+        return boxes_last[maxIndex]
         
     def ResizeForBiggerThanTemplate(self, image, template):
         factors = [x/y for x, y in zip(template.shape[0:2], image.shape[0:2])]
