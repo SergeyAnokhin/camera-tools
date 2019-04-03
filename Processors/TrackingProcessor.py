@@ -1,4 +1,6 @@
 import cv2, logging
+import numpy as np
+from scipy.spatial import distance
 import pprint as pp
 from Pipeline.Model.ProcessingResult import ProcessingResult
 
@@ -54,20 +56,46 @@ class TrackingProcessor:
 
                 color = 128
                 pos_text = (x, y - 5)
-                text = f'box: {box_index}'
-                cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 2)
-                cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, color, 2)
+                angle = 0
+                dist = 0
 
                 boxes_current.append(box)
                 box_index += 1
                 bestMatched = self.CompareBox(boxes_last, box)
                 if bestMatched != None:
-                    cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),5)
+                    cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
+                    (x, y) = bestMatched.center
+                    pos_left_top = (x - box_size // 2, y - box_size // 2)
+                    pos_right_bottom = (x + box_size // 2, y + box_size // 2)
+                    cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
+                    box.id = bestMatched.id
+                    angle = self.angle(box.center, bestMatched.center)
+                    dist = distance.euclidean(box.center, bestMatched.center)
+                    print(f"Distance: ID{box.id} => {dist:.0f}")
+                # TODO : save to summary : distance, direction, probability matching
+
+
+                text = f'box: ID{box.id}; D:{dist:.2f}'
+                cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
+                cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, color, 2)
 
             boxes_last = boxes_current
             result.Shots.append(shot)
         return result
+
+    def angle(self, p0, p1=np.array([0,0]), p2=None):
+        ''' compute angle (in degrees) for p0p1p2 corner
+        Inputs:
+            p0,p1,p2 - points in the form of [x,y]
+        '''
+        if p2 is None:
+            p2 = p1 + np.array([1, 0])
+        v0 = np.array(p0) - np.array(p1)
+        v1 = np.array(p2) - np.array(p1)
+
+        angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+        return np.degrees(angle)
 
     def ExtractBox(self, image, box_data):
         (x, y) = box_data['center_coordinate']
