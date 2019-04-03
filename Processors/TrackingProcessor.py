@@ -26,7 +26,7 @@ class TrackingProcessor:
             box_index = 0
             boxes_current = []
             shot = self.Shots[i].Copy()
-            print("===", shot.filename, "===")
+            self.log.debug(f"==={shot.filename}===")
             summary = yoloSummary[i]
             #pp.pprint(summary)
             for box_data in summary:

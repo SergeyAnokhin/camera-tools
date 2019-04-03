@@ -1,6 +1,9 @@
 import datetime
 import re
 import json
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import matplotlib.gridspec as gridspec
 from math import log2
 
 class CommonHelper:
@@ -18,6 +21,16 @@ class CommonHelper:
         minute = int(re_groups.group(5))
         seconds = int(re_groups.group(6))
         return datetime.datetime(year, month, day, hour, minute, seconds)
+
+    def Show(self, image):
+        plt.figure(figsize=(8, 6.025))
+        gs1 = gridspec.GridSpec(1, 1, left=0, right=1, top=1,
+                                     bottom=0, wspace=0, hspace=0)
+        plt.subplot(gs1[0])
+        plt.axis("off")
+        plt.imshow(image, interpolation="bilinear")
+        plt.margins(0)
+        plt.show()
 
     def size_human(self, size):
         _suffixes = ['bytes', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb', 'Eb', 'Zb', 'Yb']

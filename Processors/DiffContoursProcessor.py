@@ -3,6 +3,7 @@ import numpy as np
 import pprint as pp
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
+from Common.CommonHelper import CommonHelper
 
 class DiffCamShot:
 
@@ -14,40 +15,39 @@ class DiffCamShot:
         self.shots = shots
 
     def Process(self):
-        print("===", self.shot.filename, "===")
+        self.log.debug(f"==={self.shot.filename}===")
         self.Result.Shot = self.shot.Copy();
 
-        self.RemoveZones(self.shots[0])
-        self.RemoveZones(self.shots[1])
         mask1 = self.DiffMask(self.shots[0])
         mask2 = self.DiffMask(self.shots[1])
 
-        maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2)
+        maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2) # difference on any shot
         cntsMean = self.ContoursByMask(maskMean)
         self.DrawContours(self.Result.Shot, cntsMean, color=(0, 180, 180))
 
-        maskMin = self.Merge(mask1, mask2, lambda x, y: min(x, y))
-        cntsMin = self.ContoursByMask(maskMin, 'Min')
-        self.DrawContours(self.Result.Shot, cntsMin, thickness=1)
+        maskMin = self.Merge(mask1, mask2, lambda x, y: min(x, y)) # only difference with two others
+        cntsMin = self.ContoursByMask(maskMin, 'Diff')
+        self.DrawContours(self.Result.Shot, cntsMin, thickness=2)
         self.DrawBoxes(self.Result.Shot, cntsMin)
 
         return self.Result
 
-    def RemoveZones(self, shot: CamShot):
-        image_timestamp = shot.image[:22, :230]
-        shot.image[:22, :230] = 128 # remove timestamp
+    def RemoveZones(self, image):
+        image_timestamp = image[:22, :230]
+        image[:22, :230] = 0 # remove timestamp
+        return image
 
-    def ContoursByMask(self, mask, summaryName = None):
+    def ContoursByMask(self, mask, summaryName = ''):
         cnts, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         cnts = sorted(cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
         areas = [cv2.contourArea(c) for c in cnts]
         areasStr = [str(a) for a in areas]
         totalArea = sum(cv2.contourArea(c) for c in cnts)
-        if summaryName != None:
+        if summaryName != '':
             self.Result.Summary[summaryName] = {}
             self.Result.Summary[summaryName]['TotalArea'] = totalArea
             self.Result.Summary[summaryName]['Areas'] = areas
-        self.log.debug(f'Contours : {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
+        self.log.debug(f'Contours {summaryName}: {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
         return cnts
 
     def Merge(self, arr1, arr2, func):
@@ -69,7 +69,7 @@ class DiffCamShot:
             cv2.rectangle(shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
             cv2.putText(shot.image, str(area // 100), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
             boxes.append({  
-                'profile': round(h/w,2),
+                'profile_proportion': round(h/w,2),
                 'center': [x + w//2, y + h//2],
                 'area': area
             })
@@ -77,7 +77,10 @@ class DiffCamShot:
         self.Result.Summary['boxes'] = boxes
 
     def DiffMask(self, withshot):
-        absdiff     = cv2.absdiff(self.shot.GrayImage(), withshot.GrayImage())
+        image1 = self.RemoveZones(self.shot.GrayImage())
+        image2 = self.RemoveZones(withshot.GrayImage())
+
+        absdiff     = cv2.absdiff(image1, image2)
         gausian     = cv2.GaussianBlur(absdiff, (5, 5), 0)
         _, thresh   = cv2.threshold(gausian, 40, 255, cv2.THRESH_BINARY)
         dilate      = cv2.dilate(thresh, np.ones((10, 10), np.uint8))

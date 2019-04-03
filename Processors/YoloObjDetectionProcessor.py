@@ -35,7 +35,7 @@ class YoloCamShot:
         self.yolo.net.setInput(blob)
         start = time.time()
         layerOutputs = self.yolo.net.forward(self.yolo.layers)
-        self.log.debug("detection took {:.3f} seconds".format(time.time() - start))
+        #self.log.debug("detection took {:.3f} seconds".format(time.time() - start))
         return layerOutputs
 
     def ProcessOutput(self, layerOutputs, minConfidence, threshold):
@@ -75,6 +75,7 @@ class YoloCamShot:
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             results.append(result)
+            self.log.debug(f'Found: +++{result["label"]}+++: {result["confidence"]}')
 
         return results
     
@@ -93,15 +94,15 @@ class YoloObjDetectionProcessor:
         self.log.debug("Threshold: %s", self.threshold)
 
     def Process(self):
-        result = ProcessingResult()
+        results = []
         for shot in self.Shots:
+            result = ProcessingResult()
             yolo = YoloCamShot(shot, self.yolo)
             layerOutputs = yolo.Detect()
             yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
-            shot = yolo.Draw()
-            summary = yolo.GetProcessResult()
-            result.Shots.append(shot)
-            result.Summary.append(summary)
+            result.Shot = yolo.Draw()
+            result.Summary = yolo.GetProcessResult()
+            results.append(result)
 
-        return result
+        return results
 
