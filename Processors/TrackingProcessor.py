@@ -15,20 +15,6 @@ class TrackingProcessor:
     def __init__(self):
         self.log = logging.getLogger("PROC:TRAC")
 
-    # def calc_compare(img1, img2):
-    #     arr1 = cv2.imread(img1,cv2.IMREAD_COLOR)
-    #     arr2 = cv2.imread(img2,cv2.IMREAD_COLOR)
-    #     #print(f"Array: {len(arr1)}x{len(arr1[0])}x{len(arr1[0][0])}")
-    #     hist1 = cv2.calcHist([arr1],[0],None,[256],[0,256])
-    #     hist2 = cv2.calcHist([arr2],[0],None,[256],[0,256])
-    #     result = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
-    #     #print(f"HIST: {img1}=>{img2}: {result}")
-
-    #     arr1 = cv2.imread(img1,cv2.IMREAD_GRAYSCALE)
-    #     arr2 = cv2.imread(img2,cv2.IMREAD_GRAYSCALE)
-    #     match = cv2.matchTemplate(arr1, arr2, cv2.TM_CCOEFF_NORMED)
-    #     print(f'TEMP: {img1}=>{img2}:', max(map(max, match)))
-
     def Process(self, resultDict: {}):
         result = ProcessingResult()
         yoloSummary = resultDict['YoloObjDetectionProcessor'].Summary
@@ -36,6 +22,7 @@ class TrackingProcessor:
         boxes_last = []
 
         for i in range(len(self.Shots)):
+            trackingSummary = {}
             box_index = 0
             boxes_current = []
             shot = self.Shots[i].Copy()
@@ -71,17 +58,18 @@ class TrackingProcessor:
                     box.id = bestMatched.id
                     angle = self.angle(box.center, bestMatched.center)
                     dist = distance.euclidean(box.center, bestMatched.center)
-                    print(f"Distance: ID{box.id} => {dist:.0f}")
-                # TODO : save to summary : distance, direction, probability matching
+                    trackingSummary[box.id] = {}
+                    trackingSummary[box.id]['distance'] = int(dist)
+                    trackingSummary[box.id]['angle'] = int(angle)
 
-
-                text = f'box: ID{box.id}; D:{dist:.2f}'
+                text = f'box: ID{box.id}'
                 cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
                 cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, color, 2)
 
             boxes_last = boxes_current
             result.Shots.append(shot)
+            result.Summary.append(trackingSummary)
         return result
 
     def angle(self, p0, p1=np.array([0,0]), p2=None):
@@ -120,7 +108,7 @@ class TrackingProcessor:
             hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
 
             compCoeff = matchTemp * 0.2 + hist * 0.8
-            print(f'==MAX MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
+            print(f'==MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
             coeffs.append(compCoeff)
 
         maxValue = max(coeffs)

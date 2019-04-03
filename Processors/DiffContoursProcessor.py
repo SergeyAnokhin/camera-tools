@@ -8,14 +8,17 @@ class DiffCamShot:
 
     def __init__(self, shot: CamShot, shots):
         self.Result = ProcessingResult()
-        self.Result.Summary['Contours'] = {}
+        self.Result.Summary = {}
         self.log = logging.getLogger("PROC:DIFF")
         self.shot = shot
         self.shots = shots
 
     def Process(self):
+        print("===", self.shot.filename, "===")
         self.Result.Shot = self.shot.Copy();
 
+        self.RemoveZones(self.shots[0])
+        self.RemoveZones(self.shots[1])
         mask1 = self.DiffMask(self.shots[0])
         mask2 = self.DiffMask(self.shots[1])
 
@@ -30,6 +33,10 @@ class DiffCamShot:
 
         return self.Result
 
+    def RemoveZones(self, shot: CamShot):
+        image_timestamp = shot.image[:22, :230]
+        shot.image[:22, :230] = 128 # remove timestamp
+
     def ContoursByMask(self, mask, summaryName = None):
         cnts, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         cnts = sorted(cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
@@ -37,11 +44,10 @@ class DiffCamShot:
         areasStr = [str(a) for a in areas]
         totalArea = sum(cv2.contourArea(c) for c in cnts)
         if summaryName != None:
-            self.Result.Summary['Contours'][summaryName] = {}
-            self.Result.Summary['Contours'][summaryName]['TotalArea'] = totalArea
-            self.Result.Summary['Contours'][summaryName]['Areas'] = areas
-        self.log.debug(f'D= Contours found : {len(cnts)}. Total contours area : {totalArea}')
-        self.log.debug("D= Contours area: {}".format(", ".join(areasStr)))
+            self.Result.Summary[summaryName] = {}
+            self.Result.Summary[summaryName]['TotalArea'] = totalArea
+            self.Result.Summary[summaryName]['Areas'] = areas
+        self.log.debug(f'Contours : {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
         return cnts
 
     def Merge(self, arr1, arr2, func):
@@ -57,7 +63,7 @@ class DiffCamShot:
 
     def DrawBoxes(self, shot, contours):
         boxes = []
-        for c in contours[0:1]:
+        for c in contours[0:2]:
             area = int(cv2.contourArea(c))
             (x, y, w, h) = cv2.boundingRect(c)
             cv2.rectangle(shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
@@ -68,7 +74,7 @@ class DiffCamShot:
                 'area': area
             })
 
-        self.Result.Summary['Contours']['boxes'] = boxes
+        self.Result.Summary['boxes'] = boxes
 
     def DiffMask(self, withshot):
         absdiff     = cv2.absdiff(self.shot.GrayImage(), withshot.GrayImage())
@@ -84,7 +90,7 @@ class DiffContoursProcessor:
         self.log = logging.getLogger("PROC:DIFF")
 
     def Process(self):
-        deltas = []
+        results = []
         size = len(self.Shots)
         for i in range(size):
             # next_index = (i+1) if i < (size-1) else 0  ### => (0,1) (1,2) (2,0)
@@ -92,6 +98,6 @@ class DiffContoursProcessor:
             others = self.Shots.copy()
             others.remove(current)
             diff = DiffCamShot(current, others)
-            delta = diff.Process()
-            deltas.append(delta)
-        return deltas
+            result = diff.Process()
+            results.append(result)
+        return results

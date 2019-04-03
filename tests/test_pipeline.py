@@ -42,8 +42,8 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
         pp.pprint(result[0].Summary, indent=2)
-        self.assertEqual(result[0].Summary[0]['label'], 'person')
         result[0].Shot.Show()
+        self.assertEqual(result[0].Summary['label'], 'person')
         # result[1].Show()
         # result[2].Show()
 
@@ -53,7 +53,7 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = target.Process()
         pp.pprint(result.Summary[0], indent=2)
-        result.Shots[0].Show()
+        #result.Shots[0].Show()
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
@@ -66,8 +66,7 @@ class TestPipeline(unittest.TestCase):
         target.Shots = shots
         result['YoloObjDetectionProcessor'] = yolo.Process()
         result['TrackingProcessor'] = target.Process(result)
-        #pp.pprint(result['TrackingProcessor'].Summary[0], indent=2)
-        result['TrackingProcessor'].Shots[0].Show()
-        result['TrackingProcessor'].Shots[1].Show()
-        result['TrackingProcessor'].Shots[2].Show()
-
+        pp.pprint(result['TrackingProcessor'].Summary[1], indent=2)
+        #result['TrackingProcessor'].Shots[1].Show()
+        self.assertEqual(15, result['TrackingProcessor'].Summary[1][0]['angle'])
+        self.assertEqual(138, result['TrackingProcessor'].Summary[1][0]['distance'])
