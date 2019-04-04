@@ -10,6 +10,11 @@ from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
+from Pipeline.ShotsPipeline import ShotsPipeline
+from PostProcessors.ArchivePostProcessor import ArchivePostProcessor
+from PostProcessors.ElasticSearchPostProcessor import ElasticSearchPostProcessor
+from PostProcessors.HassioPostProcessor import HassioPostProcessor
+from PostProcessors.MailSenderPostProcessor import MailSenderPostProcessor
 
 class TestPipeline(unittest.TestCase):
 
@@ -82,3 +87,26 @@ class TestPipeline(unittest.TestCase):
         #result[1].Shot.Show()
         self.assertEqual(15, result[1].Summary[0]['angle'])
         self.assertEqual(138, result[1].Summary[0]['distance'])
+
+    def test_WholePipeline(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+
+        pipeline = ShotsPipeline()
+        pipeline.shots = shots
+
+        # # proceccor : Analyse() GetJsonResult() Draw()  
+        pipeline.processors.append(DiffContoursProcessor())
+        #pipeline.processors.append(MagnifyProcessor())
+        pipeline.processors.append(YoloObjDetectionProcessor())
+        pipeline.processors.append(TrackingProcessor())
+        pipeline.postprocessor.append(MailSenderPostProcessor()) 
+        pipeline.postprocessor.append(ElasticSearchPostProcessor()) 
+        pipeline.postprocessor.append(ArchivePostProcessor()) 
+        pipeline.postprocessor.append(HassioPostProcessor()) 
+
+        pipeline.PreLoad()
+        pipeline.Process()
+        pipeline.Show()
+        pipeline.PostProcess()

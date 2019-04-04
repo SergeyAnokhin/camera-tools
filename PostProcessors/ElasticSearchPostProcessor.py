@@ -1,0 +1,2 @@
+class ElasticSearchPostProcessor:
+    pass
