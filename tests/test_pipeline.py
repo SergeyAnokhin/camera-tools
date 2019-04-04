@@ -59,21 +59,26 @@ class TestPipeline(unittest.TestCase):
         target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         results = target.Process()
         pp.pprint(results[0].Summary, indent=2)
+        self.assertEqual(len(results[0].Summary), 1)
+        self.assertEqual(len(results[1].Summary), 1)
+        self.assertEqual(len(results[2].Summary), 1)
         self.assertEqual(results[0].Summary[0]['label'], 'person')
-        results[0].Shot.Show()
+        self.assertEqual(results[1].Summary[0]['label'], 'person')
+        self.assertEqual(results[2].Summary[0]['label'], 'person')
+        #results[0].Shot.Show()
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
-        result = {}
         yolo = YoloObjDetectionProcessor()
         target = TrackingProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         yolo.Shots = shots
         target.Shots = shots
-        result['YoloObjDetectionProcessor'] = yolo.Process()
-        result['TrackingProcessor'] = target.Process(result)
-        pp.pprint(result['TrackingProcessor'].Summary[1], indent=2)
-        #result['TrackingProcessor'].Shots[1].Show()
-        self.assertEqual(15, result['TrackingProcessor'].Summary[1][0]['angle'])
-        self.assertEqual(138, result['TrackingProcessor'].Summary[1][0]['distance'])
+        resultDict = {}
+        resultDict['YoloObjDetectionProcessor'] = yolo.Process()
+        result = target.Process(resultDict)
+        pp.pprint(result[1].Summary, indent=2)
+        #result[1].Shot.Show()
+        self.assertEqual(15, result[1].Summary[0]['angle'])
+        self.assertEqual(138, result[1].Summary[0]['distance'])

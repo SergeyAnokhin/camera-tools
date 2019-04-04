@@ -16,18 +16,19 @@ class TrackingProcessor:
         self.log = logging.getLogger("PROC:TRAC")
 
     def Process(self, resultDict: {}):
-        result = ProcessingResult()
-        yoloSummary = resultDict['YoloObjDetectionProcessor'].Summary
+        results = []
+        yoloReslt = resultDict['YoloObjDetectionProcessor']
         
         boxes_last = []
 
         for i in range(len(self.Shots)):
+            result = ProcessingResult()
             trackingSummary = {}
             box_index = 0
             boxes_current = []
             shot = self.Shots[i].Copy()
             self.log.debug(f"==={shot.filename}===")
-            summary = yoloSummary[i]
+            summary = yoloReslt[i].Summary
             #pp.pprint(summary)
             for box_data in summary:
                 (x, y) = box_data['center_coordinate']
@@ -68,9 +69,10 @@ class TrackingProcessor:
                     0.5, color, 2)
 
             boxes_last = boxes_current
-            result.Shots.append(shot)
-            result.Summary.append(trackingSummary)
-        return result
+            result.Shot = shot
+            result.Summary = trackingSummary
+            results.append(result)
+        return results
 
     def angle(self, p0, p1=np.array([0,0]), p2=None):
         ''' compute angle (in degrees) for p0p1p2 corner
