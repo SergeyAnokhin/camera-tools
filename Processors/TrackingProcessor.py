@@ -3,76 +3,129 @@ import numpy as np
 from scipy.spatial import distance
 import pprint as pp
 from Pipeline.Model.ProcessingResult import ProcessingResult
+from Processors.Processor import Processor
+from Processors.Processor import ProcessingContext
 
 class TrackingBox:
     def __init__(self):
         id = 0
         image = []
 
-class TrackingProcessor:
-    Shots: []
+class TrackingProcessor(Processor):
 
     def __init__(self):
-        self.log = logging.getLogger("PROC:TRAC")
+        super().__init__("TRAC")
+        self.boxes_last = []
 
-    def Process(self, resultDict: {}):
-        results = []
-        yoloReslt = resultDict['YoloObjDetectionProcessor']
-        
-        boxes_last = []
+    def ProcessShot(self, ctx: ProcessingContext):
+        result = super().ProcessShot(ctx)
+        trackingSummary = {}
+        box_index = 0
+        boxes_current = []
+        shot = ctx.Shot
+        yoloReslt = self.PipelineResults['YoloObjDetectionProcessor']
+        summary = yoloReslt[ctx.Index].Summary
+        for box_data in summary:
+            (x, y) = box_data['center_coordinate']
+            (w, h) = box_data['size']
 
-        for i in range(len(self.Shots)):
-            result = ProcessingResult()
-            trackingSummary = {}
-            box_index = 0
-            boxes_current = []
-            shot = self.Shots[i].Copy()
-            self.log.debug(f"==={shot.filename}===")
-            summary = yoloReslt[i].Summary
-            #pp.pprint(summary)
-            for box_data in summary:
-                (x, y) = box_data['center_coordinate']
-                (w, h) = box_data['size']
+            box_size = 10
+            pos_left_top = (x - box_size // 2, y - box_size // 2)
+            pos_right_bottom = (x + box_size // 2, y + box_size // 2)
+            box = TrackingBox()
+            box.image = self.ExtractBox(shot.image, box_data)
+            box.id = box_index
+            box.center = (x, y)
 
-                box_size = 10
+            color = 128
+            pos_text = (x, y - 5)
+            angle = 0
+            dist = 0
+
+            boxes_current.append(box)
+            box_index += 1
+            bestMatched = self.CompareBox(self.boxes_last, box)
+            if bestMatched != None:
+                cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
+                (x, y) = bestMatched.center
                 pos_left_top = (x - box_size // 2, y - box_size // 2)
                 pos_right_bottom = (x + box_size // 2, y + box_size // 2)
-                box = TrackingBox()
-                box.image = self.ExtractBox(shot.image, box_data)
-                box.id = box_index
-                box.center = (x, y)
-
-                color = 128
-                pos_text = (x, y - 5)
-                angle = 0
-                dist = 0
-
-                boxes_current.append(box)
-                box_index += 1
-                bestMatched = self.CompareBox(boxes_last, box)
-                if bestMatched != None:
-                    cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
-                    (x, y) = bestMatched.center
-                    pos_left_top = (x - box_size // 2, y - box_size // 2)
-                    pos_right_bottom = (x + box_size // 2, y + box_size // 2)
-                    cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
-                    box.id = bestMatched.id
-                    angle = self.angle(box.center, bestMatched.center)
-                    dist = distance.euclidean(box.center, bestMatched.center)
-                    trackingSummary[box.id] = {}
-                    trackingSummary[box.id]['distance'] = int(dist)
-                    trackingSummary[box.id]['angle'] = int(angle)
-
-                text = f'box: ID{box.id}'
                 cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
-                cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5, color, 2)
+                box.id = bestMatched.id
+                angle = self.angle(box.center, bestMatched.center)
+                dist = distance.euclidean(box.center, bestMatched.center)
+                trackingSummary[box.id] = {}
+                trackingSummary[box.id]['distance'] = int(dist)
+                trackingSummary[box.id]['angle'] = int(angle)
 
-            boxes_last = boxes_current
-            result.Shot = shot
-            result.Summary = trackingSummary
-            results.append(result)
-        return results
+            text = f'box: ID{box.id}'
+            cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
+            cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
+                0.5, color, 2)
+
+        self.boxes_last = boxes_current
+        result.Shot = shot
+        result.Summary = trackingSummary
+        return result
+
+    # def Process(self, resultDict: {}):
+    #     results = []
+    #     yoloReslt = resultDict['YoloObjDetectionProcessor']
+        
+    #     boxes_last = []
+
+    #     for i in range(len(self.Shots)):
+    #         result = ProcessingResult()
+    #         trackingSummary = {}
+    #         box_index = 0
+    #         boxes_current = []
+    #         shot = self.Shots[i].Copy()
+    #         self.log.debug(f"==={shot.filename}===")
+    #         summary = yoloReslt[i].Summary
+    #         #pp.pprint(summary)
+    #         for box_data in summary:
+    #             (x, y) = box_data['center_coordinate']
+    #             (w, h) = box_data['size']
+
+    #             box_size = 10
+    #             pos_left_top = (x - box_size // 2, y - box_size // 2)
+    #             pos_right_bottom = (x + box_size // 2, y + box_size // 2)
+    #             box = TrackingBox()
+    #             box.image = self.ExtractBox(shot.image, box_data)
+    #             box.id = box_index
+    #             box.center = (x, y)
+
+    #             color = 128
+    #             pos_text = (x, y - 5)
+    #             angle = 0
+    #             dist = 0
+
+    #             boxes_current.append(box)
+    #             box_index += 1
+    #             bestMatched = self.CompareBox(boxes_last, box)
+    #             if bestMatched != None:
+    #                 cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
+    #                 (x, y) = bestMatched.center
+    #                 pos_left_top = (x - box_size // 2, y - box_size // 2)
+    #                 pos_right_bottom = (x + box_size // 2, y + box_size // 2)
+    #                 cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
+    #                 box.id = bestMatched.id
+    #                 angle = self.angle(box.center, bestMatched.center)
+    #                 dist = distance.euclidean(box.center, bestMatched.center)
+    #                 trackingSummary[box.id] = {}
+    #                 trackingSummary[box.id]['distance'] = int(dist)
+    #                 trackingSummary[box.id]['angle'] = int(angle)
+
+    #             text = f'box: ID{box.id}'
+    #             cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
+    #             cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
+    #                 0.5, color, 2)
+
+    #         boxes_last = boxes_current
+    #         result.Shot = shot
+    #         result.Summary = trackingSummary
+    #         results.append(result)
+    #     return results
 
     def angle(self, p0, p1=np.array([0,0]), p2=None):
         ''' compute angle (in degrees) for p0p1p2 corner

@@ -4,18 +4,19 @@ import pprint as pp
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
 from Common.CommonHelper import CommonHelper
+from Processors.Processor import Processor
+from Processors.Processor import ProcessingContext
 
 class DiffCamShot:
 
     def __init__(self, shot: CamShot, shots):
         self.Result = ProcessingResult()
         self.Result.Summary = {}
-        self.log = logging.getLogger("PROC:DIFF")
+        self.log = logging.getLogger("PROC:DIFF") # :{shot.filenameWithoutExtension}
         self.shot = shot
         self.shots = shots
 
     def Process(self):
-        self.log.debug(f"==={self.shot.filename}===")
         self.Result.Shot = self.shot.Copy();
 
         mask1 = self.DiffMask(self.shots[0])
@@ -86,21 +87,28 @@ class DiffCamShot:
         dilate      = cv2.dilate(thresh, np.ones((10, 10), np.uint8))
         return dilate
 
-class DiffContoursProcessor:
-    
-    def __init__(self):
-        self.Shots = []
-        self.log = logging.getLogger("PROC:DIFF")
+class DiffContoursProcessor(Processor):
 
-    def Process(self):
-        results = []
-        size = len(self.Shots)
-        for i in range(size):
-            # next_index = (i+1) if i < (size-1) else 0  ### => (0,1) (1,2) (2,0)
-            current = self.Shots[i]
-            others = self.Shots.copy()
-            others.remove(current)
-            diff = DiffCamShot(current, others)
-            result = diff.Process()
-            results.append(result)
-        return results
+    def __init__(self):
+        super().__init__("DIFF")
+        # self.Shots = []
+        # self.log = logging.getLogger("PROC:DIFF")
+
+    # def Process(self):
+    #     results = []
+    #     size = len(self.Shots)
+    #     for i in range(size):
+    #         # next_index = (i+1) if i < (size-1) else 0  ### => (0,1) (1,2) (2,0)
+    #         current = self.Shots[i]
+    #         others = self.Shots.copy()
+    #         others.remove(current)
+    #         diff = DiffCamShot(current, others)
+    #         result = diff.Process()
+    #         results.append(result)
+    #     return results
+
+    def ProcessShot(self, ctx: ProcessingContext):
+        super().ProcessShot(ctx)
+        diff = DiffCamShot(ctx.Shot, ctx.OthersShots)
+        return diff.Process()
+

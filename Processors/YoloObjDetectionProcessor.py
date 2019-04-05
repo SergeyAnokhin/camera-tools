@@ -4,7 +4,8 @@ from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
 from Processors.Yolo.YoloContext import YoloContext
 from Processors.Yolo.YoloDetection import YoloDetection
-
+from Processors.Processor import Processor
+from Processors.Processor import ProcessingContext
 
 class YoloResultBoxes:
     boxes = []
@@ -25,7 +26,7 @@ class YoloCamShot:
 
     def __init__(self, shot: CamShot, yolo: YoloContext):
         self.shot = shot.Copy()
-        self.log = logging.getLogger(f"PROC:YOLO:{self.shot.filename}")
+        self.log = logging.getLogger(f"PROC:YOLO")
         self.boxes = []
         self.yolo = yolo
 
@@ -75,34 +76,45 @@ class YoloCamShot:
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             results.append(result)
-            self.log.debug(f'Found: +++{result["label"]}+++: {result["confidence"]}')
+            self.log.debug(f'Found: ### {result["label"]}: {result["confidence"]} ###')
 
         return results
     
-class YoloObjDetectionProcessor:
+class YoloObjDetectionProcessor(Processor):
     confidence = 0.4
     threshold = 0.3
     yolo: YoloContext
 
     def __init__(self):
-        self.log = logging.getLogger("PROC:YOLO")
-        self.Shots = []
+        super().__init__("YOLO")
+
+    def PreLoad(self):
+        super().Preload(True)
         #self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
         self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
         self.yolo.PreLoad()
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
 
-    def Process(self):
-        results = []
-        for shot in self.Shots:
-            result = ProcessingResult()
-            yolo = YoloCamShot(shot, self.yolo)
-            layerOutputs = yolo.Detect()
-            yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
-            result.Shot = yolo.Draw()
-            result.Summary = yolo.GetProcessResult()
-            results.append(result)
+    def ProcessShot(self, ctx: ProcessingContext):
+        result = super().ProcessShot(ctx)
+        yolo = YoloCamShot(ctx.Shot, self.yolo)
+        layerOutputs = yolo.Detect()
+        yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
+        result.Shot = yolo.Draw()
+        result.Summary = yolo.GetProcessResult()
+        return result
 
-        return results
+    # def Process(self):
+    #     results = []
+    #     for shot in self.Shots:
+    #         result = ProcessingResult()
+    #         yolo = YoloCamShot(shot, self.yolo)
+    #         layerOutputs = yolo.Detect()
+    #         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
+    #         result.Shot = yolo.Draw()
+    #         result.Summary = yolo.GetProcessResult()
+    #         results.append(result)
+
+    #     return results
 

@@ -44,8 +44,8 @@ class TestPipeline(unittest.TestCase):
     def test_DiffContoursProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = DiffContoursProcessor()
-        target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        result = target.Process()
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        result = target.Process(shots)
         pp.pprint(result[0].Summary, indent=2)
         pp.pprint(result[1].Summary, indent=2)
         pp.pprint(result[2].Summary, indent=2)
@@ -61,8 +61,9 @@ class TestPipeline(unittest.TestCase):
     def test_YoloObjDetectionProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = YoloObjDetectionProcessor()
-        target.Shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        results = target.Process()
+        target.PreLoad()
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        results = target.Process(shots)
         pp.pprint(results[0].Summary, indent=2)
         self.assertEqual(len(results[0].Summary), 1)
         self.assertEqual(len(results[1].Summary), 1)
@@ -70,19 +71,17 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(results[0].Summary[0]['label'], 'person')
         self.assertEqual(results[1].Summary[0]['label'], 'person')
         self.assertEqual(results[2].Summary[0]['label'], 'person')
-        #results[0].Shot.Show()
+        results[0].Shot.Show()
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
         yolo = YoloObjDetectionProcessor()
+        yolo.PreLoad()
         target = TrackingProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        yolo.Shots = shots
-        target.Shots = shots
-        resultDict = {}
-        resultDict['YoloObjDetectionProcessor'] = yolo.Process()
-        result = target.Process(resultDict)
+        target.PipelineResults['YoloObjDetectionProcessor'] = yolo.Process(shots)
+        result = target.Process(shots)
         pp.pprint(result[1].Summary, indent=2)
         #result[1].Shot.Show()
         self.assertEqual(15, result[1].Summary[0]['angle'])
