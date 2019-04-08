@@ -5,7 +5,7 @@ from Pipeline.Model.ProcessingResult import ProcessingResult
 from Processors.Yolo.YoloContext import YoloContext
 from Processors.Yolo.YoloDetection import YoloDetection
 from Processors.Processor import Processor
-from Processors.Processor import ProcessingContext
+from Processors.Processor import ShotProcessingContext
 
 class YoloResultBoxes:
     boxes = []
@@ -96,7 +96,7 @@ class YoloObjDetectionProcessor(Processor):
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
 
-    def ProcessShot(self, ctx: ProcessingContext):
+    def ProcessShot(self, ctx: ShotProcessingContext):
         result = super().ProcessShot(ctx)
         yolo = YoloCamShot(ctx.Shot, self.yolo)
         layerOutputs = yolo.Detect()

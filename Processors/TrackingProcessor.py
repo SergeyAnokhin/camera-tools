@@ -4,7 +4,7 @@ from scipy.spatial import distance
 import pprint as pp
 from Pipeline.Model.ProcessingResult import ProcessingResult
 from Processors.Processor import Processor
-from Processors.Processor import ProcessingContext
+from Processors.Processor import ShotProcessingContext
 
 class TrackingBox:
     def __init__(self):
@@ -17,13 +17,13 @@ class TrackingProcessor(Processor):
         super().__init__("TRAC")
         self.boxes_last = []
 
-    def ProcessShot(self, ctx: ProcessingContext):
+    def ProcessShot(self, ctx: ShotProcessingContext):
         result = super().ProcessShot(ctx)
         trackingSummary = {}
         box_index = 0
         boxes_current = []
         shot = ctx.Shot
-        yoloReslt = self.PipelineResults['YoloObjDetectionProcessor']
+        yoloReslt = self.PipelineResults['YOLO']
         summary = yoloReslt[ctx.Index].Summary
         for box_data in summary:
             (x, y) = box_data['center_coordinate']

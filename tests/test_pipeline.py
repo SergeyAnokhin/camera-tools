@@ -15,6 +15,7 @@ from PostProcessors.ArchivePostProcessor import ArchivePostProcessor
 from PostProcessors.ElasticSearchPostProcessor import ElasticSearchPostProcessor
 from PostProcessors.HassioPostProcessor import HassioPostProcessor
 from PostProcessors.MailSenderPostProcessor import MailSenderPostProcessor
+from Processors.Processor.ProcessingContext import ProcessingContext
 
 class TestPipeline(unittest.TestCase):
 
@@ -45,7 +46,11 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = DiffContoursProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        result = target.Process(shots)
+        ctx = ProcessingContext()
+        ctx.Shots = shots
+        ctx.OriginalShots = shots
+
+        result = target.Process(ctx)
         pp.pprint(result[0].Summary, indent=2)
         pp.pprint(result[1].Summary, indent=2)
         pp.pprint(result[2].Summary, indent=2)
@@ -93,19 +98,18 @@ class TestPipeline(unittest.TestCase):
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
 
         pipeline = ShotsPipeline()
-        pipeline.shots = shots
 
         # # proceccor : Analyse() GetJsonResult() Draw()  
         pipeline.processors.append(DiffContoursProcessor())
         #pipeline.processors.append(MagnifyProcessor())
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor())
-        pipeline.postprocessor.append(MailSenderPostProcessor()) 
-        pipeline.postprocessor.append(ElasticSearchPostProcessor()) 
-        pipeline.postprocessor.append(ArchivePostProcessor()) 
-        pipeline.postprocessor.append(HassioPostProcessor()) 
+        pipeline.postProcessors.append(MailSenderPostProcessor()) 
+        pipeline.postProcessors.append(ElasticSearchPostProcessor()) 
+        pipeline.postProcessors.append(ArchivePostProcessor()) 
+        pipeline.postProcessors.append(HassioPostProcessor()) 
 
         pipeline.PreLoad()
-        pipeline.Process()
+        analyseResult = pipeline.Process(shots)
         pipeline.Show()
         pipeline.PostProcess()

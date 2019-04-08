@@ -5,22 +5,24 @@ from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
 from Common.CommonHelper import CommonHelper
 from Processors.Processor import Processor
-from Processors.Processor import ProcessingContext
+from Processors.Processor import ShotProcessingContext
 
 class DiffCamShot:
 
-    def __init__(self, shot: CamShot, shots):
+    def __init__(self, ctx: ShotProcessingContext):
         self.Result = ProcessingResult()
         self.Result.Summary = {}
         self.log = logging.getLogger("PROC:DIFF") # :{shot.filenameWithoutExtension}
-        self.shot = shot
-        self.shots = shots
+        self.shot = ctx.Shot
+        self.originalShot = ctx.OriginalShot
+        self.originalShots = ctx.OriginalShots
+        self.shots = ctx.Shots
 
     def Process(self):
-        self.Result.Shot = self.shot.Copy();
+        self.Result.Shot = self.originalShot.Copy();
 
-        mask1 = self.DiffMask(self.shots[0])
-        mask2 = self.DiffMask(self.shots[1])
+        mask1 = self.DiffMask(self.originalShots[0])
+        mask2 = self.DiffMask(self.originalShots[1])
 
         maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2) # difference on any shot
         cntsMean = self.ContoursByMask(maskMean)
@@ -107,8 +109,8 @@ class DiffContoursProcessor(Processor):
     #         results.append(result)
     #     return results
 
-    def ProcessShot(self, ctx: ProcessingContext):
+    def ProcessShot(self, ctx: ShotProcessingContext):
         super().ProcessShot(ctx)
-        diff = DiffCamShot(ctx.Shot, ctx.OthersShots)
+        diff = DiffCamShot(ctx)
         return diff.Process()
 
