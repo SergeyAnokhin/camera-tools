@@ -64,6 +64,7 @@ class TestPipeline(unittest.TestCase):
         self.assertLess(metadata['boxes'][0]['area'], 6000)
 
     def test_YoloObjDetectionProcessor(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_YoloObjDetectionProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = YoloObjDetectionProcessor()
         target.PreLoad()
@@ -89,12 +90,14 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        target.PipelineResults['YoloObjDetectionProcessor'] = yolo.Process(shots)
-        result = target.Process(shots)
-        pp.pprint(result[1].Summary, indent=2)
-        #result[1].Shot.Show()
-        self.assertEqual(15, result[1].Summary[0]['angle'])
-        self.assertEqual(138, result[1].Summary[0]['distance'])
+        pipelineShots = [PipelineShot(shot) for shot in shots]
+        yolo.Process(pipelineShots)
+        target.Process(pipelineShots)
+        metadata1 = pipelineShots[1].Metadata["TRAC"]
+        pp.pprint(metadata1, indent=2)
+        pipelineShots[1].Shot.Show()
+        self.assertEqual(15, metadata1[0]['angle'])
+        self.assertEqual(138, metadata1[0]['distance'])
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
