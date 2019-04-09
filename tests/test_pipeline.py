@@ -47,22 +47,20 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = DiffContoursProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        ctx = ProcessingContext()
-        ctx.Shots = shots
-        ctx.OriginalShots = shots
+        pipelineShots = [PipelineShot(shot) for shot in shots]
 
-        result = target.Process(ctx)
-        pp.pprint(result[0].Summary, indent=2)
-        pp.pprint(result[1].Summary, indent=2)
-        pp.pprint(result[2].Summary, indent=2)
+        target.Process(pipelineShots)
+        pp.pprint(pipelineShots[0].Metadata, indent=2)
+        pp.pprint(pipelineShots[1].Metadata, indent=2)
+        pp.pprint(pipelineShots[2].Metadata, indent=2)
         # result[0].Shot.Show()
         # result[1].Shot.Show()
         # result[2].Shot.Show()
-        self.assertGreater(result[0].Summary['Diff']['TotalArea'], 5000)
-        self.assertLess(result[0].Summary['Diff']['TotalArea'], 6000)
-        self.assertEqual(len(result[0].Summary['boxes']), 2)
-        self.assertGreater(result[0].Summary['boxes'][0]['area'], 5000)
-        self.assertLess(result[0].Summary['boxes'][0]['area'], 6000)
+        self.assertGreater(pipelineShots[0].Metadata['Diff']['TotalArea'], 5000)
+        self.assertLess(pipelineShots[0].Metadata['Diff']['TotalArea'], 6000)
+        self.assertEqual(len(pipelineShots[0].Metadata['boxes']), 2)
+        self.assertGreater(pipelineShots[0].Metadata['boxes'][0]['area'], 5000)
+        self.assertLess(pipelineShots[0].Metadata['boxes'][0]['area'], 6000)
 
     def test_YoloObjDetectionProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'

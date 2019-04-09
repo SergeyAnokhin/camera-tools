@@ -26,15 +26,13 @@ class DiffCamShot:
         mask2 = self.DiffMask(pShot, others[1])
 
         maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2) # difference on any shot
-        cntsMean = self.ContoursByMask(maskMean)
+        cntsMean = self.ContoursByMask(maskMean, pShot)
         self.DrawContours(pShot.Shot, cntsMean, color=(0, 180, 180))
 
         maskMin = self.Merge(mask1, mask2, lambda x, y: min(x, y)) # only difference with two others
         cntsMin = self.ContoursByMask(maskMin, pShot, 'Diff')
         self.DrawContours(pShot.Shot, cntsMin, thickness=2)
-        self.DrawBoxes(pShot.Shot, cntsMin)
-
-        return self.Result
+        self.DrawBoxes(pShot, cntsMin)
 
     def RemoveZones(self, image):
         image_timestamp = image[:22, :230]
@@ -65,20 +63,18 @@ class DiffCamShot:
     def DrawContours(self, shot, contours, color=(0, 255, 255), thickness=1):
         cv2.drawContours(shot.image, contours, -1, color, thickness)
 
-    def DrawBoxes(self, shot, contours):
-        boxes = []
+    def DrawBoxes(self, pShot: PipelineShot, contours):
+        pShot.Metadata['DIFF']['boxes'] = []
         for c in contours[0:2]:
             area = int(cv2.contourArea(c))
             (x, y, w, h) = cv2.boundingRect(c)
-            cv2.rectangle(shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
-            cv2.putText(shot.image, str(area // 100), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
-            boxes.append({  
+            cv2.rectangle(pShot.Shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
+            cv2.putText(pShot.Shot.image, str(area // 100), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+            pShot.Metadata['DIFF']['boxes'].append({  
                 'profile_proportion': round(h/w,2),
                 'center': [x + w//2, y + h//2],
                 'area': area
             })
-
-        self.Result.Summary['boxes'] = boxes
 
     def DiffMask(self, pShot: PipelineShot, other: PipelineShot):
         image1 = self.RemoveZones(pShot.Shot.GrayImage())
