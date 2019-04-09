@@ -1,22 +1,22 @@
 import logging
-from Pipeline.Model.ProcessingResult import ProcessingResult
+from Pipeline.Model.PipelineShot import PipelineShot
 
-class ProcessingContext:
-    def __init__(self):
-        self.Shots = []
-        self.OriginalShots = []
+# class ProcessingContext:
+#     def __init__(self):
+#         self.Shots = []
+#         self.OriginalShots = []
 
-class ShotProcessingContext:
-    def __init__(self, index: int, ctx: ProcessingContext):
-        self.Index = index
+# class ShotProcessingContext:
+#     def __init__(self, index: int, ctx: ProcessingContext):
+#         self.Index = index
 
-        self.Shots = ctx.Shots
-        self.Shot = self.Shots[index]
-        self.OriginalShots = ctx.OriginalShots
-        self.OriginalShot = self.OriginalShots[index]
+#         self.Shots = ctx.Shots
+#         self.Shot = self.Shots[index]
+#         self.OriginalShots = ctx.OriginalShots
+#         self.OriginalShot = self.OriginalShots[index]
 
-        self.OthersShots = self.Shots.copy()
-        self.OthersShots.remove(self.Shot)
+#         self.OthersShots = self.Shots.copy()
+#         self.OthersShots.remove(self.Shot)
 
 class Processor:
     def __init__(self, name):
@@ -29,16 +29,15 @@ class Processor:
         if isUsed:
             self.log.info('=== PRELOAD ===')
 
-    def Process(self, ctx: ProcessingContext):
+    def Process(self, pShots: []):
         ''' Main Process '''
         self.log.info('=== PROCESS ===')
-        results = []
-        for i in range(len(ctx.Shots)):
-            ctxShot = ShotProcessingContext(i, ctx)
-            self.log.debug(f"====== {ctxShot.Shot.filename} ========================================")
-            result = self.ProcessShot(ctxShot)
-            results.append(result)
-        return results
+        for i in range(len(pShots)):
+            pShot = pShots[i]
+            otherPShots = pShots.copy()
+            otherPShots.remove(pShot)
+            self.log.debug(f"====== {pShot.Shot.filename} ========================================")
+            self.ProcessShot(pShot, otherPShots)
 
-    def ProcessShot(self, ctx: ShotProcessingContext):
-        return ProcessingResult()
+    def ProcessShot(self, pShot: PipelineShot, otherPShots: []):
+        pass

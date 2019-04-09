@@ -15,7 +15,7 @@ from PostProcessors.ArchivePostProcessor import ArchivePostProcessor
 from PostProcessors.ElasticSearchPostProcessor import ElasticSearchPostProcessor
 from PostProcessors.HassioPostProcessor import HassioPostProcessor
 from PostProcessors.MailSenderPostProcessor import MailSenderPostProcessor
-from Processors.Processor.ProcessingContext import ProcessingContext
+from Pipeline.Model.PipelineShot import PipelineShot
 
 class TestPipeline(unittest.TestCase):
 
@@ -43,6 +43,7 @@ class TestPipeline(unittest.TestCase):
         #shots[0].Show()
 
     def test_DiffContoursProcessor(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = DiffContoursProcessor()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
@@ -95,21 +96,27 @@ class TestPipeline(unittest.TestCase):
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
 
+        ## INIT
         pipeline = ShotsPipeline()
-
         # # proceccor : Analyse() GetJsonResult() Draw()  
         pipeline.processors.append(DiffContoursProcessor())
         #pipeline.processors.append(MagnifyProcessor())
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor())
-        pipeline.postProcessors.append(MailSenderPostProcessor()) 
-        pipeline.postProcessors.append(ElasticSearchPostProcessor()) 
-        pipeline.postProcessors.append(ArchivePostProcessor()) 
-        pipeline.postProcessors.append(HassioPostProcessor()) 
+        #post processors:
+        pipeline.processors.append(MailSenderPostProcessor()) 
+        pipeline.processors.append(ElasticSearchPostProcessor()) 
+        pipeline.processors.append(ArchivePostProcessor()) 
+        pipeline.processors.append(HassioPostProcessor()) 
 
         pipeline.PreLoad()
-        analyseResult = pipeline.Process(shots)
+
+        ## Procerss on shots comming
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        pipelineShots = [PipelineShot(shot) for shot in shots]
+
+
+        analyseResult = pipeline.Process(pipelineShots)
         pipeline.Show()
         pipeline.PostProcess()

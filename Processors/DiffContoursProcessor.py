@@ -5,33 +5,34 @@ from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.ProcessingResult import ProcessingResult
 from Common.CommonHelper import CommonHelper
 from Processors.Processor import Processor
-from Processors.Processor import ShotProcessingContext
+from Pipeline.Model.PipelineShot import PipelineShot
 
 class DiffCamShot:
 
-    def __init__(self, ctx: ShotProcessingContext):
-        self.Result = ProcessingResult()
-        self.Result.Summary = {}
+    def __init__(self):
+        # self.Result = ProcessingResult()
+        # self.Result.Summary = {}
         self.log = logging.getLogger("PROC:DIFF") # :{shot.filenameWithoutExtension}
-        self.shot = ctx.Shot
-        self.originalShot = ctx.OriginalShot
-        self.originalShots = ctx.OriginalShots
-        self.shots = ctx.Shots
+        # self.shot = ctx.Shot
+        # self.originalShot = ctx.OriginalShot
+        # self.originalShots = ctx.OriginalShots
+        # self.shots = ctx.Shots
 
-    def Process(self):
-        self.Result.Shot = self.originalShot.Copy();
+    def Process(self, pShot: PipelineShot, others: []):
+        #self.Result.Shot = self.originalShot.Copy();
+        pShot.Metadata["DIFF"] = {}
 
-        mask1 = self.DiffMask(self.originalShots[0])
-        mask2 = self.DiffMask(self.originalShots[1])
+        mask1 = self.DiffMask(pShot, others[0])
+        mask2 = self.DiffMask(pShot, others[1])
 
         maskMean = self.Merge(mask1, mask2, lambda x, y: x//2 + y//2) # difference on any shot
         cntsMean = self.ContoursByMask(maskMean)
-        self.DrawContours(self.Result.Shot, cntsMean, color=(0, 180, 180))
+        self.DrawContours(pShot.Shot, cntsMean, color=(0, 180, 180))
 
         maskMin = self.Merge(mask1, mask2, lambda x, y: min(x, y)) # only difference with two others
-        cntsMin = self.ContoursByMask(maskMin, 'Diff')
-        self.DrawContours(self.Result.Shot, cntsMin, thickness=2)
-        self.DrawBoxes(self.Result.Shot, cntsMin)
+        cntsMin = self.ContoursByMask(maskMin, pShot, 'Diff')
+        self.DrawContours(pShot.Shot, cntsMin, thickness=2)
+        self.DrawBoxes(pShot.Shot, cntsMin)
 
         return self.Result
 
@@ -40,16 +41,16 @@ class DiffCamShot:
         image[:22, :230] = 0 # remove timestamp
         return image
 
-    def ContoursByMask(self, mask, summaryName = ''):
+    def ContoursByMask(self, mask, pShot, summaryName = ''):
         cnts, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         cnts = sorted(cnts, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
         areas = [cv2.contourArea(c) for c in cnts]
         areasStr = [str(a) for a in areas]
         totalArea = sum(cv2.contourArea(c) for c in cnts)
         if summaryName != '':
-            self.Result.Summary[summaryName] = {}
-            self.Result.Summary[summaryName]['TotalArea'] = totalArea
-            self.Result.Summary[summaryName]['Areas'] = areas
+            pShot.Metadata['DIFF'][summaryName] = {}
+            pShot.Metadata['DIFF'][summaryName]['TotalArea'] = totalArea
+            pShot.Metadata['DIFF'][summaryName]['Areas'] = areas
         self.log.debug(f'Contours {summaryName}: {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
         return cnts
 
@@ -79,9 +80,9 @@ class DiffCamShot:
 
         self.Result.Summary['boxes'] = boxes
 
-    def DiffMask(self, withshot):
-        image1 = self.RemoveZones(self.shot.GrayImage())
-        image2 = self.RemoveZones(withshot.GrayImage())
+    def DiffMask(self, pShot: PipelineShot, other: PipelineShot):
+        image1 = self.RemoveZones(pShot.Shot.GrayImage())
+        image2 = self.RemoveZones(other.Shot.GrayImage())
 
         absdiff     = cv2.absdiff(image1, image2)
         gausian     = cv2.GaussianBlur(absdiff, (5, 5), 0)
@@ -109,8 +110,8 @@ class DiffContoursProcessor(Processor):
     #         results.append(result)
     #     return results
 
-    def ProcessShot(self, ctx: ShotProcessingContext):
-        super().ProcessShot(ctx)
-        diff = DiffCamShot(ctx)
-        return diff.Process()
+    def ProcessShot(self, pShot: PipelineShot, others: []):
+        super().ProcessShot(pShot, others)
+        diff = DiffCamShot()
+        return diff.Process(pShot, others)
 

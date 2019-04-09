@@ -1,11 +1,10 @@
 import cv2, logging, itertools, os, time, cv2
 import numpy as np
 from Pipeline.Model.CamShot import CamShot
-from Pipeline.Model.ProcessingResult import ProcessingResult
+from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Yolo.YoloContext import YoloContext
 from Processors.Yolo.YoloDetection import YoloDetection
 from Processors.Processor import Processor
-from Processors.Processor import ShotProcessingContext
 
 class YoloResultBoxes:
     boxes = []
@@ -96,25 +95,8 @@ class YoloObjDetectionProcessor(Processor):
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
 
-    def ProcessShot(self, ctx: ShotProcessingContext):
-        result = super().ProcessShot(ctx)
-        yolo = YoloCamShot(ctx.Shot, self.yolo)
+    def ProcessShot(self, pShot: PipelineShot, others: []):
+        super().ProcessShot(pShot, others)
+        yolo = YoloCamShot(pShot.Shot, self.yolo)
         layerOutputs = yolo.Detect()
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
-        result.Shot = yolo.Draw()
-        result.Summary = yolo.GetProcessResult()
-        return result
-
-    # def Process(self):
-    #     results = []
-    #     for shot in self.Shots:
-    #         result = ProcessingResult()
-    #         yolo = YoloCamShot(shot, self.yolo)
-    #         layerOutputs = yolo.Detect()
-    #         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
-    #         result.Shot = yolo.Draw()
-    #         result.Summary = yolo.GetProcessResult()
-    #         results.append(result)
-
-    #     return results
-
