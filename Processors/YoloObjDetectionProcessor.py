@@ -23,15 +23,15 @@ class YoloResultBoxes:
 class YoloCamShot: 
     detections = []
 
-    def __init__(self, shot: CamShot, yolo: YoloContext):
-        self.shot = shot.Copy()
+    def __init__(self, pShot: PipelineShot, yolo: YoloContext):
+        self.pShot = pShot
         self.log = logging.getLogger(f"PROC:YOLO")
         self.boxes = []
         self.yolo = yolo
 
     def Detect(self):
         #self.log.debug("start detect objects on: {}".format(self.shot.filename))
-        blob = cv2.dnn.blobFromImage(self.shot.image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(self.pShot.OriginalShot.image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
         self.yolo.net.setInput(blob)
         start = time.time()
         layerOutputs = self.yolo.net.forward(self.yolo.layers)
@@ -39,29 +39,11 @@ class YoloCamShot:
         return layerOutputs
 
     def ProcessOutput(self, layerOutputs, minConfidence, threshold):
-        self.ResultsBoxes = YoloResultBoxes(self.shot, layerOutputs, minConfidence, threshold)
-
-    def Draw(self):
+        self.ResultsBoxes = YoloResultBoxes(self.pShot.Shot, layerOutputs, minConfidence, threshold)
         if self.ResultsBoxes.IsEmpty():
             return
 
-        for i in self.ResultsBoxes.indexes.flatten():
-            box = self.ResultsBoxes.boxes[i]
-            (x, y, w, h) = box.GetBoxCoordinates()
-            color = [int(c) for c in self.yolo.COLORS[box.GetClassId()]]
-            text = "{}: {:.1f}".format(self.yolo.LABELS[box.GetClassId()], box.GetConfidence())
-
-            cv2.rectangle(self.shot.image, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(self.shot.image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
-                0.5, color, 2)
-        return self.shot
-
-    def GetProcessResult(self):
-        # ensure at least one detection exists
-        if self.ResultsBoxes.IsEmpty():
-            return
-
-        results = []
+        self.pShot.Metadata['YOLO'] = []
         for i in self.ResultsBoxes.indexes.flatten():
             result = {}
             box = self.ResultsBoxes.boxes[i]
@@ -74,10 +56,22 @@ class YoloCamShot:
             result['size'] = (w, h)
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
-            results.append(result)
+            self.pShot.Metadata['YOLO'].append(result)
             self.log.debug(f'Found: ### {result["label"]}: {result["confidence"]} ###')
 
-        return results
+    def Draw(self):
+        if self.ResultsBoxes.IsEmpty():
+            return
+
+        for i in self.ResultsBoxes.indexes.flatten():
+            box = self.ResultsBoxes.boxes[i]
+            (x, y, w, h) = box.GetBoxCoordinates()
+            color = [int(c) for c in self.yolo.COLORS[box.GetClassId()]]
+            text = "{}: {:.1f}".format(self.yolo.LABELS[box.GetClassId()], box.GetConfidence())
+
+            cv2.rectangle(self.pShot.Shot.image, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(self.pShot.Shot.image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                0.5, color, 2)
     
 class YoloObjDetectionProcessor(Processor):
     confidence = 0.4
@@ -97,6 +91,7 @@ class YoloObjDetectionProcessor(Processor):
 
     def ProcessShot(self, pShot: PipelineShot, others: []):
         super().ProcessShot(pShot, others)
-        yolo = YoloCamShot(pShot.Shot, self.yolo)
+        yolo = YoloCamShot(pShot, self.yolo)
         layerOutputs = yolo.Detect()
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
+        yolo.Draw()

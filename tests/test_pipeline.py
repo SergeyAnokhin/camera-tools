@@ -56,26 +56,31 @@ class TestPipeline(unittest.TestCase):
         # result[0].Shot.Show()
         # result[1].Shot.Show()
         # result[2].Shot.Show()
-        self.assertGreater(pipelineShots[0].Metadata['Diff']['TotalArea'], 5000)
-        self.assertLess(pipelineShots[0].Metadata['Diff']['TotalArea'], 6000)
-        self.assertEqual(len(pipelineShots[0].Metadata['boxes']), 2)
-        self.assertGreater(pipelineShots[0].Metadata['boxes'][0]['area'], 5000)
-        self.assertLess(pipelineShots[0].Metadata['boxes'][0]['area'], 6000)
+        metadata = pipelineShots[0].Metadata['DIFF']
+        self.assertGreater(metadata['Diff']['TotalArea'], 5000)
+        self.assertLess(metadata['Diff']['TotalArea'], 6000)
+        self.assertEqual(len(metadata['boxes']), 2)
+        self.assertGreater(metadata['boxes'][0]['area'], 5000)
+        self.assertLess(metadata['boxes'][0]['area'], 6000)
 
     def test_YoloObjDetectionProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = YoloObjDetectionProcessor()
         target.PreLoad()
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        results = target.Process(shots)
-        pp.pprint(results[0].Summary, indent=2)
-        self.assertEqual(len(results[0].Summary), 1)
-        self.assertEqual(len(results[1].Summary), 1)
-        self.assertEqual(len(results[2].Summary), 1)
-        self.assertEqual(results[0].Summary[0]['label'], 'person')
-        self.assertEqual(results[1].Summary[0]['label'], 'person')
-        self.assertEqual(results[2].Summary[0]['label'], 'person')
-        results[0].Shot.Show()
+        pipelineShots = [PipelineShot(shot) for shot in shots]
+        target.Process(pipelineShots)
+        metadata0 = pipelineShots[0].Metadata['YOLO']
+        metadata1 = pipelineShots[1].Metadata['YOLO']
+        metadata2 = pipelineShots[2].Metadata['YOLO']
+        pp.pprint(metadata0, indent=2)
+        self.assertEqual(len(metadata0), 1)
+        self.assertEqual(len(metadata1), 1)
+        self.assertEqual(len(metadata2), 1)
+        self.assertEqual(metadata0[0]['label'], 'person')
+        self.assertEqual(metadata1[0]['label'], 'person')
+        self.assertEqual(metadata2[0]['label'], 'person')
+        pipelineShots[0].Shot.Show()
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
