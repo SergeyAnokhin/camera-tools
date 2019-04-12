@@ -81,7 +81,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(metadata0[0]['label'], 'person')
         self.assertEqual(metadata1[0]['label'], 'person')
         self.assertEqual(metadata2[0]['label'], 'person')
-        pipelineShots[0].Shot.Show()
+        #pipelineShots[0].Shot.Show()
 
     def test_TrackingProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor
@@ -95,7 +95,7 @@ class TestPipeline(unittest.TestCase):
         target.Process(pipelineShots)
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
-        pipelineShots[1].Shot.Show()
+        # pipelineShots[1].Shot.Show()
         self.assertEqual(15, metadata1[0]['angle'])
         self.assertEqual(138, metadata1[0]['distance'])
 
@@ -110,11 +110,11 @@ class TestPipeline(unittest.TestCase):
         #pipeline.processors.append(MagnifyProcessor())
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor())
-        #post processors:
-        pipeline.processors.append(MailSenderPostProcessor()) 
-        pipeline.processors.append(ElasticSearchPostProcessor()) 
-        pipeline.processors.append(ArchivePostProcessor()) 
-        pipeline.processors.append(HassioPostProcessor()) 
+        # #post processors:
+        # pipeline.processors.append(MailSenderPostProcessor())
+        # pipeline.processors.append(ElasticSearchPostProcessor())
+        # pipeline.processors.append(ArchivePostProcessor())
+        # pipeline.processors.append(HassioPostProcessor())
 
         pipeline.PreLoad()
 
@@ -122,7 +122,15 @@ class TestPipeline(unittest.TestCase):
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         pipelineShots = [PipelineShot(shot) for shot in shots]
 
-
-        analyseResult = pipeline.Process(pipelineShots)
-        pipeline.Show()
-        pipeline.PostProcess()
+        result = pipeline.Process(pipelineShots)
+        # analyseResult[0].Shot.Show()
+        # analyseResult[1].Shot.Show()
+        # analyseResult[2].Shot.Show()
+        #metadata1 = pipelineShots[1].Metadata["TRAC"]
+        pp.pprint(result[1].Metadata)
+        self.assertTrue("TRAC" in result[1].Metadata)
+        self.assertTrue("YOLO" in result[1].Metadata)
+        self.assertTrue("DIFF" in result[1].Metadata)
+        self.assertTrue("TRAC" in result[2].Metadata)
+        self.assertTrue("YOLO" in result[2].Metadata)
+        self.assertTrue("DIFF" in result[2].Metadata)
