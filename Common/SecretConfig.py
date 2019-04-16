@@ -5,7 +5,7 @@ class SecretConfig:
     filename = 'configs/secret.json'
 
     def __init__(self):
-        self.gmail_usermane = ""
+        self.gmail_username = ""
         self.gmail_password = ""
 
     def fromJsonFile(self):

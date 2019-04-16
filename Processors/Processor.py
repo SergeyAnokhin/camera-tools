@@ -1,23 +1,6 @@
 import logging
 from Pipeline.Model.PipelineShot import PipelineShot
 
-# class ProcessingContext:
-#     def __init__(self):
-#         self.Shots = []
-#         self.OriginalShots = []
-
-# class ShotProcessingContext:
-#     def __init__(self, index: int, ctx: ProcessingContext):
-#         self.Index = index
-
-#         self.Shots = ctx.Shots
-#         self.Shot = self.Shots[index]
-#         self.OriginalShots = ctx.OriginalShots
-#         self.OriginalShot = self.OriginalShots[index]
-
-#         self.OthersShots = self.Shots.copy()
-#         self.OthersShots.remove(self.Shot)
-
 class Processor:
     def __init__(self, name):
         self.name = name

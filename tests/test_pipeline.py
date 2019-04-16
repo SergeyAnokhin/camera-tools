@@ -14,7 +14,7 @@ from Pipeline.ShotsPipeline import ShotsPipeline
 from PostProcessors.ArchivePostProcessor import ArchivePostProcessor
 from PostProcessors.ElasticSearchPostProcessor import ElasticSearchPostProcessor
 from PostProcessors.HassioPostProcessor import HassioPostProcessor
-from PostProcessors.MailSenderPostProcessor import MailSenderPostProcessor
+from Processors.MailSenderProcessor import MailSenderProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 
 class TestPipeline(unittest.TestCase):
@@ -99,6 +99,23 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(15, metadata1[0]['angle'])
         self.assertEqual(138, metadata1[0]['distance'])
 
+    def test_MailSend(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        pipeline = ShotsPipeline()
+        pipeline.processors.append(DiffContoursProcessor())
+        pipeline.processors.append(MailSenderProcessor(True))
+        pipeline.PreLoad()
+
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        pipelineShots = [PipelineShot(shot) for shot in shots]
+        result = pipeline.Process(pipelineShots)
+
+        sendMeta = result[0].Metadata['IMAP']
+        self.assertEqual(sendMeta["Subject"], "SUBJECT")
+        self.assertEqual(sendMeta["Body"], "BODY")
+        self.assertGreater(sendMeta["MessageSize"], 200000)
+
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
@@ -111,9 +128,9 @@ class TestPipeline(unittest.TestCase):
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor())
         # #post processors:
+        # pipeline.processors.append(ArchivePostProcessor())
         # pipeline.processors.append(MailSenderPostProcessor())
         # pipeline.processors.append(ElasticSearchPostProcessor())
-        # pipeline.processors.append(ArchivePostProcessor())
         # pipeline.processors.append(HassioPostProcessor())
 
         pipeline.PreLoad()
