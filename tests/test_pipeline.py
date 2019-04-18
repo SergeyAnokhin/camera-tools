@@ -116,6 +116,20 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
+    def test_Archiveage(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        pipeline = ShotsPipeline('Foscam')
+        pipeline.processors.append(DiffContoursProcessor())
+        pipeline.processors.append(ArchivePostProcessor())
+
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        pipelineShots = [PipelineShot(shot) for shot in shots]
+        result = pipeline.Process(pipelineShots)
+
+        shot = result[0].Shot
+        self.assertEqual(shot.filename, "toto-cv.jpg")
+
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
@@ -128,10 +142,21 @@ class TestPipeline(unittest.TestCase):
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor())
         # #post processors:
-        # pipeline.processors.append(ArchivePostProcessor())
-        # pipeline.processors.append(MailSenderPostProcessor())
-        # pipeline.processors.append(ElasticSearchPostProcessor())
-        # pipeline.processors.append(HassioPostProcessor())
+
+        ########################################################################
+        # save original files and analysed to archive directory by date
+        # original: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.jpg 
+        # analysed: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.jpg 
+        # pipeline.processors.append(ArchiveProcessor())           
+
+        # mail analysed files to gmail
+        # pipeline.processors.append(MailSenderPostProcessor())    
+
+        # add to ES info about files + analysed info
+        # pipeline.processors.append(ElasticSearchPostProcessor()) 
+
+        # update files in hassio server
+        # pipeline.processors.append(HassioPostProcessor())        
 
         pipeline.PreLoad()
 
