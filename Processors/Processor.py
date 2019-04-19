@@ -1,12 +1,14 @@
 import logging
 from Pipeline.Model.PipelineShot import PipelineShot
+from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class Processor:
+    config: CameraArchiveConfig
+
     def __init__(self, name):
         self.name = name
         self.log = logging.getLogger(f"PROC:{name}")
         self.PipelineResults = {}
-        self.camera = ""
 
     def Preload(self, isUsed = False):
         ''' Will start on application start once '''

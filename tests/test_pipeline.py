@@ -10,12 +10,12 @@ from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
-from Pipeline.ShotsPipeline import ShotsPipeline
-from PostProcessors.ArchivePostProcessor import ArchivePostProcessor
-from PostProcessors.ElasticSearchPostProcessor import ElasticSearchPostProcessor
-from PostProcessors.HassioPostProcessor import HassioPostProcessor
+from Processors.ArchiveProcessor import ArchiveProcessor
+from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
+from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
+from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class TestPipeline(unittest.TestCase):
 
@@ -108,8 +108,7 @@ class TestPipeline(unittest.TestCase):
         pipeline.PreLoad()
 
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
-        result = pipeline.Process(pipelineShots)
+        result = pipeline.Process(shots)
 
         sendMeta = result[0].Metadata['IMAP']
         self.assertEqual(sendMeta["Subject"], "SUBJECT")
@@ -117,18 +116,29 @@ class TestPipeline(unittest.TestCase):
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
     def test_Archiveage(self):
-        # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
+        # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+
         pipeline = ShotsPipeline('Foscam')
         pipeline.processors.append(DiffContoursProcessor())
-        pipeline.processors.append(ArchivePostProcessor())
+        pipeline.processors.append(SaveToTempProcessor())
+        pipeline.processors.append(ArchiveProcessor())
+        pipeline.PreLoad()
 
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
-        result = pipeline.Process(pipelineShots)
+        result = pipeline.Process(shots)
 
-        shot = result[0].Shot
-        self.assertEqual(shot.filename, "toto-cv.jpg")
+        meta = result[0].Metadata
+        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090254-foscam.jpg")
+        self.assertEqual(meta['TEMP']['filename'], "20190206-090254-foscam.jpg")
+        self.assertEqual(meta['TEMP']['filenameWithoutExtension'], "20190206-090254-foscam")
+        self.assertEqual(meta['TEMP']['fullnameWithoutExtension'], "temp/20190206-090254-foscam")
+        meta = result[1].Metadata
+        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090255-foscam.jpg")
+        meta = result[2].Metadata
+        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090256-foscam.jpg")
+
+
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
@@ -137,6 +147,7 @@ class TestPipeline(unittest.TestCase):
         ## INIT
         pipeline = ShotsPipeline()
         # # proceccor : Analyse() GetJsonResult() Draw()  
+        #pipeline.processors.append(ZonesProcessor())
         pipeline.processors.append(DiffContoursProcessor())
         #pipeline.processors.append(MagnifyProcessor())
         pipeline.processors.append(YoloObjDetectionProcessor())
@@ -144,17 +155,31 @@ class TestPipeline(unittest.TestCase):
         # #post processors:
 
         ########################################################################
+        # Save analysed files to temp 
+        # original: temp\20190203-085908-{camera}-{n}.jpg 
+        # analysed: temp\20190203-085908-{camera}-{n}.(jpeg|png)
+        # pipeline.processors.append(SaveToTempProcessor())           
+
+        ########################################################################
         # save original files and analysed to archive directory by date
+        # move from local archive to distant server (windows => diskstation) 
         # original: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.jpg 
-        # analysed: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.jpg 
+        # analysed: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.(jpeg|png)
         # pipeline.processors.append(ArchiveProcessor())           
 
+        ########################################################################
         # mail analysed files to gmail
+        # attached: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.(jpeg|png)
+        # attached: info.json 
+        # body    : Analysis Log 
+        # Subject : {HH:MM} {detected objects} {total_area_countours}
         # pipeline.processors.append(MailSenderPostProcessor())    
 
+        ########################################################################
         # add to ES info about files + analysed info
         # pipeline.processors.append(ElasticSearchPostProcessor()) 
 
+        ########################################################################
         # update files in hassio server
         # pipeline.processors.append(HassioPostProcessor())        
 
@@ -162,9 +187,7 @@ class TestPipeline(unittest.TestCase):
 
         ## Procerss on shots comming
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
-
-        result = pipeline.Process(pipelineShots)
+        result = pipeline.Process(shots)
         # analyseResult[0].Shot.Show()
         # analyseResult[1].Shot.Show()
         # analyseResult[2].Shot.Show()

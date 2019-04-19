@@ -1,20 +1,30 @@
+from Archiver.CameraArchiveConfig import CameraArchiveConfig
+from Archiver.CameraArchiveHelper import CameraArchiveHelper
+from Pipeline.Model.PipelineShot import PipelineShot
+# using cases :
+# 1. New mail comes
+# 2. Re-index whole archive
+# 3. (?) Process video
+
 class ShotsPipeline:
 
     def __init__(self, camera: str):
         self.processors = []
-        self.camera = camera
+        self.archiver = CameraArchiveHelper()
+        self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
     def PreLoad(self):
         for processor in self.processors:
-            proceccor.camera = self.camera
+            processor.config = self.config
             # PreLoad = getattr(processor, "PreLoad", None)
             # if callable(PreLoad):
             processor.PreLoad()
 
     def Process(self, shots: []):
+        pShots = [PipelineShot(shot) for shot in shots]
         for processor in self.processors:
-            processor.Process(shots)
-        return shots
+            processor.Process(pShots)
+        return pShots
 
     def Show(self):
         pass
