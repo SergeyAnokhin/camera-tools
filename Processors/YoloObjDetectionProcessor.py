@@ -89,8 +89,8 @@ class YoloObjDetectionProcessor(Processor):
         self.log.debug("Confidence: %s", self.confidence)
         self.log.debug("Threshold: %s", self.threshold)
 
-    def ProcessShot(self, pShot: PipelineShot, others: []):
-        super().ProcessShot(pShot, others)
+    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+        super().ProcessShot(pShot, pShots)
         yolo = YoloCamShot(pShot, self.yolo)
         layerOutputs = yolo.Detect()
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)

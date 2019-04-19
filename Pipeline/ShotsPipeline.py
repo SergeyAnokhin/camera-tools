@@ -24,6 +24,10 @@ class ShotsPipeline:
         pShots = [PipelineShot(shot) for shot in shots]
         for processor in self.processors:
             processor.Process(pShots)
+            PostProcess = getattr(processor, "PostProcess", None)
+            if callable(PostProcess):
+                processor.PostProcess(pShots)
+
         return pShots
 
     def Show(self):

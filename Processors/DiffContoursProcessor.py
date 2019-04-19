@@ -106,7 +106,9 @@ class DiffContoursProcessor(Processor):
     #         results.append(result)
     #     return results
 
-    def ProcessShot(self, pShot: PipelineShot, others: []):
+    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+        others = pShots.copy()
+        others.remove(pShot)
         super().ProcessShot(pShot, others)
         diff = DiffCamShot()
         return diff.Process(pShot, others)

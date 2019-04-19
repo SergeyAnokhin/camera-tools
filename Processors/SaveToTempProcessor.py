@@ -13,7 +13,7 @@ class SaveToTempProcessor(Processor):
     def __init__(self):
         super().__init__("TEMP")
     
-    def ProcessShot(self, pShot: PipelineShot, others: []):
+    def ProcessShot(self, pShot: PipelineShot, pShots: []):
         pShot.Metadata['TEMP'] = {}
         meta = pShot.Metadata['TEMP']
 

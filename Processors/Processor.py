@@ -20,10 +20,15 @@ class Processor:
         self.log.info('=== PROCESS ===')
         for i in range(len(pShots)):
             pShot = pShots[i]
-            otherPShots = pShots.copy()
-            otherPShots.remove(pShot)
             self.log.debug(f"====== {pShot.Shot.filename} ========================================")
-            self.ProcessShot(pShot, otherPShots)
+            self.ProcessShot(pShot, pShots)
+
+    def CreateMetadata(self, pShot: PipelineShot):
+        pShot.Metadata[self.name] = {}
+        return pShot.Metadata[self.name]
 
     def ProcessShot(self, pShot: PipelineShot, otherPShots: []):
+        pass
+
+    def PostProcess(self, pShots: []):
         pass

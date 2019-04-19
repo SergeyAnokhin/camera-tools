@@ -152,9 +152,21 @@ class TestPipeline(unittest.TestCase):
 
         ########################################################################
         # Save analysed files to temp 
-        # original: temp\20190203-085908-{camera}-{n}.jpg 
-        # analysed: temp\20190203-085908-{camera}-{n}.(jpeg|png)
+        # original: temp\20190203_085908_{camera}.jpg 
+        # analysed: temp\20190203_085908_{camera}.(jpeg|png)
         # pipeline.processors.append(SaveToTempProcessor())           
+
+        ########################################################################
+        # mail analysed files to gmail
+        # attached: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.(jpeg|png)
+        # attached: info.json 
+        # body    : Analysis Log 
+        # Subject : {HH:MM} {detected objects} {total_area_countours}
+        # pipeline.processors.append(MailSenderProcessor())    
+
+        ########################################################################
+        # update files in hassio server
+        # pipeline.processors.append(HassioProcessor())        
 
         ########################################################################
         # save original files and analysed to archive directory by date
@@ -164,20 +176,8 @@ class TestPipeline(unittest.TestCase):
         # pipeline.processors.append(ArchiveProcessor())           
 
         ########################################################################
-        # mail analysed files to gmail
-        # attached: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.(jpeg|png)
-        # attached: info.json 
-        # body    : Analysis Log 
-        # Subject : {HH:MM} {detected objects} {total_area_countours}
-        # pipeline.processors.append(MailSenderPostProcessor())    
-
-        ########################################################################
         # add to ES info about files + analysed info
         # pipeline.processors.append(ElasticSearchPostProcessor()) 
-
-        ########################################################################
-        # update files in hassio server
-        # pipeline.processors.append(HassioPostProcessor())        
 
         pipeline.PreLoad()
 

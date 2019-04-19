@@ -16,8 +16,8 @@ class TrackingProcessor(Processor):
         super().__init__("TRAC")
         self.boxes_last = []
 
-    def ProcessShot(self, pShot: PipelineShot, others: []):
-        super().ProcessShot(pShot, others)
+    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+        super().ProcessShot(pShot, pShots)
         pShot.Metadata['TRAC'] = {}
         box_index = 0
         boxes_current = []
