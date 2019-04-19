@@ -2,7 +2,7 @@ import os, pytz, logging, cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
-
+from scipy.misc import imsave
 
 class FileImage:
     image: []
@@ -10,7 +10,9 @@ class FileImage:
     def __init__(self, fullname: str = None):
         self.log = logging.getLogger('IMG')
         self.local = pytz.timezone("Europe/Paris")
+        self.UpdateFullName(fullname)
 
+    def UpdateFullName(self, fullname):
         if fullname == None:
             return        
         self.fullname = fullname
@@ -28,6 +30,14 @@ class FileImage:
         fp = open(self.fullname, 'wb')
         fp.write(content)
         fp.close()
+
+    def Save(self):
+        params = list()
+        image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
+        if self.filenameExtension == 'png':
+            imsave(self.fullname,image,params)
+        else:
+            cv2.imwrite(self.fullname,image,params)
 
     def SetImage(self, image):
         self.log.info(f"Set image from array: {len(image)}x{len(image[0])}")

@@ -1,7 +1,7 @@
 # run with :
 # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
 # python -m unittest discover     
-import unittest, datetime, logging
+import unittest, datetime, logging, os
 import numpy as np
 import pprint as pp
 from copy import copy, deepcopy
@@ -102,7 +102,7 @@ class TestPipeline(unittest.TestCase):
     def test_MailSend(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        pipeline = ShotsPipeline()
+        pipeline = ShotsPipeline('Foscam')
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(MailSenderProcessor(True))
         pipeline.PreLoad()
@@ -115,37 +115,33 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
-    def test_Archiveage(self):
+    def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(SaveToTempProcessor())
-        pipeline.processors.append(ArchiveProcessor())
         pipeline.PreLoad()
 
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = pipeline.Process(shots)
 
-        meta = result[0].Metadata
-        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090254-foscam.jpg")
-        self.assertEqual(meta['TEMP']['filename'], "20190206-090254-foscam.jpg")
-        self.assertEqual(meta['TEMP']['filenameWithoutExtension'], "20190206-090254-foscam")
-        self.assertEqual(meta['TEMP']['fullnameWithoutExtension'], "temp/20190206-090254-foscam")
-        meta = result[1].Metadata
-        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090255-foscam.jpg")
-        meta = result[2].Metadata
-        self.assertEqual(meta['TEMP']['fullname'], "temp/20190206-090256-foscam.jpg")
-
-
+        self.assertEqual(result[0].Shot.fullname, "temp\\20190206_090254_Foscam_cv.jpeg")
+        self.assertEqual(result[0].OriginalShot.fullname, "temp\\20190206_090254_Foscam.jpg")
+        self.assertTrue(os.path.isfile(result[0].Shot.fullname))
+        self.assertTrue(os.path.isfile(result[0].OriginalShot.fullname))
+        self.assertEqual(result[1].Shot.fullname, "temp\\20190206_090255_Foscam_cv.jpeg")
+        self.assertEqual(result[1].OriginalShot.fullname, "temp\\20190206_090255_Foscam.jpg")
+        self.assertEqual(result[2].Shot.fullname, "temp\\20190206_090256_Foscam_cv.jpeg")
+        self.assertEqual(result[2].OriginalShot.fullname, "temp\\20190206_090256_Foscam.jpg")
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
 
         ## INIT
-        pipeline = ShotsPipeline()
+        pipeline = ShotsPipeline('Foscam' )
         # # proceccor : Analyse() GetJsonResult() Draw()  
         #pipeline.processors.append(ZonesProcessor())
         pipeline.processors.append(DiffContoursProcessor())

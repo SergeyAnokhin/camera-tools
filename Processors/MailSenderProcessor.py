@@ -13,8 +13,8 @@ class MailSenderProcessor(Processor):
 
     def __init__(self, isSimulation: bool = False):
         super().__init__("IMAP")
-        self.config = SecretConfig()
-        self.config.fromJsonFile()
+        self.secretConfig = SecretConfig()
+        self.secretConfig.fromJsonFile()
         self.isSimulation = isSimulation
 
     def Process(self, pShots: []):
@@ -42,7 +42,7 @@ class MailSenderProcessor(Processor):
 
         smtp = smtplib.SMTP('smtp.gmail.com', 587)
         smtp.starttls()
-        smtp.login(self.config.gmail_username, self.config.gmail_password)
+        smtp.login(self.secretConfig.gmail_username, self.secretConfig.gmail_password)
         self.log.debug(f"[IMAP] Send mail: '{subject}'")
         if not self.isSimulation:
             smtp.sendmail(self.sender, self.to, msg.as_string())

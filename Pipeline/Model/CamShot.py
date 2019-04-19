@@ -21,6 +21,13 @@ class CamShot(FileImage):
         seconds = int(re_groups.group(6))
         return datetime.datetime(year, month, day, hour, minute, seconds)
 
+    def GetMailAttachmentIndex(self):
+        re_groups = re.search("-(\\d)\.", self.filename)
+        if not re_groups:
+            print('Cant get index in : {}'.format(input))
+            raise ValueError('Cant get index in file : {}'.format(input))
+        return int(re_groups.group(1))
+
     def GrayImage(self):
         return cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 

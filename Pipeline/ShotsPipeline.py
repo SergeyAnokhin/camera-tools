@@ -16,9 +16,9 @@ class ShotsPipeline:
     def PreLoad(self):
         for processor in self.processors:
             processor.config = self.config
-            # PreLoad = getattr(processor, "PreLoad", None)
-            # if callable(PreLoad):
-            processor.PreLoad()
+            PreLoad = getattr(processor, "PreLoad", None)
+            if callable(PreLoad):
+                processor.PreLoad()
 
     def Process(self, shots: []):
         pShots = [PipelineShot(shot) for shot in shots]
