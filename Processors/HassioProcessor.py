@@ -14,5 +14,5 @@ class HassioProcessor(Processor):
         meta = self.CreateMetadata(pShot)
         camera = self.config.camera
         dest = os.path.join(self.hassLocation, f'cv_{camera}.jpg')
-        meta['hassio_loaction'] = dest
+        meta['hassio_location'] = dest
         shutil.copy2(pShot.Shot.fullname, dest)

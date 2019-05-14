@@ -1,17 +1,17 @@
 {
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
-    "python.unitTest.unittestArgs": [
+    "python.testing.unittestArgs": [
         "-v",
         "-s",
         "./tests",
         "-p",
         "test_*.py"
     ],
-    "python.unitTest.pyTestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.unittestEnabled": true,
-    "python.unitTest.nosetestArgs": [
+    "python.testing.pyTestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.testing.nosetestArgs": [
         "tests"
     ]
 }

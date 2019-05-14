@@ -153,8 +153,8 @@ class TestPipeline(unittest.TestCase):
         ########################################################################
         # Save analysed files to temp 
         # original: temp\20190203_085908_{camera}.jpg 
-        # analysed: temp\20190203_085908_{camera}.(jpeg|png)
-        # pipeline.processors.append(SaveToTempProcessor())           
+        # analysed: temp\20190203_085908_{camera}_cv.jpeg
+        pipeline.processors.append(SaveToTempProcessor())           
 
         ########################################################################
         # mail analysed files to gmail
@@ -162,7 +162,7 @@ class TestPipeline(unittest.TestCase):
         # attached: info.json 
         # body    : Analysis Log 
         # Subject : {HH:MM} {detected objects} {total_area_countours}
-        # pipeline.processors.append(MailSenderProcessor())    
+        pipeline.processors.append(MailSenderProcessor(True))    
 
         ########################################################################
         # update files in hassio server
@@ -195,3 +195,12 @@ class TestPipeline(unittest.TestCase):
         self.assertTrue("TRAC" in result[2].Metadata)
         self.assertTrue("YOLO" in result[2].Metadata)
         self.assertTrue("DIFF" in result[2].Metadata)
+        self.assertTrue("TEMP" in result[2].Metadata)
+
+        tempMD = result[1].Metadata['TEMP']
+        self.assertEqual(tempMD['fullname'], "temp\\20190328_080123_Foscam_cv.jpeg")
+        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
+        mailMD = result[0].Metadata['IMAP']
+        self.assertEqual(mailMD["Subject"], "SUBJECT")
+        self.assertEqual(mailMD["Body"], "BODY")
+        self.assertGreater(mailMD["MessageSize"], 200000)

@@ -14,8 +14,7 @@ class SaveToTempProcessor(Processor):
         super().__init__("TEMP")
     
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
-        pShot.Metadata['TEMP'] = {}
-        meta = pShot.Metadata['TEMP']
+        meta = self.CreateMetadata(pShot)
 
         dt = pShot.Shot.GetDatetime()
         index = pShot.Shot.GetMailAttachmentIndex()
