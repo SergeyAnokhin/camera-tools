@@ -4,6 +4,7 @@
 import unittest, datetime, logging, os
 import numpy as np
 import pprint as pp
+import sys
 from copy import copy, deepcopy
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
@@ -13,6 +14,7 @@ from Processors.TrackingProcessor import TrackingProcessor
 from Processors.ArchiveProcessor import ArchiveProcessor
 from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
+from Processors.HassioProcessor import HassioProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
@@ -20,8 +22,15 @@ from Archiver.CameraArchiveConfig import CameraArchiveConfig
 class TestPipeline(unittest.TestCase):
 
     def setUp(self):
-        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', 
-            level=logging.DEBUG, datefmt='%H:%M:%S')
+        file_handler = logging.FileHandler(filename='processing.log')
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        handlers = [file_handler, stdout_handler]
+
+        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
+            level=logging.DEBUG, 
+            datefmt='%H:%M:%S',
+            handlers=handlers)
+
         self.log = logging.getLogger("TEST")
         self.log.info('start %s: %s', __name__, datetime.datetime.now())
 
@@ -111,7 +120,7 @@ class TestPipeline(unittest.TestCase):
         result = pipeline.Process(shots)
 
         sendMeta = result[0].Metadata['IMAP']
-        self.assertEqual(sendMeta["Subject"], "SUBJECT")
+        self.assertEqual(sendMeta["Subject"], "Foscam @09:02 ")
         self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
@@ -139,9 +148,12 @@ class TestPipeline(unittest.TestCase):
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
+        hassioDir = "temp\\hassio"
+        if not os.path.exists(hassioDir):
+            os.mkdir(hassioDir)
 
         ## INIT
-        pipeline = ShotsPipeline('Foscam' )
+        pipeline = ShotsPipeline('Foscam')
         # # proceccor : Analyse() GetJsonResult() Draw()  
         #pipeline.processors.append(ZonesProcessor())
         pipeline.processors.append(DiffContoursProcessor())
@@ -166,7 +178,9 @@ class TestPipeline(unittest.TestCase):
 
         ########################################################################
         # update files in hassio server
-        # pipeline.processors.append(HassioProcessor())        
+        hassio = HassioProcessor()
+        hassio.hassLocation = hassioDir
+        pipeline.processors.append(hassio)        
 
         ########################################################################
         # save original files and analysed to archive directory by date
@@ -188,7 +202,8 @@ class TestPipeline(unittest.TestCase):
         # analyseResult[1].Shot.Show()
         # analyseResult[2].Shot.Show()
         #metadata1 = pipelineShots[1].Metadata["TRAC"]
-        pp.pprint(result[1].Metadata)
+        pp.pprint(result[0].Metadata)
+        pp.pprint(result[0].Shot.GetDatetime())
         self.assertTrue("TRAC" in result[1].Metadata)
         self.assertTrue("YOLO" in result[1].Metadata)
         self.assertTrue("DIFF" in result[1].Metadata)
@@ -196,11 +211,16 @@ class TestPipeline(unittest.TestCase):
         self.assertTrue("YOLO" in result[2].Metadata)
         self.assertTrue("DIFF" in result[2].Metadata)
         self.assertTrue("TEMP" in result[2].Metadata)
+        self.assertTrue("HASS" in result[2].Metadata)
 
-        tempMD = result[1].Metadata['TEMP']
-        self.assertEqual(tempMD['fullname'], "temp\\20190328_080123_Foscam_cv.jpeg")
-        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
+        tempMD = result[0].Metadata['TEMP']
+        self.assertEqual(tempMD['fullname'], "temp\\20190328_080122_Foscam_cv.jpeg")
+        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080122_Foscam.jpg")
+
         mailMD = result[0].Metadata['IMAP']
-        self.assertEqual(mailMD["Subject"], "SUBJECT")
-        self.assertEqual(mailMD["Body"], "BODY")
+        self.assertEqual(mailMD["Subject"], "Foscam @08:01 person:2")
+        #self.assertEqual(mailMD["Body"], "/** Processing LOG **/")
         self.assertGreater(mailMD["MessageSize"], 200000)
+
+        hassMD = result[0].Metadata['HASS']
+        self.assertEqual(hassMD['hassio_location'], 'temp\\hassio\\cv_Foscam_0.jpg')

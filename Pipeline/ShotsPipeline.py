@@ -21,7 +21,7 @@ class ShotsPipeline:
                 processor.PreLoad()
 
     def Process(self, shots: []):
-        pShots = [PipelineShot(shot) for shot in shots]
+        pShots = [PipelineShot(shots[i], i) for i in range(len(shots))]
         for processor in self.processors:
             processor.Process(pShots)
             PostProcess = getattr(processor, "PostProcess", None)
