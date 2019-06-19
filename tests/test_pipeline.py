@@ -17,7 +17,6 @@ from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
-from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class TestPipeline(unittest.TestCase):
 
@@ -187,7 +186,7 @@ class TestPipeline(unittest.TestCase):
         # move from local archive to distant server (windows => diskstation) 
         # original: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.jpg 
         # analysed: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.(jpeg|png)
-        # pipeline.processors.append(ArchiveProcessor())           
+        pipeline.processors.append(ArchiveProcessor(True))
 
         ########################################################################
         # add to ES info about files + analysed info
@@ -224,3 +223,7 @@ class TestPipeline(unittest.TestCase):
 
         hassMD = result[0].Metadata['HASS']
         self.assertEqual(hassMD['hassio_location'], 'temp\\hassio\\cv_Foscam_0.jpg')
+
+        archMD = result[0].Metadata['ARCH']
+        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122.jpg')

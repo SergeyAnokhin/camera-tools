@@ -4,6 +4,7 @@ from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class Processor:
     config: CameraArchiveConfig
+    isSimulation: bool
 
     def __init__(self, name):
         self.name = name
