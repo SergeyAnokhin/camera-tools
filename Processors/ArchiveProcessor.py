@@ -17,6 +17,5 @@ class ArchiveProcessor(Processor):
         meta['archive_destination_orig'] = dest_orig
         # pShot.Shot.filename = pShot.Shot.filenameWithoutExtension + "_cv" + pShot.Shot.filenameExtension
         if not self.isSimulation:
-            pass
-            # Copy origin 
-            # Copy analysed (_cv)
+            pShot.Shot.Move(dest)
+            pShot.OriginalShot.Move(dest_orig)

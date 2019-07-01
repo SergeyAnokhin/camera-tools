@@ -1,4 +1,4 @@
-import re, datetime, cv2
+import re, datetime, cv2, os
 from copy import copy, deepcopy
 from Pipeline.Model.FileImage import FileImage
 
@@ -31,7 +31,7 @@ class CamShot(FileImage):
     def GrayImage(self):
         return cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 
-    def Copy(self):
+    def Clone(self):
         copy = CamShot(self.fullname)
         if len(self.image) != 0:
             copy.image = deepcopy(self.image)

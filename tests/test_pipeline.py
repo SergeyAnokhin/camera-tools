@@ -124,6 +124,18 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
+    def test_ArchiveProcessor(self):
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        pShots = [PipelineShot(shot) for shot in shots]
+
+        target = ArchiveProcessor()
+        target.config.path_to = 'temp'
+
+        target.Process(pShots)
+
+        self.assertEqual('temp/toto.jpg', pShots[0].Shot.fullname)
+
     def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'

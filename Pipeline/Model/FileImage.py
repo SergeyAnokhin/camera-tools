@@ -61,3 +61,8 @@ class FileImage:
         plt.imshow(self.image, interpolation="bilinear")
         plt.margins(0)
         plt.show()
+
+    def Move(self, dest: str):
+        os.rename(self.fullname, dest)
+        self.UpdateFullName(dest)
+        
