@@ -42,8 +42,9 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(shots[0].Exist())
 
     def test_DirectoryShotsProvider(self):
-        target = DirectoryShotsProvider.FromDir(None, 'temp')
-        shots = target.GetShots(datetime.datetime.now)
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        target = DirectoryShotsProvider.FromDir(None, folder)
+        shots = target.GetShots()
         self.assertEqual(3, len(shots))
         self.assertIsNotNone(shots[0].filename)
         self.assertIsNotNone(shots[0].fullname)

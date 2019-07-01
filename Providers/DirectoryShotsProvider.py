@@ -14,7 +14,7 @@ class DirectoryShotsProvider:
         self.log.debug("Loaded {} shots from directory {}".format(len(self.Shots), folder)) 
         return self
 
-    def GetShots(self, dateTime):
+    def GetShots(self, dt: datetime = datetime.now):
         for s in self.Shots:
             s.LoadImage()
         return self.Shots
