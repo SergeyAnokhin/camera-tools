@@ -164,7 +164,7 @@ class TestPipeline(unittest.TestCase):
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
-        hassioDir = "temp\\hassio"
+        hassioDir = "temp"
         if not os.path.exists(hassioDir):
             os.mkdir(hassioDir)
 
@@ -239,7 +239,7 @@ class TestPipeline(unittest.TestCase):
         self.assertGreater(mailMD["MessageSize"], 200000)
 
         hassMD = result[0].Metadata['HASS']
-        self.assertEqual(hassMD['hassio_location'], 'temp\\hassio\\cv_Foscam_0.jpg')
+        self.assertEqual(hassMD['hassio_location'], 'temp\\cv_Foscam_0.jpg')
 
         archMD = result[0].Metadata['ARCH']
         self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_cv.jpeg')

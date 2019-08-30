@@ -19,7 +19,8 @@ class ImapShotsProvider:
 
     def CleanFolder(self):
         for filename in os.listdir(self.tempFolder):
-            os.unlink(os.path.join(self.tempFolder, filename))
+            file = os.path.join(self.tempFolder, filename)
+            os.unlink(file)
 
     def GetShots(self, imap_folder):
         self.Connect()
