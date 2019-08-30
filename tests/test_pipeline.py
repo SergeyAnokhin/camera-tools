@@ -17,6 +17,7 @@ from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
+from Archiver.CameraArchiveHelper import CameraArchiveHelper
 
 class TestPipeline(unittest.TestCase):
 
@@ -32,6 +33,7 @@ class TestPipeline(unittest.TestCase):
 
         self.log = logging.getLogger("TEST")
         self.log.info('start %s: %s', __name__, datetime.datetime.now())
+        self.archiver = CameraArchiveHelper()
 
     def test_imapShotsProvider(self):
         target = ImapShotsProvider('temp')
@@ -126,15 +128,17 @@ class TestPipeline(unittest.TestCase):
 
     def test_ArchiveProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+
+        pipeline = ShotsPipeline('Foscam')
+        pipeline.processors.append(ArchiveProcessor(True))
+        pipeline.PreLoad()
+
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pShots = [PipelineShot(shot) for shot in shots]
+        result = pipeline.Process(shots)
 
-        target = ArchiveProcessor()
-        target.config.path_to = 'temp'
-
-        target.Process(pShots)
-
-        self.assertEqual('temp/toto.jpg', pShots[0].Shot.fullname)
+        archMD = result[0].Metadata['ARCH']
+        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254.jpg')
 
     def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
