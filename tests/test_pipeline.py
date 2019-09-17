@@ -18,6 +18,7 @@ from Processors.HassioProcessor import HassioProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
+from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 
 class TestPipeline(unittest.TestCase):
 
@@ -32,6 +33,7 @@ class TestPipeline(unittest.TestCase):
             handlers=handlers)
 
         self.log = logging.getLogger("TEST")
+        self.log.info(' ##################### ==> ')
         self.log.info('start %s: %s', __name__, datetime.datetime.now())
         self.archiver = CameraArchiveHelper()
 
@@ -160,6 +162,22 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(result[1].OriginalShot.fullname, "temp\\20190206_090255_Foscam.jpg")
         self.assertEqual(result[2].Shot.fullname, "temp\\20190206_090256_Foscam_cv.jpeg")
         self.assertEqual(result[2].OriginalShot.fullname, "temp\\20190206_090256_Foscam.jpg")
+
+    def test_ElasticSearchProcessor(self):
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+
+        pipeline = ShotsPipeline('Foscam')
+        pipeline.processors.append(DiffContoursProcessor())
+        pipeline.processors.append(ElasticSearchProcessor(True))
+        pipeline.processors.append(SaveToTempProcessor())
+        pipeline.PreLoad()
+
+        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        result = pipeline.Process(shots)
+
+        els = result[0].Metadata["ELSE"]
+        self.assertIsNotNone(els['JSON'])
+        self.assertEqual(els['JSON']['Analyse']['DIFF'], 1.0) #TODO
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
