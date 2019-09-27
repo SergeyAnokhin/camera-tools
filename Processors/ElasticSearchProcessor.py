@@ -14,12 +14,14 @@ class ElasticSearchProcessor(Processor):
         meta = self.CreateMetadata(pShot)
         #fullfilename_ftp = file.to.path.replace("\\\\diskstation", '').replace('\\', '/')
         file = FileInfo(pShot.Shot.fullname)
+        path = pShot.Metadata['ARCH']['archive_destination_orig']
+        path = path.replace("\\\\diskstation", '').replace('\\', '/')
 
         dict = {
             "ext": file.get_extension(),  # 'jpg'
             "volume": "/volume2",
-            # "/Camera/Foscam/FI9805W_C4D6553DECE1/snap/MDAlarm_20190201-124005.jpg",
-            "path": file.path,
+            # "/CameraArchive/Foscam/2019-02/06/20190206_090254_Foscam.jpg",
+            "path": path,
             "@timestamp": file.get_timestamp_utc(),  # "2019-02-01T11:40:05.000Z",
             "doc": "event",
             "sensor": self.config.sensor,
@@ -31,6 +33,13 @@ class ElasticSearchProcessor(Processor):
                 "camera_tools"
             ]
         }
+
+        dict['Analyse'] = {}
+        for metaKey in pShot.Metadata:
+            if metaKey == self.name:
+                continue
+            dict['Analyse'][metaKey] = pShot.Metadata[metaKey]
+
         json_data = json.dumps(dict, indent=4, sort_keys=True)
         #print('{}@{}'.format(self.config.camera, file.get_timestamp_utc()), json_data)
         meta['JSON'] = json_data

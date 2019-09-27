@@ -1,7 +1,7 @@
 # run with :
 # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
 # python -m unittest discover     
-import unittest, datetime, logging, os
+import unittest, datetime, logging, os, json
 import numpy as np
 import pprint as pp
 import sys
@@ -139,8 +139,8 @@ class TestPipeline(unittest.TestCase):
         result = pipeline.Process(shots)
 
         archMD = result[0].Metadata['ARCH']
-        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_cv.jpeg')
-        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254.jpg')
+        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
 
     def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
@@ -168,8 +168,9 @@ class TestPipeline(unittest.TestCase):
 
         pipeline = ShotsPipeline('Foscam')
         pipeline.processors.append(DiffContoursProcessor())
+        pipeline.processors.append(ArchiveProcessor(True))
         pipeline.processors.append(ElasticSearchProcessor(True))
-        pipeline.processors.append(SaveToTempProcessor())
+        #pipeline.processors.append(SaveToTempProcessor())
         pipeline.PreLoad()
 
         shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
@@ -177,7 +178,42 @@ class TestPipeline(unittest.TestCase):
 
         els = result[0].Metadata["ELSE"]
         self.assertIsNotNone(els['JSON'])
-        self.assertEqual(els['JSON']['Analyse']['DIFF'], 1.0) #TODO
+        #print(els['JSON'])
+        dictEls = json.loads(els['JSON'])
+        analyse = dictEls['Analyse']
+        del dictEls['Analyse']
+
+        expected = {
+            "@timestamp": "2019-02-06T08:02:54.000Z",
+            "camera": "Foscam",
+            "doc": "event",
+            "ext": "jpg",
+            "path": "/CameraArchive/Foscam/2019-02/06/20190206_090254_Foscam.jpg",
+            "position": {
+                "detail": "under the roof",
+                "floor": -1,
+                "room": "FrontWall"
+            },
+            "sensor": {
+                "device": "Foscam FI9805W",
+                "display": "Foscam(.) FrontWall",
+                "id": "FoscamCameraArchiveFI9805W_C4D6553DECE1",
+                "is_external": True,
+                "type": "CameraArchive",
+                "unit": "bytes"
+            },
+            "tags": [
+                "synology_cameraarchive",
+                "camera_tools"
+            ],
+            "value": 69623,
+            "volume": "/volume2"
+        }
+
+        for key in expected:
+            self.assertEqual(dictEls[key], expected[key])
+        # self.assertEqual(els['JSON']['Analyse']['DIFF'], 1.0) #TODO
+
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
@@ -204,7 +240,7 @@ class TestPipeline(unittest.TestCase):
 
         ########################################################################
         # mail analysed files to gmail
-        # attached: {ARCHIVE}\2019\02\03\cv_20190203-085908-{camera}-{n}.(jpeg|png)
+        # attached: {ARCHIVE}\2019\02\03\cv_20190203-085908-{n}-{camera}_cv.(jpeg|png)
         # attached: info.json 
         # body    : Analysis Log 
         # Subject : {HH:MM} {detected objects} {total_area_countours}
@@ -219,13 +255,13 @@ class TestPipeline(unittest.TestCase):
         ########################################################################
         # save original files and analysed to archive directory by date
         # move from local archive to distant server (windows => diskstation) 
-        # original: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.jpg 
-        # analysed: {ARCHIVE}\2019\02\03\20190203-085908-{camera}-{n}.(jpeg|png)
+        # original: {ARCHIVE}\2019\02\03\20190203-085908-{n}-{camera}.jpg 
+        # analysed: {ARCHIVE}\2019\02\03\20190203-085908-{n}-{camera}_cv.(jpeg|png)
         pipeline.processors.append(ArchiveProcessor(True))
 
         ########################################################################
         # add to ES info about files + analysed info
-        # pipeline.processors.append(ElasticSearchPostProcessor()) 
+        # pipeline.processors.append(ElasticSearchProcessor()) 
 
         pipeline.PreLoad()
 
@@ -250,6 +286,9 @@ class TestPipeline(unittest.TestCase):
         tempMD = result[0].Metadata['TEMP']
         self.assertEqual(tempMD['fullname'], "temp\\20190328_080122_Foscam_cv.jpeg")
         self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080122_Foscam.jpg")
+        tempMD = result[1].Metadata['TEMP']
+        self.assertEqual(tempMD['fullname'], "temp\\20190328_080123_Foscam_cv.jpeg")
+        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
 
         mailMD = result[0].Metadata['IMAP']
         self.assertEqual(mailMD["Subject"], "Foscam @08:01 person:2")
@@ -260,5 +299,5 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(hassMD['hassio_location'], 'temp\\cv_Foscam_0.jpg')
 
         archMD = result[0].Metadata['ARCH']
-        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_cv.jpeg')
-        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122.jpg')
+        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam.jpg')
