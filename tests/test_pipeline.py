@@ -15,10 +15,10 @@ from Processors.ArchiveProcessor import ArchiveProcessor
 from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
+from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
-from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 
 class TestPipeline(unittest.TestCase):
 
@@ -212,8 +212,8 @@ class TestPipeline(unittest.TestCase):
 
         for key in expected:
             self.assertEqual(dictEls[key], expected[key])
-        # self.assertEqual(els['JSON']['Analyse']['DIFF'], 1.0) #TODO
 
+        self.assertAlmostEqual(analyse['DIFF']['boxes'][0]['profile_proportion'], 1.77, delta=0.01)
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
@@ -261,7 +261,7 @@ class TestPipeline(unittest.TestCase):
 
         ########################################################################
         # add to ES info about files + analysed info
-        # pipeline.processors.append(ElasticSearchProcessor()) 
+        pipeline.processors.append(ElasticSearchProcessor(True)) 
 
         pipeline.PreLoad()
 
@@ -271,9 +271,6 @@ class TestPipeline(unittest.TestCase):
         # analyseResult[0].Shot.Show()
         # analyseResult[1].Shot.Show()
         # analyseResult[2].Shot.Show()
-        #metadata1 = pipelineShots[1].Metadata["TRAC"]
-        pp.pprint(result[0].Metadata)
-        pp.pprint(result[0].Shot.GetDatetime())
         self.assertTrue("TRAC" in result[1].Metadata)
         self.assertTrue("YOLO" in result[1].Metadata)
         self.assertTrue("DIFF" in result[1].Metadata)
@@ -282,6 +279,7 @@ class TestPipeline(unittest.TestCase):
         self.assertTrue("DIFF" in result[2].Metadata)
         self.assertTrue("TEMP" in result[2].Metadata)
         self.assertTrue("HASS" in result[2].Metadata)
+        self.assertTrue("ELSE" in result[2].Metadata)
 
         tempMD = result[0].Metadata['TEMP']
         self.assertEqual(tempMD['fullname'], "temp\\20190328_080122_Foscam_cv.jpeg")
@@ -301,3 +299,11 @@ class TestPipeline(unittest.TestCase):
         archMD = result[0].Metadata['ARCH']
         self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam_cv.jpeg')
         self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam.jpg')
+
+        els = result[0].Metadata["ELSE"]
+        self.assertIsNotNone(els['JSON'])
+        dictEls = json.loads(els['JSON'])
+        print(els['JSON'])
+        self.assertIsNotNone(dictEls['Analyse'])
+        self.assertEqual(dictEls['Analyse']['YOLO'][0]['label'], "person")
+        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01 person:2 / 2019-03-28")

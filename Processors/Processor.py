@@ -18,7 +18,7 @@ class Processor:
 
     def Process(self, pShots: []):
         ''' Main Process '''
-        self.log.info('=== PROCESS ===')
+        self.log.info(f'=== PROCESS: ***{self.name}*** ===')
         for i in range(len(pShots)):
             pShot = pShots[i]
             self.log.debug(f"====== {pShot.Shot.filename} ========================================")
