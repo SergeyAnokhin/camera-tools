@@ -29,5 +29,6 @@ class SaveToTempProcessor(Processor):
         pShot.OriginalShot.UpdateFullName(fullname)
         meta['original_fullname'] = pShot.OriginalShot.fullname
 
+        self.log.info(f'Save to => {fullname}')
         pShot.Shot.Save()
         pShot.OriginalShot.Save()

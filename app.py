@@ -52,16 +52,13 @@ if __name__ == "__main__":
 #yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
 lock = threading.Lock()
 
-hassio = HassioProcessor()
-hassio.hassLocation = 'temp'
-
 pipeline = ShotsPipeline('Foscam')
 pipeline.processors.append(DiffContoursProcessor())
 pipeline.processors.append(YoloObjDetectionProcessor())
 pipeline.processors.append(TrackingProcessor())
 pipeline.processors.append(SaveToTempProcessor())           
 pipeline.processors.append(MailSenderProcessor(True))    
-pipeline.processors.append(hassio)        
+pipeline.processors.append(HassioProcessor('temp'))        
 pipeline.processors.append(ArchiveProcessor(True))
 pipeline.processors.append(ElasticSearchProcessor(True)) 
 pipeline.PreLoad()
@@ -76,7 +73,7 @@ def health():
 def testV2():
     ### INIT
     lock.acquire()
-    log.info('start endpoint /V2/test @ %s', datetime.datetime.now())
+    log.info('start endpoint /V2/test')
     folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
 
     ### RUN
@@ -85,8 +82,8 @@ def testV2():
 
     ### FINISH
     lock.release()
-    log.info('end endpoint /V2/test @ %s', datetime.datetime.now())
-    return json.dumps(result[0].Metadata)
+    log.info('end endpoint /V2/test')
+    return 'OK' # json.dumps(result[0].Metadata)
 
 @app.route('/analyse', methods=['GET'])
 def analyse():

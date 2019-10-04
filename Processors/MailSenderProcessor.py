@@ -19,6 +19,7 @@ class MailSenderProcessor(Processor):
 
     def Process(self, pShots: []):
         #send_mail(self, subject, text, files=None):
+        self.log.info(f'### PROCESS: ***{self.name}*** ######################')
         subject = self.GetSubject(pShots)
         body = self.GetBody(pShots)
 
@@ -40,14 +41,14 @@ class MailSenderProcessor(Processor):
             part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
             msg.attach(part)
 
-        smtp = smtplib.SMTP('smtp.gmail.com', 587)
-        smtp.starttls()
-        smtp.login(self.secretConfig.gmail_username, self.secretConfig.gmail_password)
         self.log.debug(f"[IMAP] Send mail: '{subject}'")
         if not self.isSimulation:
+            smtp = smtplib.SMTP('smtp.gmail.com', 587)
+            smtp.starttls()
+            smtp.login(self.secretConfig.gmail_username, self.secretConfig.gmail_password)
             smtp.sendmail(self.sender, self.to, msg.as_string())
-        smtp.quit() 
-        smtp.close()
+            smtp.quit() 
+            smtp.close()
 
         pShots[0].Metadata["IMAP"] = {}
         pShots[0].Metadata["IMAP"]["Subject"] = subject
@@ -64,7 +65,7 @@ class MailSenderProcessor(Processor):
         labelsCount = self.GetMaximumCountPerShot(pShots, labels)
 
         details = " ".join(labelsCount)
-        return subject + details
+        return subject + details + f' ({dt:%d.%m.%Y})'
 
     def GetMaximumCountPerShot(self, pShots: [], labels: []):
         all_dict = {}
@@ -86,7 +87,7 @@ class MailSenderProcessor(Processor):
                         all_dict[label] = current_dict[label]
                 else:
                     all_dict[label] = current_dict[label]
-        print(all_dict)
+        #print(all_dict)
         results = []
         for label in all_dict:
             count = all_dict[label]

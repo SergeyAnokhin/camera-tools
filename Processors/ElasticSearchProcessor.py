@@ -44,9 +44,9 @@ class ElasticSearchProcessor(Processor):
         #print('{}@{}'.format(self.config.camera, file.get_timestamp_utc()), json_data)
         meta['JSON'] = json_data
         meta['timestamp_utc'] = file.get_timestamp_utc()
+        id = '{}@{}'.format(self.config.camera, file.get_timestamp_utc())
+        self.log.info(f'add document: ID = {id}')
         if not self.isSimulation:
             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
             res = es.index(index="cameraarchive-" + file.get_month_id_utc(),
-                        doc_type='doc',
-                        body=json_data,
-                        id='{}@{}'.format(self.config.camera, file.get_timestamp_utc()))
+                        doc_type='doc', body=json_data, id=id)

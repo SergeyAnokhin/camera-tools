@@ -99,7 +99,7 @@ class TrackingProcessor(Processor):
             hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
 
             compCoeff = matchTemp * 0.2 + hist * 0.8
-            print(f'==MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
+            self.log.debug(f'==MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
             coeffs.append(compCoeff)
 
         maxValue = max(coeffs)
