@@ -24,7 +24,7 @@ class ShotsPipeline:
     def GetShots(self):
         shots = []
         for provider in self.providers:
-            providers.config = self.config
+            self.providers.config = self.config
             shots = provider.GetShots(shots)
         return shots
 

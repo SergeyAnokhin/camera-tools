@@ -27,6 +27,7 @@ class ImapShotsProvider(Provider):
         mail = self.GetLastMail(self.config.imap_folder)
         os.makedirs(self.tempFolder, exist_ok=True)
         shots = self.SaveAttachments(mail, self.tempFolder + '/{:%Y%m%d-%H%M%S}-{}.jpg')
+        pShots.extend(shots)
         self.Disconnect()
         return shots
 

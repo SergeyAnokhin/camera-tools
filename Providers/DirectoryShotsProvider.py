@@ -4,18 +4,27 @@ from Pipeline.Model.CamShot import CamShot
 from Providers.Provider import Provider
 
 class DirectoryShotsProvider(Provider):
-    Shots = []
 
     def __init__(self):
         super().__init__("DIR")
 
     def FromDir(self, folder: str):
         self = DirectoryShotsProvider()
-        self.Shots = [CamShot(os.path.join(folder, f)) for f in os.listdir(folder)]   
-        self.log.debug("Loaded {} shots from directory {}".format(len(self.Shots), folder)) 
-        return self
-
-    def GetShots(self, dt: datetime = datetime.now):
-        for s in self.Shots:
+        shots = [CamShot(os.path.join(folder, f)) for f in os.listdir(folder)]   
+        self.log.debug("Loaded {} shots from directory {}".format(len(shots), folder)) 
+        for s in shots:
             s.LoadImage()
-        return self.Shots
+        return shots
+
+    def GetShots(self, pShots: []):
+        if len(pShots) > 0:
+            meta = pShots[0].Metadata
+            if 'IMAP' in meta:
+                if 'datetime' in meta['IMAP']:
+                    dtStr = meta['IMAP']['datetime']
+                    dt = datetime.strptime(dtStr, '%Y-%m-%d %H:%M:%S.%f')
+                    # path_from: F:\inetpub\ftproot\Camera\Foscam\FI9805W_C4D6553DECE1
+                    # to found: \snap\MDAlarm_20190926-122821.jpg
+                    pathSearch = self.config.path_from
+
+

@@ -75,15 +75,13 @@ def health():
 @app.route('/V2/analyse', methods=['GET'])
 def analyseV2():
     ### INIT
-    lock.acquire()
     log.info('====== start endpoint /V2/analyse ============================================================================')
 
     ### RUN
-    target = ImapShotsProvider(pipeline.config, 'temp')
-    shots = target.GetShots('camera/foscam')
+    shots = pipeline.GetShots()
 
-    #folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
-    # shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+    log.info(' ... wait lock ...')
+    lock.acquire()
     result = pipeline.Process(shots)
 
     ### FINISH
