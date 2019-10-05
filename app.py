@@ -44,7 +44,6 @@ logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s',
 log = logging.getLogger("API")
 log.info('start API @ %s', datetime.datetime.now())
 
-
 app = Flask(__name__)
 print('start: {}'.format(datetime.datetime.now()))
 if __name__ == "__main__":
@@ -75,7 +74,7 @@ def health():
 def analyseV2():
     ### INIT
     lock.acquire()
-    log.info('start endpoint /V2/analyse')
+    log.info('====== start endpoint /V2/analyse ============================================================================')
 
     ### RUN
     target = ImapShotsProvider('temp')
@@ -87,7 +86,7 @@ def analyseV2():
 
     ### FINISH
     lock.release()
-    log.info('end endpoint /V2/analyse')
+    log.info('======= end endpoint /V2/analyse ============================================================================')
     return 'OK' # json.dumps(result[0].Metadata)
 
 @app.route('/V1/analyse', methods=['GET'])
@@ -126,4 +125,4 @@ def analyseV1():
 # def fitTest():
 #     return presentor.fit(cHelper.ReadFile('fitTest.json'))
 
-#testV2()
+#analyseV2()

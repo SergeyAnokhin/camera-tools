@@ -1,5 +1,8 @@
-import os
-import logging
+# import os
+# import logging
+import app
+
+app.analyseV2()
 
 # os.remove('temp/example.html')
 # logging.basicConfig(

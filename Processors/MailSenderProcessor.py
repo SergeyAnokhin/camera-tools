@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 from Common.SecretConfig import SecretConfig
 from Processors.Processor import Processor
+from Pipeline.Model.PipelineShot import PipelineShot
 
 class MailSenderProcessor(Processor):
     sender: str = 'home.assistant.sergey@gmail.com'
@@ -42,6 +43,7 @@ class MailSenderProcessor(Processor):
             msg.attach(part)
 
         self.log.debug(f"- Send mail: '{subject}' to {self.to}")
+        self.log.debug(f"- Body: \n{body}")
         if not self.isSimulation:
             smtp = smtplib.SMTP('smtp.gmail.com', 587)
             smtp.starttls()
@@ -108,4 +110,21 @@ class MailSenderProcessor(Processor):
         return set(list)
 
     def GetBody(self, pShots: []):
-        return "BODY"
+        body = ""
+        for shot in pShots:
+            body += f'#{shot.Index}: {shot.OriginalShot.filename} \n'
+            if 'YOLO' in shot.Metadata:
+                yolo = shot.Metadata['YOLO']
+                for item in yolo:
+                    body += f'- YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}\n'
+            if 'DIFF' in shot.Metadata:
+                diff = shot.Metadata['DIFF']
+                body += f'- DIFF: {diff["Diff"]["TotalArea"]}\n'
+                if "boxes" in diff:
+                    for item in diff["boxes"]:
+                        body += f'  - BOX {item["area"]} prof: {item["profile_proportion"]} @{item["center"][0]}x{item["center"][1]}\n'
+            if 'TRAC' in shot.Metadata:
+                trac = shot.Metadata['TRAC']
+                for key in trac:
+                    body += f'- TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]} \n'
+        return body
