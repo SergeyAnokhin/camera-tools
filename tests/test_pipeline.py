@@ -60,13 +60,13 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/'
         baseShot = os.path.join(folder, 'Day_Lilia_Gate/Snap_20190206-090254-0.jpg')
         pShots = [ PipelineShot(CamShot(baseShot), 0) ]
-
         target = DirectoryShotsProvider()
         pShots = target.GetShots(pShots)
 
-        self.assertEqual('Snap_20190206-090254-0.jpg', pShots[0].Shot.filename)
-        self.assertEqual('Snap_20190206-090254-1.jpg', pShots[1].Shot.filename)
-        self.assertEqual('Snap_20190206-090254-2.jpg', pShots[2].Shot.filename)
+        # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
+        self.assertEqual('MDAlarm_20190206-090254.jpg', pShots[0].Shot.filename)
+        self.assertEqual('MDAlarm_20190206-090259.jpg', pShots[1].Shot.filename)
+        self.assertEqual('MDAlarm_20190206-090304.jpg', pShots[2].Shot.filename)
 
     def test_DiffContoursProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
