@@ -41,7 +41,7 @@ class MailSenderProcessor(Processor):
             part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
             msg.attach(part)
 
-        self.log.debug(f"[IMAP] Send mail: '{subject}'")
+        self.log.debug(f"- Send mail: '{subject}' to {self.to}")
         if not self.isSimulation:
             smtp = smtplib.SMTP('smtp.gmail.com', 587)
             smtp.starttls()

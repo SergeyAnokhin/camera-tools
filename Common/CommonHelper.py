@@ -42,6 +42,13 @@ class CommonHelper:
         # should never resort to exponent values)
         return '{:.4g} {}'.format(size / (1 << (order * 10)), _suffixes[order])
 
+    def Progress(self, current, total = 1, maxLenth = 20):
+        current = current if current <=total else total
+        limitChar = "|"
+        progress = "#" * int(round(current / total * maxLenth))
+        rest = "-" * int(round((1 - current / total) * maxLenth))
+        return f'{limitChar}{progress}{rest}{limitChar}'
+
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
         #print("type: ", type(obj))

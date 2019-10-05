@@ -1,4 +1,4 @@
-import os, pytz, logging, cv2
+import os, pytz, logging, cv2, shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -65,4 +65,10 @@ class FileImage:
     def Move(self, dest: str):
         os.rename(self.fullname, dest)
         self.UpdateFullName(dest)
+        
+    def Move2(self, dest: str):
+        orig = self.fullname
+        shutil.copy2(self.fullname, dest)
+        self.UpdateFullName(dest)
+        os.remove(orig)
         

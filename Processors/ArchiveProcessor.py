@@ -23,7 +23,15 @@ class ArchiveProcessor(Processor):
         meta['archive_destination'] = dest
         meta['archive_destination_orig'] = dest_orig
         # pShot.Shot.filename = pShot.Shot.filenameWithoutExtension + "_cv" + pShot.Shot.filenameExtension
-        self.log.info(f'Move to => {dest}')
+        self.log.info(f'    - CV   Move: {dest}')
+        self.log.info(f'    - ORIG Move: {dest_orig}')
+        dest_path = os.path.dirname(dest)
         if not self.isSimulation:
-            pShot.Shot.Move(dest)
-            pShot.OriginalShot.Move(dest_orig)
+            if not os.path.exists(dest_path):
+                self.log.debug(f'- create archive directory: {dest_path}')
+                os.makedirs(dest_path, exist_ok=True)
+            pShot.Shot.Move2(dest)
+            pShot.OriginalShot.Move2(dest_orig)
+        else:
+            if not os.path.exists(dest_path):
+                self.log.debug(f'- create archive directory (Simulation): {dest_path}')

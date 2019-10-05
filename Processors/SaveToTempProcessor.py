@@ -25,10 +25,11 @@ class SaveToTempProcessor(Processor):
         pShot.Shot.UpdateFullName(fullname)
         meta['fullname'] = pShot.Shot.fullname
 
-        fullname = os.path.join('temp', f'{dt:%Y%m%d_%H%M%S}_{camera}.jpg')
-        pShot.OriginalShot.UpdateFullName(fullname)
+        fullname_orig = os.path.join('temp', f'{dt:%Y%m%d_%H%M%S}_{camera}.jpg')
+        pShot.OriginalShot.UpdateFullName(fullname_orig)
         meta['original_fullname'] = pShot.OriginalShot.fullname
 
-        self.log.info(f'Save to => {fullname}')
+        self.log.info(f'    - CV   save: {fullname}')
+        self.log.info(f'    - ORIG save: {fullname_orig}')
         pShot.Shot.Save()
         pShot.OriginalShot.Save()

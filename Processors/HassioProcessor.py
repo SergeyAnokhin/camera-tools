@@ -17,5 +17,5 @@ class HassioProcessor(Processor):
         camera = self.config.camera
         dest = os.path.join(self.hassLocation, f'cv_{camera}_{pShot.Index}.jpg')
         meta['hassio_location'] = dest
-        self.log.info(f'Copy to => {dest}')
+        self.log.info(f'- Copy: {dest}')
         shutil.copy2(pShot.Shot.fullname, dest)

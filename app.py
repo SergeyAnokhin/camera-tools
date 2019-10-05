@@ -6,6 +6,7 @@ from Common.ImapGmailHelper import ImapGmailHelper
 from OpenCV.ThreeShots import ThreeShots
 from OpenCV.YoloContext import YoloContext
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
+from Providers.ImapShotsProvider import ImapShotsProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
@@ -20,7 +21,7 @@ from Pipeline.ShotsPipeline import ShotsPipeline
 
 '''
 run locally :
-> set FLASK_APP=api.py
+> set FLASK_APP=app.py
 > flask run
     -OR-
 > run.cmd
@@ -29,6 +30,7 @@ run locally :
 temp = 'temp'
 imap_folder = 'camera/foscam'
 camera = 'Foscam'
+isSimulation = False
 
 file_handler = logging.FileHandler(filename='camera-tools-api.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
@@ -57,10 +59,10 @@ pipeline.processors.append(DiffContoursProcessor())
 pipeline.processors.append(YoloObjDetectionProcessor())
 pipeline.processors.append(TrackingProcessor())
 pipeline.processors.append(SaveToTempProcessor())           
-pipeline.processors.append(MailSenderProcessor(True))    
-pipeline.processors.append(HassioProcessor('temp'))        
-pipeline.processors.append(ArchiveProcessor(True))
-pipeline.processors.append(ElasticSearchProcessor(True)) 
+pipeline.processors.append(MailSenderProcessor(isSimulation))
+pipeline.processors.append(HassioProcessor()) #('temp' if isSimulation else None))        
+pipeline.processors.append(ArchiveProcessor(isSimulation))
+pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
 pipeline.PreLoad()
 
 log.info('initialization API finished @ %s', datetime.datetime.now())
@@ -69,24 +71,27 @@ log.info('initialization API finished @ %s', datetime.datetime.now())
 def health():
     return 'OK'
 
-@app.route('/V2/test', methods=['GET'])
-def testV2():
+@app.route('/V2/analyse', methods=['GET'])
+def analyseV2():
     ### INIT
     lock.acquire()
-    log.info('start endpoint /V2/test')
-    folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
+    log.info('start endpoint /V2/analyse')
 
     ### RUN
-    shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+    target = ImapShotsProvider('temp')
+    shots = target.GetShots('camera/foscam')
+
+    #folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
+    # shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
     result = pipeline.Process(shots)
 
     ### FINISH
     lock.release()
-    log.info('end endpoint /V2/test')
+    log.info('end endpoint /V2/analyse')
     return 'OK' # json.dumps(result[0].Metadata)
 
-@app.route('/analyse', methods=['GET'])
-def analyse():
+@app.route('/V1/analyse', methods=['GET'])
+def analyseV1():
     lock.acquire()
 
     ### 1. Download Mail From GMail
@@ -120,3 +125,5 @@ def analyse():
 # @app.route('/fitTest', methods=['GET'])
 # def fitTest():
 #     return presentor.fit(cHelper.ReadFile('fitTest.json'))
+
+#testV2()

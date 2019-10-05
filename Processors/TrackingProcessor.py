@@ -4,6 +4,7 @@ from scipy.spatial import distance
 import pprint as pp
 from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Processor import Processor
+from Common.CommonHelper import CommonHelper
 
 class TrackingBox:
     def __init__(self):
@@ -15,6 +16,7 @@ class TrackingProcessor(Processor):
     def __init__(self):
         super().__init__("TRAC")
         self.boxes_last = []
+        self.helper = CommonHelper()
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         super().ProcessShot(pShot, pShots)
@@ -22,6 +24,9 @@ class TrackingProcessor(Processor):
         box_index = 0
         boxes_current = []
         shot = pShot.Shot
+        if 'YOLO' not in pShot.Metadata:
+            self.log.warn("No data on YOLO analysis found. Ignore tracking analysys")
+            return
         summary = pShot.Metadata['YOLO']
         for box_data in summary:
             (x, y) = box_data['center_coordinate']
@@ -99,7 +104,8 @@ class TrackingProcessor(Processor):
             hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
 
             compCoeff = matchTemp * 0.2 + hist * 0.8
-            self.log.debug(f'==MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f}')
+            report = f'- MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f} {self.helper.Progress(compCoeff)}'
+            self.log.debug(report)
             coeffs.append(compCoeff)
 
         maxValue = max(coeffs)

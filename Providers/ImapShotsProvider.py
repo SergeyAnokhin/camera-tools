@@ -47,6 +47,7 @@ class ImapShotsProvider:
                     shot.Write(part.get_payload(decode=True))
                 else:
                     self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
+                shot.LoadImage()
                 result.append(shot)
             index += 1
         return result

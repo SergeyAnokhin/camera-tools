@@ -5,6 +5,7 @@ from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Yolo.YoloContext import YoloContext
 from Processors.Yolo.YoloDetection import YoloDetection
 from Processors.Processor import Processor
+from Common.CommonHelper import CommonHelper
 
 class YoloResultBoxes:
     boxes = []
@@ -28,6 +29,7 @@ class YoloCamShot:
         self.log = logging.getLogger(f"PROC:YOLO")
         self.boxes = []
         self.yolo = yolo
+        self.helper = CommonHelper()
 
     def Detect(self):
         #self.log.debug("start detect objects on: {}".format(self.shot.filename))
@@ -57,7 +59,7 @@ class YoloCamShot:
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             self.pShot.Metadata['YOLO'].append(result)
-            self.log.debug(f'Found: ### {result["label"]}: {result["confidence"]} ###')
+            self.log.debug(f'- Found: {result["label"]}: {result["confidence"]} {self.helper.Progress(result["confidence"])}')
 
     def Draw(self):
         if self.ResultsBoxes.IsEmpty():
