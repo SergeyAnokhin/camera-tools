@@ -59,12 +59,19 @@ class TestPipeline(unittest.TestCase):
     def test_DirectoryShotsProvider_SearchByDate(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/'
         baseShot = os.path.join(folder, 'Day_Lilia_Gate/Snap_20190206-090254-0.jpg')
-        pShots = [ PipelineShot(CamShot(baseShot), 0) ]
+        shot = CamShot(baseShot)
+        shot.LoadImage()
+        pShot = PipelineShot(shot, 0)
+        pShot.Metadata['IMAP'] = {}
+        pShot.Metadata['IMAP']['datetime'] = str(shot.GetDatetime())
+
+        pShots = [ pShot ]
         target = DirectoryShotsProvider()
+        target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
         pShots = target.GetShots(pShots)
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
-        self.assertEqual('MDAlarm_20190206-090254.jpg', pShots[0].Shot.filename)
+        self.assertEqual('Snap_20190206-090254-0.jpg', pShots[0].Shot.filename)
         self.assertEqual('MDAlarm_20190206-090259.jpg', pShots[1].Shot.filename)
         self.assertEqual('MDAlarm_20190206-090304.jpg', pShots[2].Shot.filename)
 
