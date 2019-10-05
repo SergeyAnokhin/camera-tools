@@ -54,6 +54,8 @@ if __name__ == "__main__":
 lock = threading.Lock()
 
 pipeline = ShotsPipeline('Foscam')
+pipeline.providers.append(ImapShotsProvider())
+pipeline.providers.append(DirectoryShotsProvider())
 pipeline.processors.append(DiffContoursProcessor())
 pipeline.processors.append(YoloObjDetectionProcessor())
 pipeline.processors.append(TrackingProcessor())

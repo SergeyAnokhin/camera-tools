@@ -4,14 +4,16 @@ import email.header
 from Common.SecretConfig import SecretConfig
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
+from Pipeline.Model.PipelineShot import PipelineShot
+from Providers.Provider import Provider
 
-class ImapShotsProvider:
+class ImapShotsProvider(Provider):
 
-    def __init__(self, config: CameraArchiveConfig, tempFolder = 'temp'):
+    def __init__(self, tempFolder = 'temp'):
+        super().__init__("IMAP")
         self.log = logging.getLogger('IMAP')
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
-        self.config = config
         self.tempFolder = tempFolder
         self.CleanFolder()
 
@@ -20,9 +22,9 @@ class ImapShotsProvider:
             file = os.path.join(self.tempFolder, filename)
             os.unlink(file)
 
-    def GetShots(self, imap_folder):
+    def GetShots(self, pShots: []):
         self.Connect()
-        mail = self.GetLastMail(imap_folder)
+        mail = self.GetLastMail(self.config.imap_folder)
         os.makedirs(self.tempFolder, exist_ok=True)
         shots = self.SaveAttachments(mail, self.tempFolder + '/{:%Y%m%d-%H%M%S}-{}.jpg')
         self.Disconnect()
@@ -47,7 +49,12 @@ class ImapShotsProvider:
                 else:
                     self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
                 shot.LoadImage()
-                result.append(shot)
+
+                pShot = PipelineShot(shot, index)
+                meta = self.CreateMetadata(pShot)
+                meta["datetime"] = str(dt)
+                self.log.info(f'Attachment time : {dt}')
+                result.append(pShot)
             index += 1
         return result
 

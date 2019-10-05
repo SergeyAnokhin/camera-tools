@@ -10,6 +10,7 @@ class ShotsPipeline:
 
     def __init__(self, camera: str):
         self.processors = []
+        self.providers = []
         self.archiver = CameraArchiveHelper()
         self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
@@ -20,8 +21,15 @@ class ShotsPipeline:
             if callable(PreLoad):
                 processor.PreLoad()
 
-    def Process(self, shots: []):
-        pShots = [PipelineShot(shots[i], i) for i in range(len(shots))]
+    def GetShots(self):
+        shots = []
+        for provider in self.providers:
+            providers.config = self.config
+            shots = provider.GetShots(shots)
+        return shots
+
+    def Process(self, pShots: []):
+        #pShots = [PipelineShot(shots[i], i) for i in range(len(shots))]
         for processor in self.processors:
             processor.Process(pShots)
             PostProcess = getattr(processor, "PostProcess", None)

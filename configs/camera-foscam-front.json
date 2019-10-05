@@ -14,5 +14,6 @@
         "room": "FrontWall",
         "detail": "under the roof"
     },
-    "camera": "Foscam"
+    "camera": "Foscam",
+    "imap_folder": "camera/foscam"
 }

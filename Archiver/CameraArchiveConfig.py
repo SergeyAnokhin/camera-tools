@@ -5,6 +5,7 @@ class CameraArchiveConfig:
     sensor: {}
     position: {}
     camera: str
+    imap_folder: str
     path_from: str
     path_to: str
     ignore_dir: []

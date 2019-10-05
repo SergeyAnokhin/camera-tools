@@ -1,12 +1,13 @@
 import os, logging
 from datetime import datetime
 from Pipeline.Model.CamShot import CamShot
+from Providers.Provider import Provider
 
-class DirectoryShotsProvider:
+class DirectoryShotsProvider(Provider):
     Shots = []
 
     def __init__(self):
-        self.log = logging.getLogger("PROV:DIR")
+        super().__init__("DIR")
 
     def FromDir(self, folder: str):
         self = DirectoryShotsProvider()
