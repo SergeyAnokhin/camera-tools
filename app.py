@@ -77,7 +77,7 @@ def analyseV2():
     log.info('====== start endpoint /V2/analyse ============================================================================')
 
     ### RUN
-    target = ImapShotsProvider('temp')
+    target = ImapShotsProvider(pipeline.config, 'temp')
     shots = target.GetShots('camera/foscam')
 
     #folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'

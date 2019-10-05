@@ -1,19 +1,17 @@
-import email
-import getpass, imaplib
-import os
-import sys
-import logging
+import email, getpass, imaplib, os, sys, logging, datetime
 from email.parser import HeaderParser
 import email.header
 from Common.SecretConfig import SecretConfig
 from Pipeline.Model.CamShot import CamShot
+from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class ImapShotsProvider:
 
-    def __init__(self, tempFolder = 'temp'):
+    def __init__(self, config: CameraArchiveConfig, tempFolder = 'temp'):
         self.log = logging.getLogger('IMAP')
-        self.config = SecretConfig()
-        self.config.fromJsonFile()
+        self.secretConfig = SecretConfig()
+        self.secretConfig.fromJsonFile()
+        self.config = config
         self.tempFolder = tempFolder
         self.CleanFolder()
 
@@ -26,11 +24,11 @@ class ImapShotsProvider:
         self.Connect()
         mail = self.GetLastMail(imap_folder)
         os.makedirs(self.tempFolder, exist_ok=True)
-        shots = self.SaveAttachments(mail, self.tempFolder + '/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg')
+        shots = self.SaveAttachments(mail, self.tempFolder + '/{:%Y%m%d-%H%M%S}-{}.jpg')
         self.Disconnect()
         return shots
 
-    # filePattern : /path_to_file/MDAlarm_{:%Y%m%d-%H%M%S}-{}.jpg
+    # filePattern : /path_to_file/{:%Y%m%d-%H%M%S}-{}.jpg
     def SaveAttachments(self, mail, filePattern: str):
         index = 0
         result = []
@@ -42,7 +40,8 @@ class ImapShotsProvider:
             if bool(fileName):
                 memShot = CamShot(fileName)
                 dt = memShot.GetDatetime()
-                shot = CamShot(filePattern.format(dt, index))
+                dt = dt + datetime.timedelta(0,index)
+                shot = CamShot(filePattern.format(dt, self.config.camera))
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:
@@ -77,7 +76,7 @@ class ImapShotsProvider:
 
     def Connect(self):
         self.imapSession = imaplib.IMAP4_SSL('imap.gmail.com')
-        typ, accountDetails = self.imapSession.login(self.config.gmail_username, self.config.gmail_password)
+        typ, accountDetails = self.imapSession.login(self.secretConfig.gmail_username, self.secretConfig.gmail_password)
         if typ != 'OK':
             self.log.debug('Not able to sign in!')
             print ('Not able to sign in!')

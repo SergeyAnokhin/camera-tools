@@ -18,7 +18,8 @@ class SaveToTempProcessor(Processor):
 
         dt = pShot.Shot.GetDatetime()
         index = pShot.Shot.GetMailAttachmentIndex()
-        dt = dt + timedelta(seconds=index)
+        if index != None:
+            dt = dt + timedelta(seconds=index)
         camera = self.config.camera
 
         fullname = os.path.join('temp', f'{dt:%Y%m%d_%H%M%S}_{camera}_cv.jpeg')

@@ -25,7 +25,8 @@ class CamShot(FileImage):
         re_groups = re.search("-(\\d)\.", self.filename)
         if not re_groups:
             print('Cant get index in : {}'.format(input))
-            raise ValueError('Cant get index in file : {}'.format(input))
+            #raise ValueError('Cant get index in file : {}'.format(input))
+            return None
         return int(re_groups.group(1))
 
     def GrayImage(self):
