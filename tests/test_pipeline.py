@@ -18,6 +18,7 @@ from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
+from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 
 class TestPipeline(unittest.TestCase):
@@ -54,6 +55,18 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(shots[0].fullname)
         self.assertIsNotNone(shots[0].Exist())
         #shots[0].Show()
+
+    def test_DirectoryShotsProvider_SearchByDate(self):
+        folder = '../camera-OpenCV-data/Camera/Foscam/'
+        baseShot = os.path.join(folder, 'Day_Lilia_Gate/Snap_20190206-090254-0.jpg')
+        pShots = [ PipelineShot(CamShot(baseShot), 0) ]
+
+        target = DirectoryShotsProvider()
+        pShots = target.GetShots(pShots)
+
+        self.assertEqual('Snap_20190206-090254-0.jpg', pShots[0].Shot.filename)
+        self.assertEqual('Snap_20190206-090254-1.jpg', pShots[1].Shot.filename)
+        self.assertEqual('Snap_20190206-090254-2.jpg', pShots[2].Shot.filename)
 
     def test_DiffContoursProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor

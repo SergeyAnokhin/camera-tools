@@ -27,4 +27,5 @@ class DirectoryShotsProvider(Provider):
                     # to found: \snap\MDAlarm_20190926-122821.jpg
                     pathSearch = self.config.path_from
 
+        return pShots
 
