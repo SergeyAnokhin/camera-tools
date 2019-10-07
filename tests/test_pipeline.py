@@ -57,17 +57,21 @@ class TestPipeline(unittest.TestCase):
         #shots[0].Show()
 
     def test_DirectoryShotsProvider_SearchByDate(self):
-        folder = '../camera-OpenCV-data/Camera/Foscam/'
-        baseShot = os.path.join(folder, 'Day_Lilia_Gate/Snap_20190206-090254-0.jpg')
-        shot = CamShot(baseShot)
-        shot.LoadImage()
-        pShot = PipelineShot(shot, 0)
-        pShot.Metadata['IMAP'] = {}
-        pShot.Metadata['IMAP']['datetime'] = str(shot.GetDatetime())
+        # python -m unittest tests.test_pipeline.TestPipeline.test_DirectoryShotsProvider_SearchByDate
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        shots = DirectoryShotsProvider.FromDir(None, folder)
 
-        pShots = [ pShot ]
+        folder = '../camera-OpenCV-data/Camera/Foscam/2019-02'
+
+        # Create base Shot
+        pShots = [PipelineShot(shot, i) for i, shot in enumerate(shots)]
+        for pShot in pShots:
+            pShot.Metadata['IMAP'] = {}
+            pShot.Metadata['IMAP']['datetime'] = str(pShot.Shot.GetDatetime())
+
         target = DirectoryShotsProvider()
         target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
+        target.config.path_from = folder
         pShots = target.GetShots(pShots)
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06

@@ -44,7 +44,7 @@ class FileImage:
         self.image = image
 
     def LoadImage(self):
-        self.log.info(f"Load image from: {self.fullname}")
+        #self.log.info(f"Load image from: {self.fullname}")
         #self.image = mpimg.imread(self.fullname)
         self.image = cv2.imread(self.fullname, cv2.IMREAD_UNCHANGED)
         self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)

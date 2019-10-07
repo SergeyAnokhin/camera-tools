@@ -1,6 +1,4 @@
-import datetime
-import re
-import json
+import datetime, re, json, os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -48,6 +46,20 @@ class CommonHelper:
         progress = "#" * int(round(current / total * maxLenth))
         rest = "-" * int(round((1 - current / total) * maxLenth))
         return f'{limitChar}{progress}{rest}{limitChar}'
+
+    def WalkFiles(self, path: str, condition, ignoreDirs: [] = None):
+        for root, dirnames, filenames in os.walk(path):
+            if ignoreDirs and self.dir_to_ignore(root, ignoreDirs):
+                continue
+            for filename in filenames:
+                if condition(filename):
+                    yield os.path.join(root, filename)
+
+    def dir_to_ignore(self, dir: str, ignore_dir: []):
+        for dir in ignore_dir:
+            if dir in dir:
+                return True
+        return False
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
