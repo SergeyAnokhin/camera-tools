@@ -13,7 +13,7 @@ class CamShot(FileImage):
         return self.helper.get_datetime(self.filename)
 
     def GrayImage(self):
-        return cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        return cv2.cvtColor(self.GetImage(), cv2.COLOR_BGR2GRAY)
 
     def Clone(self):
         copy = CamShot(self.fullname)

@@ -29,7 +29,6 @@ class ShotsPipeline:
         return shots
 
     def Process(self, pShots: []):
-        [s.Shot.LoadImage() for s in pShots]
         for processor in self.processors:
             processor.Process(pShots)
             PostProcess = getattr(processor, "PostProcess", None)

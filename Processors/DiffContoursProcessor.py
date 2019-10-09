@@ -36,7 +36,7 @@ class DiffCamShot:
         self.DrawBoxes(pShot, cntsMin)
 
     def RemoveZones(self, image):
-        image_timestamp = image[:22, :230]
+        #image_timestamp = image[:22, :230]
         image[:22, :230] = 0 # remove timestamp
         return image
 
@@ -62,15 +62,15 @@ class DiffCamShot:
 
 
     def DrawContours(self, shot, contours, color=(0, 255, 255), thickness=1):
-        cv2.drawContours(shot.image, contours, -1, color, thickness)
+        cv2.drawContours(shot.GetImage(), contours, -1, color, thickness)
 
     def DrawBoxes(self, pShot: PipelineShot, contours):
         pShot.Metadata['DIFF']['boxes'] = []
         for c in contours[0:2]:
             area = int(cv2.contourArea(c))
             (x, y, w, h) = cv2.boundingRect(c)
-            cv2.rectangle(pShot.Shot.image, (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
-            cv2.putText(pShot.Shot.image, str(area // 100), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.rectangle(pShot.Shot.GetImage(), (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
+            cv2.putText(pShot.Shot.GetImage(), str(area // 100), (x, y-3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
             pShot.Metadata['DIFF']['boxes'].append({  
                 'profile_proportion': round(h/w,2),
                 'center': [x + w//2, y + h//2],
@@ -78,8 +78,8 @@ class DiffCamShot:
             })
 
     def DiffMask(self, pShot: PipelineShot, other: PipelineShot):
-        image1 = self.RemoveZones(pShot.Shot.GrayImage())
-        image2 = self.RemoveZones(other.Shot.GrayImage())
+        image1 = self.RemoveZones(pShot.OriginalShot.GrayImage())
+        image2 = self.RemoveZones(other.OriginalShot.GrayImage())
 
         absdiff     = cv2.absdiff(image1, image2)
         gausian     = cv2.GaussianBlur(absdiff, (5, 5), 0)
@@ -91,21 +91,6 @@ class DiffContoursProcessor(Processor):
 
     def __init__(self):
         super().__init__("DIFF")
-        # self.Shots = []
-        # self.log = logging.getLogger("PROC:DIFF")
-
-    # def Process(self):
-    #     results = []
-    #     size = len(self.Shots)
-    #     for i in range(size):
-    #         # next_index = (i+1) if i < (size-1) else 0  ### => (0,1) (1,2) (2,0)
-    #         current = self.Shots[i]
-    #         others = self.Shots.copy()
-    #         others.remove(current)
-    #         diff = DiffCamShot(current, others)
-    #         result = diff.Process()
-    #         results.append(result)
-    #     return results
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         others = pShots.copy()

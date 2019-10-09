@@ -12,7 +12,6 @@ class ImapShotsProvider(Provider):
 
     def __init__(self, tempFolder = 'temp'):
         super().__init__("IMAP")
-        self.log = logging.getLogger('IMAP')
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
         self.tempFolder = tempFolder
@@ -54,12 +53,11 @@ class ImapShotsProvider(Provider):
                     shot.Write(part.get_payload(decode=True))
                 else:
                     self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
-                shot.LoadImage()
 
                 pShot = PipelineShot(shot, index)
                 meta = self.CreateMetadata(pShot)
                 meta["datetime"] = str(dt)
-                self.log.info(f'Attachment time : {dt}')
+                #self.log.info(f'Attachment time : {dt}')
                 result.append(pShot)
             index += 1
         return result

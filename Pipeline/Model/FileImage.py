@@ -7,7 +7,7 @@ from scipy.misc import imsave
 class FileImage:
 
     def __init__(self, fullname: str = None):
-        self.log = logging.getLogger('IMG')
+        self.log = logging.getLogger('IMAG')
         self.local = pytz.timezone("Europe/Paris")
         self.image = []
         self.UpdateFullName(fullname)
@@ -27,7 +27,7 @@ class FileImage:
         return os.path.isfile(self.fullname)
 
     def Write(self, content):
-        self.log.info('Write content to: ' + self.fullname)
+        self.log.info(f'Write brut content to: => {self.fullname}')
         fp = open(self.fullname, 'wb')
         fp.write(content)
         fp.close()
@@ -38,6 +38,7 @@ class FileImage:
         if fullname:
             self.UpdateFullName(fullname)
         image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
+        self.log.info(f"Save image: => {self.fullname}")
         if self.filenameExtension == 'png':
             imsave(self.fullname,image,params)
         else:
@@ -48,7 +49,7 @@ class FileImage:
         self.image = image
 
     def LoadImage(self):
-        #self.log.info(f"Load image from: {self.fullname}")
+        self.log.info(f"Load image from: <= {self.fullname}")
         #self.image = mpimg.imread(self.fullname)
         self.image = cv2.imread(self.fullname, cv2.IMREAD_UNCHANGED)
         #self.log.info(f"Image: {len(self.image)}")
@@ -73,13 +74,15 @@ class FileImage:
         plt.margins(0)
         plt.show()
 
-    def Move(self, dest: str):
-        os.rename(self.fullname, dest)
-        self.UpdateFullName(dest)
+    # def Move(self, dest: str):
+    #     self.log.info(f"Move: {self.fullname} => {dest}")
+    #     os.rename(self.fullname, dest)
+    #     self.UpdateFullName(dest)
         
     def Move2(self, dest: str):
         if self.Exist():
             orig = self.fullname
+            self.log.info(f"Move2: {self.fullname} => {dest}")
             shutil.copy2(self.fullname, dest)
             self.UpdateFullName(dest)
             os.remove(orig)

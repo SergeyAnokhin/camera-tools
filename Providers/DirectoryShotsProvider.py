@@ -7,7 +7,7 @@ from Common.CommonHelper import CommonHelper
 class DirectoryShotsProvider(Provider):
 
     def __init__(self, folder: str = None):
-        super().__init__("DIR")
+        super().__init__("DIRC")
         self.helper = CommonHelper()
         self.folder = folder
 

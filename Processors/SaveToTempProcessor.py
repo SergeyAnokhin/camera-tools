@@ -25,11 +25,10 @@ class SaveToTempProcessor(Processor):
         self.log.info(f'    - CV   save: {fullname}')
         self.log.info(f'    - ORIG save: {fullname_orig}')
 
+        pShot.Shot.Save(fullname)
         if self.isSimulation:
-            pShot.Shot.Save(fullname)
             pShot.OriginalShot.Save(fullname_orig)
         else:
-            pShot.Shot.Move2(fullname)
             pShot.OriginalShot.Move2(fullname_orig)
 
         meta['fullname'] = pShot.Shot.fullname
