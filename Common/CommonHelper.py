@@ -17,7 +17,11 @@ class CommonHelper:
         if not re_groups:
             print('Cant parse datetime in : {}'.format(input))
             raise ValueError('Cant parse datetime in file : {}'.format(input))
-        return self.RegexGroupsToDateTime(re_groups)
+        try:
+            return self.RegexGroupsToDateTime(re_groups)
+        except:
+            print(f'ERROR: Parse datetime with {input}')
+            return None
 
     def RegexGroupsToDateTime(self, re_groups, add_seconds = 0):
         year = int(re_groups.group(1))
@@ -33,6 +37,8 @@ class CommonHelper:
         if not start: #no filters
             return True
         dtFile = self.get_datetime(filename)
+        if not dtFile:
+            return False
         dtMax = start + datetime.timedelta(seconds=seconds)
         return start <= dtFile <=dtMax
 
