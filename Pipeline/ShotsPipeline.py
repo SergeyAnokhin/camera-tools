@@ -24,12 +24,12 @@ class ShotsPipeline:
     def GetShots(self):
         shots = []
         for provider in self.providers:
-            self.providers.config = self.config
+            provider.config = self.config
             shots = provider.GetShots(shots)
         return shots
 
     def Process(self, pShots: []):
-        #pShots = [PipelineShot(shots[i], i) for i in range(len(shots))]
+        [s.Shot.LoadImage() for s in pShots]
         for processor in self.processors:
             processor.Process(pShots)
             PostProcess = getattr(processor, "PostProcess", None)

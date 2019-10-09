@@ -2,6 +2,7 @@ import email, getpass, imaplib, os, sys, logging, datetime
 from email.parser import HeaderParser
 import email.header
 from Common.SecretConfig import SecretConfig
+from Common.CommonHelper import CommonHelper
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Pipeline.Model.PipelineShot import PipelineShot
@@ -15,24 +16,26 @@ class ImapShotsProvider(Provider):
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
         self.tempFolder = tempFolder
-        self.CleanFolder()
+        self.helper = CommonHelper()
 
-    def CleanFolder(self):
-        for filename in os.listdir(self.tempFolder):
-            file = os.path.join(self.tempFolder, filename)
-            os.unlink(file)
-
-    def GetShots(self, pShots: []):
+    def GetShotsProtected(self, pShots: []):
         self.Connect()
         mail = self.GetLastMail(self.config.imap_folder)
         os.makedirs(self.tempFolder, exist_ok=True)
-        shots = self.SaveAttachments(mail, self.tempFolder + '/{:%Y%m%d-%H%M%S}-{}.jpg')
+        file_template = self.tempFolder + '/{:%Y%m%d-%H%M%S}-{}.jpg'
+        shots = self.SaveAttachments(mail, file_template, self.CleanOldFiles)
         pShots.extend(shots)
         self.Disconnect()
         return shots
 
+    def CleanOldFiles(self, shot: CamShot):
+        secs = self.config.camera_triggered_interval_sec
+        condition = lambda f: self.helper.FileNameByDateRange(f, shot.GetDatetime(), secs)
+        removed = self.helper.CleanFolder(self.tempFolder, condition)
+        [self.log.info(f'REMOVED: {f}') for f in removed]
+
     # filePattern : /path_to_file/{:%Y%m%d-%H%M%S}-{}.jpg
-    def SaveAttachments(self, mail, filePattern: str):
+    def SaveAttachments(self, mail, filePattern: str, beforeFirstSave: None):
         index = 0
         result = []
         for part in mail.walk():
@@ -45,6 +48,8 @@ class ImapShotsProvider(Provider):
                 dt = memShot.GetDatetime()
                 dt = dt + datetime.timedelta(0,index)
                 shot = CamShot(filePattern.format(dt, self.config.camera))
+                if beforeFirstSave and index == 0:
+                    beforeFirstSave(shot)
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:

@@ -33,7 +33,7 @@ class YoloCamShot:
 
     def Detect(self):
         #self.log.debug("start detect objects on: {}".format(self.shot.filename))
-        blob = cv2.dnn.blobFromImage(self.pShot.OriginalShot.image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(self.pShot.OriginalShot.GetImage(), 1 / 255.0, (416, 416), swapRB=True, crop=False)
         self.yolo.net.setInput(blob)
         start = time.time()
         layerOutputs = self.yolo.net.forward(self.yolo.layers)
@@ -71,8 +71,8 @@ class YoloCamShot:
             color = [int(c) for c in self.yolo.COLORS[box.GetClassId()]]
             text = "{}: {:.1f}".format(self.yolo.LABELS[box.GetClassId()], box.GetConfidence())
 
-            cv2.rectangle(self.pShot.Shot.image, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(self.pShot.Shot.image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.rectangle(self.pShot.Shot.GetImage(), (x, y), (x + w, y + h), color, 2)
+            cv2.putText(self.pShot.Shot.GetImage(), text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
     
 class YoloObjDetectionProcessor(Processor):

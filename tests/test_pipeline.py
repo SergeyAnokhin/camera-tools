@@ -39,32 +39,31 @@ class TestPipeline(unittest.TestCase):
         self.archiver = CameraArchiveHelper()
 
     def test_imapShotsProvider(self):
-        target = ImapShotsProvider('temp')
-        shots = target.GetShots('camera/foscam')
+        target = ImapShotsProvider('temp/queue')
+        target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
+        shots = target.GetShots([])
         self.assertEqual(3, len(shots))
-        self.assertIsNotNone(shots[0].filename)
-        self.assertIsNotNone(shots[0].fullname)
-        self.assertIsNotNone(shots[0].Exist())
+        self.assertIsNotNone(shots[0].Shot.filename)
+        self.assertIsNotNone(shots[0].Shot.fullname)
+        self.assertIsNotNone(shots[0].Shot.Exist())
 
     def test_DirectoryShotsProvider(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        target = DirectoryShotsProvider.FromDir(None, folder)
-        shots = target.GetShots()
+        shots = DirectoryShotsProvider.FromDir(None, folder)
         self.assertEqual(3, len(shots))
-        self.assertIsNotNone(shots[0].filename)
-        self.assertIsNotNone(shots[0].fullname)
-        self.assertIsNotNone(shots[0].Exist())
+        self.assertIsNotNone(shots[0].Shot.filename)
+        self.assertIsNotNone(shots[0].Shot.fullname)
+        self.assertIsNotNone(shots[0].Shot.Exist())
         #shots[0].Show()
 
     def test_DirectoryShotsProvider_SearchByDate(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_DirectoryShotsProvider_SearchByDate
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        shots = DirectoryShotsProvider.FromDir(None, folder)
+        pShots = DirectoryShotsProvider.FromDir(None, folder)
 
         folder = '../camera-OpenCV-data/Camera/Foscam/2019-02'
 
         # Create base Shot
-        pShots = [PipelineShot(shot, i) for i, shot in enumerate(shots)]
         for pShot in pShots:
             pShot.Metadata['IMAP'] = {}
             pShot.Metadata['IMAP']['datetime'] = str(pShot.Shot.GetDatetime())
@@ -76,20 +75,21 @@ class TestPipeline(unittest.TestCase):
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
         self.assertEqual('Snap_20190206-090254-0.jpg', pShots[0].Shot.filename)
-        self.assertEqual('MDAlarm_20190206-090259.jpg', pShots[1].Shot.filename)
-        self.assertEqual('MDAlarm_20190206-090304.jpg', pShots[2].Shot.filename)
+        self.assertEqual('Snap_20190206-090254-1.jpg', pShots[1].Shot.filename)
+        self.assertEqual('Snap_20190206-090254-2.jpg', pShots[2].Shot.filename)
+        self.assertEqual('MDAlarm_20190206-090259.jpg', pShots[3].Shot.filename)
+        self.assertEqual('MDAlarm_20190206-090304.jpg', pShots[4].Shot.filename)
 
     def test_DiffContoursProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = DiffContoursProcessor()
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
+        pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
 
         target.Process(pipelineShots)
-        pp.pprint(pipelineShots[0].Metadata, indent=2)
-        pp.pprint(pipelineShots[1].Metadata, indent=2)
-        pp.pprint(pipelineShots[2].Metadata, indent=2)
+        # pp.pprint(pipelineShots[0].Metadata, indent=2)
+        # pp.pprint(pipelineShots[1].Metadata, indent=2)
+        # pp.pprint(pipelineShots[2].Metadata, indent=2)
         # result[0].Shot.Show()
         # result[1].Shot.Show()
         # result[2].Shot.Show()
@@ -105,12 +105,11 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         target = YoloObjDetectionProcessor()
         target.PreLoad()
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
-        target.Process(pipelineShots)
-        metadata0 = pipelineShots[0].Metadata['YOLO']
-        metadata1 = pipelineShots[1].Metadata['YOLO']
-        metadata2 = pipelineShots[2].Metadata['YOLO']
+        shots = DirectoryShotsProvider.FromDir(None, folder)
+        target.Process(shots)
+        metadata0 = shots[0].Metadata['YOLO']
+        metadata1 = shots[1].Metadata['YOLO']
+        metadata2 = shots[2].Metadata['YOLO']
         pp.pprint(metadata0, indent=2)
         self.assertEqual(len(metadata0), 1)
         self.assertEqual(len(metadata1), 1)
@@ -126,8 +125,7 @@ class TestPipeline(unittest.TestCase):
         yolo = YoloObjDetectionProcessor()
         yolo.PreLoad()
         target = TrackingProcessor()
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
-        pipelineShots = [PipelineShot(shot) for shot in shots]
+        pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
         yolo.Process(pipelineShots)
         target.Process(pipelineShots)
         metadata1 = pipelineShots[1].Metadata["TRAC"]
@@ -140,26 +138,28 @@ class TestPipeline(unittest.TestCase):
         # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(MailSenderProcessor(True))
         pipeline.PreLoad()
+        shots = pipeline.GetShots()
 
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
         result = pipeline.Process(shots)
 
         sendMeta = result[0].Metadata['IMAP']
-        self.assertEqual(sendMeta["Subject"], "Foscam @09:02 ")
-        self.assertEqual(sendMeta["Body"], "BODY")
+        self.assertEqual(sendMeta["Subject"], "Foscam @09:02  (06.02.2019)")
+        #self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
 
     def test_ArchiveProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(ArchiveProcessor(True))
         pipeline.PreLoad()
 
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        shots = pipeline.GetShots()
         result = pipeline.Process(shots)
 
         archMD = result[0].Metadata['ARCH']
@@ -171,11 +171,12 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(DiffContoursProcessor())
-        pipeline.processors.append(SaveToTempProcessor())
+        pipeline.processors.append(SaveToTempProcessor(True))
         pipeline.PreLoad()
 
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        shots = pipeline.GetShots()
         result = pipeline.Process(shots)
 
         self.assertEqual(result[0].Shot.fullname, "temp\\20190206_090254_Foscam_cv.jpeg")
@@ -191,13 +192,14 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(ArchiveProcessor(True))
         pipeline.processors.append(ElasticSearchProcessor(True))
         #pipeline.processors.append(SaveToTempProcessor())
         pipeline.PreLoad()
 
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        shots = pipeline.GetShots()
         result = pipeline.Process(shots)
 
         els = result[0].Metadata["ELSE"]
@@ -248,6 +250,7 @@ class TestPipeline(unittest.TestCase):
 
         ## INIT
         pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
         # # proceccor : Analyse() GetJsonResult() Draw()  
         #pipeline.processors.append(ZonesProcessor())
         pipeline.processors.append(DiffContoursProcessor())
@@ -260,7 +263,7 @@ class TestPipeline(unittest.TestCase):
         # Save analysed files to temp 
         # original: temp\20190203_085908_{camera}.jpg 
         # analysed: temp\20190203_085908_{camera}_cv.jpeg
-        pipeline.processors.append(SaveToTempProcessor())           
+        pipeline.processors.append(SaveToTempProcessor(True))           
 
         ########################################################################
         # mail analysed files to gmail
@@ -272,9 +275,7 @@ class TestPipeline(unittest.TestCase):
 
         ########################################################################
         # update files in hassio server
-        hassio = HassioProcessor()
-        hassio.hassLocation = hassioDir
-        pipeline.processors.append(hassio)        
+        pipeline.processors.append(HassioProcessor(hassioDir))        
 
         ########################################################################
         # save original files and analysed to archive directory by date
@@ -290,7 +291,7 @@ class TestPipeline(unittest.TestCase):
         pipeline.PreLoad()
 
         ## Procerss on shots comming
-        shots = DirectoryShotsProvider.FromDir(None, folder).GetShots(datetime.datetime.now)
+        shots = pipeline.GetShots()
         result = pipeline.Process(shots)
         # analyseResult[0].Shot.Show()
         # analyseResult[1].Shot.Show()
@@ -307,13 +308,13 @@ class TestPipeline(unittest.TestCase):
 
         tempMD = result[0].Metadata['TEMP']
         self.assertEqual(tempMD['fullname'], "temp\\20190328_080122_Foscam_cv.jpeg")
-        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080122_Foscam.jpg")
+        #self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080122_Foscam.jpg")
         tempMD = result[1].Metadata['TEMP']
         self.assertEqual(tempMD['fullname'], "temp\\20190328_080123_Foscam_cv.jpeg")
-        self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
+        #self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
 
         mailMD = result[0].Metadata['IMAP']
-        self.assertEqual(mailMD["Subject"], "Foscam @08:01 person:2")
+        self.assertEqual(mailMD["Subject"], "Foscam @08:01 person:2 (28.03.2019)")
         #self.assertEqual(mailMD["Body"], "/** Processing LOG **/")
         self.assertGreater(mailMD["MessageSize"], 200000)
 
@@ -330,4 +331,4 @@ class TestPipeline(unittest.TestCase):
         print(els['JSON'])
         self.assertIsNotNone(dictEls['Analyse'])
         self.assertEqual(dictEls['Analyse']['YOLO'][0]['label'], "person")
-        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01 person:2 / 2019-03-28")
+        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01 person:2 (28.03.2019)")

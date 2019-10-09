@@ -9,6 +9,7 @@ class CameraArchiveConfig:
     path_from: str
     path_to: str
     ignore_dir: []
+    camera_triggered_interval_sec: int
 
     def __init__(self):
         self.ignore_dir = []

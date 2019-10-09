@@ -15,5 +15,6 @@
         "detail": "under the roof"
     },
     "camera": "Foscam",
-    "imap_folder": "camera/foscam"
+    "imap_folder": "camera/foscam",
+    "camera_triggered_interval_sec": 15 
 }

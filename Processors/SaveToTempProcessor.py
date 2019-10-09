@@ -10,27 +10,27 @@ class SaveToTempProcessor(Processor):
         original: temp/20190203_085908_{camera}.jpg \n
         analysed: temp/20190203_085908_{camera}_cv.(jpeg|png) \n
     '''
-    def __init__(self):
+    def __init__(self, isSimulation: bool = False):
         super().__init__("TEMP")
+        self.isSimulation = isSimulation
     
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         meta = self.CreateMetadata(pShot)
 
         dt = pShot.Shot.GetDatetime()
-        index = pShot.Shot.GetMailAttachmentIndex()
-        if index != None:
-            dt = dt + timedelta(seconds=index)
         camera = self.config.camera
 
         fullname = os.path.join('temp', f'{dt:%Y%m%d_%H%M%S}_{camera}_cv.jpeg')
-        pShot.Shot.UpdateFullName(fullname)
-        meta['fullname'] = pShot.Shot.fullname
-
         fullname_orig = os.path.join('temp', f'{dt:%Y%m%d_%H%M%S}_{camera}.jpg')
-        pShot.OriginalShot.UpdateFullName(fullname_orig)
-        meta['original_fullname'] = pShot.OriginalShot.fullname
-
         self.log.info(f'    - CV   save: {fullname}')
         self.log.info(f'    - ORIG save: {fullname_orig}')
-        pShot.Shot.Save()
-        pShot.OriginalShot.Save()
+
+        if self.isSimulation:
+            pShot.Shot.Save(fullname)
+            pShot.OriginalShot.Save(fullname_orig)
+        else:
+            pShot.Shot.Move2(fullname)
+            pShot.OriginalShot.Move2(fullname_orig)
+
+        meta['fullname'] = pShot.Shot.fullname
+        meta['original_fullname'] = pShot.OriginalShot.fullname

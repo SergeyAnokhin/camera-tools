@@ -7,18 +7,34 @@ from math import log2
 class CommonHelper:
 
     def get_datetime(self, input: str):
-        re_groups = re.search("(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)", 
-            input)
+        pattern = "(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)"
+
+        re_groups_index = re.search(pattern + "[_-](\\d)", input)
+        if re_groups_index:
+            return self.RegexGroupsToDateTime(re_groups_index, int(re_groups_index.group(7)))
+
+        re_groups = re.search(pattern, input)
         if not re_groups:
             print('Cant parse datetime in : {}'.format(input))
             raise ValueError('Cant parse datetime in file : {}'.format(input))
+        return self.RegexGroupsToDateTime(re_groups)
+
+    def RegexGroupsToDateTime(self, re_groups, add_seconds = 0):
         year = int(re_groups.group(1))
         month = int(re_groups.group(2))
         day = int(re_groups.group(3))
         hour = int(re_groups.group(4))
         minute = int(re_groups.group(5))
         seconds = int(re_groups.group(6))
-        return datetime.datetime(year, month, day, hour, minute, seconds)
+        dt = datetime.datetime(year, month, day, hour, minute, seconds)
+        return dt + datetime.timedelta(seconds= add_seconds)
+
+    def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
+        if not start: #no filters
+            return True
+        dtFile = self.get_datetime(filename)
+        dtMax = start + datetime.timedelta(seconds=seconds)
+        return start <= dtFile <=dtMax
 
     def Show(self, image):
         plt.figure(figsize=(8, 6.025))
@@ -60,6 +76,15 @@ class CommonHelper:
             if dir in dir:
                 return True
         return False
+
+    def CleanFolder(self, path: str, condition = None):
+        removed = []
+        for filename in os.listdir(path):
+            file = os.path.join(path, filename)
+            if not condition or condition(file):
+                os.unlink(file)
+                removed.append(file)
+        return removed
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
