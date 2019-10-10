@@ -42,7 +42,9 @@ logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s',
     handlers=handlers)
 
 log = logging.getLogger("API")
-log.info('start API @ %s', datetime.datetime.now())
+log.info('|##########################################################################################################|')
+log.info('|####### start API @ %s ###################################################################################|', datetime.datetime.now())
+log.info('|##########################################################################################################|')
 
 app = Flask(__name__)
 print('start: {}'.format(datetime.datetime.now()))
@@ -80,14 +82,18 @@ def analyseV2():
     ### RUN
     shots = pipeline.GetShots()
 
-    log.info(' ... wait lock ...')
-    lock.acquire()
-    result = pipeline.Process(shots)
-
-    ### FINISH
-    lock.release()
-    log.info('======= end endpoint /V2/analyse ============================================================================')
+    try:
+        log.info(' ... wait lock ...')
+        lock.acquire()
+        result = pipeline.Process(shots)
+    except Exception:
+        log.error("Pipeline processing error ", exc_info=True)
+        return 'Error'
+    finally:
+        lock.release()
+        log.info('======= end endpoint /V2/analyse ============================================================================')
     return 'OK' # json.dumps(result[0].Metadata)
+    ### FINISH
 
 @app.route('/V1/analyse', methods=['GET'])
 def analyseV1():

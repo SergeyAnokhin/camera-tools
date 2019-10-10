@@ -26,12 +26,14 @@ class DirectoryShotsProvider(Provider):
             meta = pShots[0].Metadata
             dtStr = meta['IMAP']['datetime']
             dt = datetime.datetime.strptime(dtStr, '%Y-%m-%d %H:%M:%S')
-            self.log.debug(f'Base datetime for search files: {dt}')
+            self.log.debug(f'Search files: @{dt} in {folder}')
 
         # path_from: F:\inetpub\ftproot\Camera\Foscam\FI9805W_C4D6553DECE1
         # to found: \snap\MDAlarm_20190926-122821.jpg
         filenames = self.helper.WalkFiles(folder,
-                        lambda x: self.helper.FileNameByDateRange(x, dt, self.config.camera_triggered_interval_sec),
+                        lambda x: 
+                            self.helper.FileNameByDateRange(x, dt, self.config.camera_triggered_interval_sec)
+                                and self.helper.IsImage(x),
                         self.config.ignore_dir)
         return [PipelineShot(CamShot(f)) for f in filenames]
         #[s.LoadImage() for s in shots]

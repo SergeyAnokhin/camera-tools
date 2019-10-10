@@ -33,6 +33,9 @@ class CommonHelper:
         dt = datetime.datetime(year, month, day, hour, minute, seconds)
         return dt + datetime.timedelta(seconds= add_seconds)
 
+    def IsImage(self, filename: str):
+        return filename.endswith(".jpg") or filename.endswith(".jpeg") or filename.endswith(".png")
+
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
         if not start: #no filters
             return True
