@@ -50,7 +50,7 @@ class DiffCamShot:
             pShot.Metadata['DIFF'][summaryName] = {}
             pShot.Metadata['DIFF'][summaryName]['TotalArea'] = totalArea
             pShot.Metadata['DIFF'][summaryName]['Areas'] = areas
-        self.log.debug(f'{self.helper.Progress(totalArea, 5e4)} Contours {summaryName}: {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
+        self.log.debug(f'{self.helper.Progress(totalArea, 2.5e4)} Contours {summaryName}: {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
         return cnts
 
     def Merge(self, arr1, arr2, func):
