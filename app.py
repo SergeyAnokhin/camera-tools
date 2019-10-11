@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from logging.handlers import TimedRotatingFileHandler
 import logging, os, json, datetime, shutil, threading, sys
 from Common.GmailContext import GmailContext
 from Common.ImapGmailHelper import ImapGmailHelper
@@ -32,9 +33,12 @@ imap_folder = 'camera/foscam'
 camera = 'Foscam'
 isSimulation = False
 
-file_handler = logging.FileHandler(filename='camera-tools-api.log')
+file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
+file_error_handler.setLevel(logging.ERROR)
+file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='D', backupCount=7)
+file_handler.suffix = '_%Y-%m-%d.log'
 stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [file_handler, stdout_handler]
+handlers = [file_handler, stdout_handler, file_error_handler]
 
 logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
     level=logging.DEBUG, 
