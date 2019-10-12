@@ -35,7 +35,7 @@ isSimulation = False
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
 file_error_handler.setLevel(logging.ERROR)
-file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='D', backupCount=7)
+file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='midnight', backupCount=7)
 file_handler.suffix = '_%Y-%m-%d.log'
 stdout_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, stdout_handler, file_error_handler]
