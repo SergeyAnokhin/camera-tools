@@ -66,6 +66,11 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 /* .w3-table-all tr:nth-child(odd){background-color:#fff}.w3-table-all tr:nth-child(even){background-color:#f1f1f1} */
 /* .w3-hoverable tbody tr:hover,.w3-ul.w3-hoverable li:hover{background-color:#ccc}.w3-centered tr th,.w3-centered tr td{text-align:center} */
 .w3-card,.w3-card-2{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)}
+.w3-pink,.w3-hover-pink:hover{color:#fff!important;background-color:#e91e63!important}
+.w3-light-green,.w3-hover-light-green:hover{color:#000!important;background-color:#8bc34a!important}
+.w3-green,.w3-hover-green:hover{color:#fff!important;background-color:#4CAF50!important}
+.nowrap{white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+.nowrap:hover{overflow: visible;}
 /* .w3-card-4,.w3-hover-shadow:hover{box-shadow:0 4px 10px 0 rgba(0,0,0,0.2),0 4px 20px 0 rgba(0,0,0,0.19)} */
         </style>
     </head>
@@ -191,29 +196,31 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         if 'YOLO' in shot.Metadata:
             yolo = shot.Metadata['YOLO']
             for item in yolo:
-                body += self.GetLine(f'- YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
-                                25.055555, 'w3-blue')
+                body += self.GetLine(f'&#x1F9E0; YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
+                                item["confidence"]*100, 'w3-blue')
         if 'DIFF' in shot.Metadata:
             diff = shot.Metadata['DIFF']
-            body += self.GetLine(f'- DIFF: {diff["Diff"]["TotalArea"]}', 12.4566)
+            body += self.GetLine(f'&#x1F53A; DIFF: {diff["Diff"]["TotalArea"]}', diff["Diff"]["TotalArea"] / 2.5e2, 'w3-green')
             if "boxes" in diff:
                 for item in diff["boxes"]:
-                    body += self.GetLine(f'- BOX {item["area"]} prof: {item["profile_proportion"]} @{item["center"][0]}x{item["center"][1]}<br>\n',
-                                75.055555, 'w3-blue')
+                    body += self.GetLine(f'&nbsp;- &#x1F532; BOX {item["area"]} prof: {item["profile_proportion"]} @{item["center"][0]}x{item["center"][1]}<br>\n',
+                                item["area"] / 2.5e2, 'w3-light-green')
         if 'TRAC' in shot.Metadata:
             trac = shot.Metadata['TRAC']
             for key in trac:
-                body += self.GetLine(f'- TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]}', 55.0456, 'w3-blue')
+                body += self.GetLine(f'&#x1F9ED; TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]}',
+                    trac[key]["angle"] / 360 * 100, 'w3-pink')
         body += '</table>'
         return body
 
     def GetLine(self, text, percent, style='w3-blue'):
+        percent = percent if percent <= 100 else 100
         percent_int = round(percent)
         return f"""    <tr>
                 <td>{text}</td>
-                <td>
+                <td style="min-width: 300px;">
                         <div class="w3-light-grey w3-round">
-                            <div class="w3-container {style} w3-round" style="width:{percent_int}%">{percent}%</div>
+                            <div class="w3-container {style} w3-round nowrap" style="width:{percent_int}%">{percent:.2f}%</div>
                         </div>
                     </td>
                 </tr>
