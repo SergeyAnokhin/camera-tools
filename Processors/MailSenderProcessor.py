@@ -22,15 +22,57 @@ class MailSenderProcessor(Processor):
         #send_mail(self, subject, text, files=None):
         self.log.info(f'### PROCESS: ***{self.name}*** ######################')
         subject = self.GetSubject(pShots)
-        body = self.GetBody(pShots)
+        body = self.GetBodyText(pShots)
 
-        msg = MIMEMultipart()
+        msg = MIMEMultipart('alternative')
         msg['From'] = self.sender
         msg['To'] = COMMASPACE.join(self.to)
         msg['Date'] = formatdate(localtime=True)
         msg['Subject'] = subject
 
-        msg.attach(MIMEText(body))
+        html = """
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> -->
+        <style>
+html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
+/* html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0} */
+html,body{font-family:Verdana,sans-serif;font-size:12px;line-height:1.5}html{overflow-x:hidden}
+a{background-color:transparent}a:active,a:hover{outline-width:0}
+.w3-container,.w3-panel{padding:0.03em 16px}
+/* .w3-container:after,.w3-container:before,.w3-panel:after,.w3-panel:before,.w3-row:after,.w3-row:before,.w3-row-padding:after,.w3-row-padding:before, */
+
+.w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{color:#000!important;background-color:#f1f1f1!important}
+/* .w3-round-small{border-radius:2px} */
+.w3-round,.w3-round-medium{border-radius:4px}
+/* .w3-round-large{border-radius:8px}
+.w3-round-xlarge{border-radius:16px}
+.w3-round-xxlarge{border-radius:32px} */
+/* .w3-cell-row:before,.w3-cell-row:after,.w3-clear:after,.w3-clear:before,.w3-bar:before,.w3-bar:after{content:"";display:table;clear:both} */
+/* .w3-panel{margin-top:16px;margin-bottom:16px} */
+.w3-blue,.w3-hover-blue:hover{color:#fff!important;background-color:#2196F3!important}
+.w3-table,.w3-table-all{border-collapse:collapse;border-spacing:0;width:100%;display:table;margin-bottom: 4px}
+/* .w3-table-all{border:1px solid #ccc} */
+.w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{padding:1px 4px;display:table-cell;text-align:left;vertical-align:top}
+.w3-table th:first-child,.w3-table td:first-child,.w3-table-all th:first-child,.w3-table-all td:first-child{padding-left:5px;}
+/* .w3-border-0{border:0!important} */
+.w3-border{border:1px solid #ccc!important;}
+/* .w3-border-top{border-top:1px solid #ccc!important}
+.w3-border-bottom{border-bottom:1px solid #ccc!important}
+.w3-border-left{border-left:1px solid #ccc!important}
+.w3-border-right{border-right:1px solid #ccc!important} */
+/* .w3-bordered tr,.w3-table-all tr{border-bottom:1px solid #ddd}.w3-striped tbody tr:nth-child(even){background-color:#f1f1f1} */
+/* .w3-table-all tr:nth-child(odd){background-color:#fff}.w3-table-all tr:nth-child(even){background-color:#f1f1f1} */
+/* .w3-hoverable tbody tr:hover,.w3-ul.w3-hoverable li:hover{background-color:#ccc}.w3-centered tr th,.w3-centered tr td{text-align:center} */
+.w3-card,.w3-card-2{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)}
+/* .w3-card-4,.w3-hover-shadow:hover{box-shadow:0 4px 10px 0 rgba(0,0,0,0.2),0 4px 20px 0 rgba(0,0,0,0.19)} */
+        </style>
+    </head>
+    <body>
+   <!-- 🚶‍ # &#128540; # &#x1F6B6; -->
+    <div class="w3-container">    
+        """
 
         for pShot in pShots or []:
             f = pShot.Shot.fullname
@@ -39,11 +81,22 @@ class MailSenderProcessor(Processor):
                     fil.read(),
                     Name=basename(f)
                 )
-            part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+            part.add_header('Content-ID', f'<{pShot.Shot.filename}>')
+            part['Content-Disposition'] = f'attachment; filename="{basename(f)}"'
             msg.attach(part)
 
+            html += f"""
+            {self.GetBodyHtml(pShot)}
+            <img src="cid:{pShot.Shot.filename}"><br>
+            """
+
+        html += "</div></body></html>"
+        part1 = MIMEText(body, 'plain')
+        part2 = MIMEText(html, 'html')
+        msg.attach(part1)
+        msg.attach(part2)
+
         self.log.debug(f"- Send mail: '{subject}' to {self.to}")
-        self.log.debug(f"- Body: \n{body}")
         if not self.isSimulation:
             smtp = smtplib.SMTP('smtp.gmail.com', 587)
             smtp.starttls()
@@ -109,7 +162,7 @@ class MailSenderProcessor(Processor):
             
         return set(list)
 
-    def GetBody(self, pShots: []):
+    def GetBodyText(self, pShots: []):
         body = ""
         for shot in pShots:
             body += f'#{shot.Index}: {shot.OriginalShot.filename} \n'
@@ -128,3 +181,40 @@ class MailSenderProcessor(Processor):
                 for key in trac:
                     body += f'- TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]} \n'
         return body
+
+    def GetBodyHtml(self, shot):
+        body = '<table class="w3-table w3-border w3-card-2">'
+        body += f"""<tr class="w3-light-grey">
+                <td>#{shot.Index}: {shot.OriginalShot.filename}</td>
+                <td></td>
+            </tr>\n"""
+        if 'YOLO' in shot.Metadata:
+            yolo = shot.Metadata['YOLO']
+            for item in yolo:
+                body += self.GetLine(f'- YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
+                                25.055555, 'w3-blue')
+        if 'DIFF' in shot.Metadata:
+            diff = shot.Metadata['DIFF']
+            body += self.GetLine(f'- DIFF: {diff["Diff"]["TotalArea"]}', 12.4566)
+            if "boxes" in diff:
+                for item in diff["boxes"]:
+                    body += self.GetLine(f'- BOX {item["area"]} prof: {item["profile_proportion"]} @{item["center"][0]}x{item["center"][1]}<br>\n',
+                                75.055555, 'w3-blue')
+        if 'TRAC' in shot.Metadata:
+            trac = shot.Metadata['TRAC']
+            for key in trac:
+                body += self.GetLine(f'- TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]}', 55.0456, 'w3-blue')
+        body += '</table>'
+        return body
+
+    def GetLine(self, text, percent, style='w3-blue'):
+        percent_int = round(percent)
+        return f"""    <tr>
+                <td>{text}</td>
+                <td>
+                        <div class="w3-light-grey w3-round">
+                            <div class="w3-container {style} w3-round" style="width:{percent_int}%">{percent}%</div>
+                        </div>
+                    </td>
+                </tr>
+                """

@@ -24,7 +24,7 @@ from Archiver.CameraArchiveHelper import CameraArchiveHelper
 class TestPipeline(unittest.TestCase):
 
     def setUp(self):
-        file_handler = logging.FileHandler(filename='processing.log')
+        file_handler = logging.FileHandler(filename='test.log', mode='w')
         stdout_handler = logging.StreamHandler(sys.stdout)
         handlers = [file_handler, stdout_handler]
 
