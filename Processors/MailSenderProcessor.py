@@ -1,5 +1,6 @@
-import smtplib
+import smtplib, itertools
 from os.path import basename
+from collections import Counter
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -119,53 +120,73 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
     def GetSubject(self, pShots: []):
         dt = pShots[0].Shot.GetDatetime()
         camera = self.config.camera
-        subject = f"{camera} @{dt:%H:%M} "
+        subject = f"{camera} @{dt:%H:%M:%S} "
 
-        labels = self.GetAllLabels(pShots)
-        labelsCount = self.GetMaximumCountPerShot(pShots, labels)
+        labelsCount = self.GetMaximumCountPerShot(pShots)
 
         details = " ".join(labelsCount)
         return subject + details + f' ({dt:%d.%m.%Y})'
 
-    def GetMaximumCountPerShot(self, pShots: [], labels: []):
-        all_dict = {}
+    def GetMaximumCountPerShot(self, pShots: []):
+        counters = []
         for pShot in pShots:
-            if "YOLO" not in pShot.Metadata:
-                continue
-            current_dict = {}
-            for area in pShot.Metadata["YOLO"]:
-                label = area["label"]
-                if label in current_dict:
-                    current_dict[label] += + 1
-                else:
-                    current_dict[label] = 1
+            labels = self.GetYoloLabels(pShot)
+            counters.append(Counter(labels))
+        uniq = set(itertools.chain.from_iterable([list(c) for c in counters]))
+        maxCounters = []
+        # for x in uniq:
+        #     maxCounters += [x, max([c[x] for c in counters])] 
+        maxCounters = [[x, max([c[x] for c in counters])] for x in uniq]
+        maxCounters.sort(key = lambda c: f'{c[1]}{c[0]}', reverse = True)
+        return [f'{c[0]}{":"+str(c[1]) if c[1] > 1 else ""}' for c in maxCounters]
+        # all_dict = {}
+        # for pShot in pShots:
+        #     if "YOLO" not in pShot.Metadata:
+        #         continue
+        #     current_dict = {}
+        #     for area in pShot.Metadata["YOLO"]:
+        #         label = area["label"]
+        #         if label in current_dict:
+        #             current_dict[label] += + 1
+        #         else:
+        #             current_dict[label] = 1
 
-            for label in current_dict:
-                if label in all_dict:
-                    count = all_dict[label]
-                    if current_dict[label] > count:
-                        all_dict[label] = current_dict[label]
-                else:
-                    all_dict[label] = current_dict[label]
-        #print(all_dict)
-        results = []
-        for label in all_dict:
-            count = all_dict[label]
-            if count == 1:
-                results.append(label)
-            else:
-                results.append(f'{label}:{count}')
-        return results
+        #     for label in current_dict:
+        #         if label in all_dict:
+        #             count = all_dict[label]
+        #             if current_dict[label] > count:
+        #                 all_dict[label] = current_dict[label]
+        #         else:
+        #             all_dict[label] = current_dict[label]
+        # #print(all_dict)
+        # results = []
+        # for label in all_dict:
+        #     count = all_dict[label]
+        #     if count == 1:
+        #         results.append(label)
+        #     else:
+        #         results.append(f'{label}:{count}')
+        # return results
 
-    def GetAllLabels(self, pShots: []):
-        list = []
-        for pShot in pShots:
-            if "YOLO" not in pShot.Metadata:
-                continue
-            for area in pShot.Metadata["YOLO"]:
-                list.append(area["label"]) 
-            
-        return set(list)
+    def MapToEmoji(self, label: str):
+        mapDict = {
+            "question": "&#x2754;",
+            "person": "&#x1F6B9;",
+            "handbug": "&#x1F4BC;",
+            "car": "&#x1F697;",
+            "suitcase": "&#x1F9F3;",
+            "fire hydrant": "&#x1F9EF;",
+            "skateboard": "&#x1F6F9;",
+            "dog": "&#x1F415;",
+            "bear": "&#x1F43B;",
+            "bird": "&#x1F426;",
+        }
+        return mapDict[label] if label in mapDict else label
+        
+    def GetYoloLabels(self, pShot: PipelineShot):
+        if "YOLO" not in pShot.Metadata:
+            return []
+        return [area["label"] for area in pShot.Metadata["YOLO"]]
 
     def GetBodyText(self, pShots: []):
         body = ""
@@ -209,7 +230,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             trac = shot.Metadata['TRAC']
             for key in trac:
                 body += self.GetLine(f'&#x1F9ED; TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]}',
-                    trac[key]["angle"] / 360 * 100, 'w3-pink')
+                    (trac[key]["angle"] + 180) / 360 * 100, 'w3-pink')
         body += '</table>'
         return body
 
@@ -218,9 +239,9 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         percent_int = round(percent)
         return f"""    <tr>
                 <td>{text}</td>
-                <td style="min-width: 300px;">
+                <td style="width: 100px;">
                         <div class="w3-light-grey w3-round">
-                            <div class="w3-container {style} w3-round nowrap" style="width:{percent_int}%">{percent:.2f}%</div>
+                            <div class="w3-container {style} w3-round nowrap" style="width:{percent_int}px">{percent:.2f}%</div>
                         </div>
                     </td>
                 </tr>

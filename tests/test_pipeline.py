@@ -143,13 +143,32 @@ class TestPipeline(unittest.TestCase):
         pipeline.processors.append(MailSenderProcessor(True))
         pipeline.PreLoad()
         shots = pipeline.GetShots()
+        shots[0].Metadata['YOLO'] = [self.getYoloArea('person'), self.getYoloArea('person'), self.getYoloArea('car')]
+        shots[1].Metadata['YOLO'] = [self.getYoloArea('person'), self.getYoloArea('bird'), self.getYoloArea('car')]
+        shots[2].Metadata['YOLO'] = []
 
         result = pipeline.Process(shots)
 
         sendMeta = result[0].Metadata['IMAP']
-        self.assertEqual(sendMeta["Subject"], "Foscam @09:02  (06.02.2019)")
+        self.assertEqual(sendMeta["Subject"], "Foscam @09:02:54 person:2 car bird (06.02.2019)")
         #self.assertEqual(sendMeta["Body"], "BODY")
         self.assertGreater(sendMeta["MessageSize"], 200000)
+
+    def getYoloArea(self, label:str):
+        return {
+            "area": 5562,
+            "center_coordinate": [
+                169,
+                158
+            ],
+            "confidence": 0.99,
+            "label": label,
+            "profile_proportion": 1.91,
+            "size": [
+                54,
+                103
+            ]
+        }
 
     def test_ArchiveProcessor(self):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
