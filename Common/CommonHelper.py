@@ -6,7 +6,7 @@ from math import log2
 
 class CommonHelper:
 
-    def get_datetime(self, input: str):
+    def get_datetime(self, input: str, is_raise_exception = True):
         pattern = "(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)"
 
         re_groups_index = re.search(pattern + "[_-](\\d)", input)
@@ -16,7 +16,10 @@ class CommonHelper:
         re_groups = re.search(pattern, input)
         if not re_groups:
             print('Cant parse datetime in : {}'.format(input))
-            raise ValueError('Cant parse datetime in file : {}'.format(input))
+            if is_raise_exception:
+                raise ValueError('Cant parse datetime in file : {}'.format(input))
+            else:
+                return None
         try:
             return self.RegexGroupsToDateTime(re_groups)
         except:
@@ -39,7 +42,7 @@ class CommonHelper:
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
         if not start: #no filters
             return True
-        dtFile = self.get_datetime(filename)
+        dtFile = self.get_datetime(filename, False)
         if not dtFile:
             return False
         dtMax = start + datetime.timedelta(seconds=seconds)
@@ -90,7 +93,7 @@ class CommonHelper:
         removed = []
         for filename in os.listdir(path):
             file = os.path.join(path, filename)
-            if not condition or condition(file):
+            if os.path.isfile(file) and not condition or condition(file):
                 os.unlink(file)
                 removed.append(file)
         return removed

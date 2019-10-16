@@ -9,8 +9,8 @@ class CamShot(FileImage):
         self.helper = CommonHelper()
         return super().__init__(*args, **kwargs)
 
-    def GetDatetime(self):
-        return self.helper.get_datetime(self.filename)
+    def GetDatetime(self, is_raise_exception = True):
+        return self.helper.get_datetime(self.filename, is_raise_exception)
 
     def GrayImage(self):
         return cv2.cvtColor(self.GetImage(), cv2.COLOR_BGR2GRAY)

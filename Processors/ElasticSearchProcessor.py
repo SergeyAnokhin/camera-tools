@@ -49,7 +49,6 @@ class ElasticSearchProcessor(Processor):
             dict['Analyse'][metaKey] = pShot.Metadata[metaKey]
 
         json_data = json.dumps(dict, indent=4, sort_keys=True)
-        #print('{}@{}'.format(self.config.camera, file.get_timestamp_utc()), json_data)
         meta['JSON'] = json_data
         meta['timestamp_utc'] = file.get_timestamp_utc()
         id = '{}@{}'.format(self.config.camera, file.get_timestamp_utc())
@@ -60,3 +59,6 @@ class ElasticSearchProcessor(Processor):
             es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
             res = es.index(index="cameraarchive-" + file.get_month_id_utc(),
                         doc_type='doc', body=json_data, id=id)
+        else:
+            self.log.debug(json_data)
+

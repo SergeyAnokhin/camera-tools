@@ -29,7 +29,10 @@ class ImapShotsProvider(Provider):
 
     def CleanOldFiles(self, shot: CamShot):
         secs = self.config.camera_triggered_interval_sec
-        condition = lambda f: self.helper.FileNameByDateRange(f, shot.GetDatetime(), secs)
+        dt = shot.GetDatetime(False)
+        if not dt:
+            return
+        condition = lambda f: self.helper.FileNameByDateRange(f, dt, secs)
         removed = self.helper.CleanFolder(self.tempFolder, condition)
         [self.log.info(f'REMOVED: {f}') for f in removed]
 

@@ -4,7 +4,7 @@ from Archiver.CameraArchiveConfig import CameraArchiveConfig
 
 class Processor:
     config: CameraArchiveConfig
-    isSimulation: bool
+    isSimulation: bool = False
 
     def __init__(self, name):
         self.name = name
@@ -17,7 +17,7 @@ class Processor:
 
     def Process(self, pShots: [], pipelineContext: dict):
         ''' Main Process '''
-        self.log.info(f'@@@ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@')
+        self.log.info(f'@@@ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@ {"(Simulation)" if self.isSimulation else ""}')
         for i in range(len(pShots)):
             pShot = pShots[i]
             self.log.debug(f"====== {pShot.Shot.filename} ======")

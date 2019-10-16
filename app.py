@@ -31,7 +31,7 @@ run locally :
 temp = 'temp'
 imap_folder = 'camera/foscam'
 camera = 'Foscam'
-isSimulation = False
+isSimulation = __name__ != "__main__"
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
 file_error_handler.setLevel(logging.ERROR)
@@ -66,8 +66,8 @@ pipeline.processors.append(DiffContoursProcessor())
 pipeline.processors.append(YoloObjDetectionProcessor())
 pipeline.processors.append(TrackingProcessor())
 pipeline.processors.append(SaveToTempProcessor())           
-pipeline.processors.append(MailSenderProcessor(isSimulation))
-pipeline.processors.append(HassioProcessor()) #('temp' if isSimulation else None))        
+pipeline.processors.append(MailSenderProcessor())
+pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
 pipeline.processors.append(ArchiveProcessor(isSimulation))
 pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
 pipeline.PreLoad()

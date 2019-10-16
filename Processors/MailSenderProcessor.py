@@ -81,6 +81,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
    <!-- 🚶‍ # &#128540; # &#x1F6B6; -->
     <div class="w3-container">    
         """
+        html += self.MapToEmoji(self.GetYoloLabels(ctx))
 
         for pShot in pShots or []:
             f = pShot.Shot.fullname
@@ -123,24 +124,33 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         dt = pShots[0].Shot.GetDatetime()
         camera = self.config.camera
         subject = f"{camera} @{dt:%H:%M:%S} "
+        return subject + self.GetYoloLabels(ctx) + f' ({dt:%d.%m.%Y})'
 
-        details = ctx["YOLO"]["labels"] if "YOLO" in ctx and "labels" in ctx["YOLO"] else ""
-        return subject + details + f' ({dt:%d.%m.%Y})'
+    def GetYoloLabels(self, ctx):
+        return ctx["YOLO"]["labels"] if "YOLO" in ctx and "labels" in ctx["YOLO"] else ""
+
+    mapDict = {
+        "question": "&#x2754;",
+        "person": "&#x1F6B9;",
+        "handbug": "&#x1F4BC;",
+        "car": "&#x1F697;",
+        "suitcase": "&#x1F9F3;",
+        "fire hydrant": "&#x1F9EF;",
+        "skateboard": "&#x1F6F9;",
+        "dog": "&#x1F415;",
+        "bear": "&#x1F43B;",
+        "bird": "&#x1F426;",
+    }
+
+    def MapToEmojiOrEmpty(self, label: str):
+        if label in self.mapDict:
+            return self.mapDict[label]
+        else:
+            return ""
 
     def MapToEmoji(self, label: str):
-        mapDict = {
-            "question": "&#x2754;",
-            "person": "&#x1F6B9;",
-            "handbug": "&#x1F4BC;",
-            "car": "&#x1F697;",
-            "suitcase": "&#x1F9F3;",
-            "fire hydrant": "&#x1F9EF;",
-            "skateboard": "&#x1F6F9;",
-            "dog": "&#x1F415;",
-            "bear": "&#x1F43B;",
-            "bird": "&#x1F426;",
-        }
-        for old, new in mapDict:
+
+        for old, new in self.mapDict.items():
             label = label.replace(old, new)
         return label
         #return mapDict[label] if label in mapDict else label
@@ -149,7 +159,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         body = ""
         for shot in pShots:
             body += f'#{shot.Index}: {shot.OriginalShot.filename} \n'
-            if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']['areas']:
+            if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']:
                 yolo = shot.Metadata['YOLO']['areas']
                 for item in yolo:
                     body += f'- YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}\n'
@@ -169,12 +179,12 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         body = '<table class="w3-table w3-border w3-card-2">'
         body += f"""<tr class="w3-light-grey">
                 <td>#{shot.Index}: {shot.OriginalShot.filename}</td>
-                <td></td>
+                <td style="width: 100px;"></td>
             </tr>\n"""
-        if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']['areas']:
+        if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']:
             yolo = shot.Metadata['YOLO']['areas']
             for item in yolo:
-                body += self.GetLine(f'&#x1F9E0; YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
+                body += self.GetLine(f'&#x1F9E0; YOLO: {self.MapToEmojiOrEmpty(item["label"])} {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
                                 item["confidence"]*100, 'w3-blue')
         if 'DIFF' in shot.Metadata:
             diff = shot.Metadata['DIFF']
