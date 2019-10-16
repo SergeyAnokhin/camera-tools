@@ -101,6 +101,23 @@ class TestPipeline(unittest.TestCase):
         self.assertGreater(metadata['boxes'][0]['area'], 5000)
         self.assertLess(metadata['boxes'][0]['area'], 6000)
 
+    def test_YoloObjDetectionProcessor_noObjects(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_YoloObjDetectionProcessor_noObjects
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_No_Objects'
+        target = YoloObjDetectionProcessor()
+        target.PreLoad()
+        shots = DirectoryShotsProvider.FromDir(None, folder)
+        target.Process(shots, {})
+        self.assertEqual(5, len(shots))
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,48)
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,50)
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,52)
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,53)
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,58)
+        self.assertFalse('YOLO' in shots[0].Metadata) ['YOLO']
+        self.assertFalse('YOLO' in shots[1].Metadata) ['YOLO']
+        self.assertFalse('YOLO' in shots[2].Metadata) ['YOLO']
+
     def test_YoloObjDetectionProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_YoloObjDetectionProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'

@@ -81,10 +81,14 @@ class YoloCamShot:
 
     @staticmethod
     def GetLabelCouter(pShot: PipelineShot):
+        if 'YOLO' not in pShot.Metadata:
+            return []
         labels = YoloCamShot.GetLabels(pShot)
         return Counter(labels)
 
     def GetLabelCouterStrArr(self):
+        if 'YOLO' not in self.pShot.Metadata:
+            return []
         counter = YoloCamShot.GetLabelCouter(self.pShot)
         items = sorted(counter.items(), key = lambda x : f'{x[1]}{x[0]}', reverse = True)
         items.sort(key = lambda c: f'{c[1]}{c[0]}', reverse = True)
