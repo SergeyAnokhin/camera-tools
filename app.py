@@ -31,7 +31,7 @@ run locally :
 temp = 'temp'
 imap_folder = 'camera/foscam'
 camera = 'Foscam'
-isSimulation = __name__ != "__main__"
+isSimulation = False
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
 file_error_handler.setLevel(logging.ERROR)
@@ -52,14 +52,14 @@ log.info('|#####################################################################
 
 app = Flask(__name__)
 print('start: {}'.format(datetime.datetime.now()))
-if __name__ == "__main__":
-    print('app.run @ 5000')
-    app.run(host='192.168.1.31', port=5000)
+# if __name__ == "__main__":
+#     print('app.run @ 5000')
+#     app.run(host='localhost', port=5000)
 #yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
 #yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolo-coco')
 lock = threading.Lock()
 
-pipeline = ShotsPipeline('Foscam')
+pipeline = ShotsPipeline(camera)
 pipeline.providers.append(ImapShotsProvider())
 pipeline.providers.append(DirectoryShotsProvider())
 pipeline.processors.append(DiffContoursProcessor())
@@ -73,6 +73,17 @@ pipeline.processors.append(ElasticSearchProcessor(isSimulation))
 pipeline.PreLoad()
 
 log.info('initialization API finished @ %s', datetime.datetime.now())
+
+@app.route('/simulation', methods=['GET'])
+def simulation():
+    global isSimulation
+    if isSimulation:
+        isSimulation = False
+    else:
+        isSimulation = True
+    msg = f'Simulation: {"ON" if isSimulation else "OFF"}'
+    log.info(msg)
+    return msg
 
 @app.route('/', methods=['GET'])
 def health():

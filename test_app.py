@@ -2,6 +2,7 @@
 # import logging
 import app
 
+app.simulation()
 app.analyseV2()
 
 # os.remove('temp/example.html')
