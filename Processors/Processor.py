@@ -9,26 +9,29 @@ class Processor:
     def __init__(self, name):
         self.name = name
         self.log = logging.getLogger(f"PROC:{name}")
-        self.PipelineResults = {}
 
     def Preload(self, isUsed = False):
         ''' Will start on application start once '''
         if isUsed:
             self.log.info('=== PRELOAD ===')
 
-    def Process(self, pShots: []):
+    def Process(self, pShots: [], pipelineContext: dict):
         ''' Main Process '''
         self.log.info(f'@@@ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@')
         for i in range(len(pShots)):
             pShot = pShots[i]
             self.log.debug(f"====== {pShot.Shot.filename} ======")
             self.ProcessShot(pShot, pShots)
+        self.AfterProcess(pShots, pipelineContext)
 
     def CreateMetadata(self, pShot: PipelineShot):
         pShot.Metadata[self.name] = {}
         return pShot.Metadata[self.name]
 
     def ProcessShot(self, pShot: PipelineShot, otherPShots: []):
+        pass
+
+    def AfterProcess(self, pShots: [], ctx):
         pass
 
     def PostProcess(self, pShots: []):

@@ -16,6 +16,7 @@ from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
+from tests.TestProcessor import TestProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Pipeline.Model.CamShot import CamShot
@@ -86,7 +87,7 @@ class TestPipeline(unittest.TestCase):
         target = DiffContoursProcessor()
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
 
-        target.Process(pipelineShots)
+        target.Process(pipelineShots, {})
         # pp.pprint(pipelineShots[0].Metadata, indent=2)
         # pp.pprint(pipelineShots[1].Metadata, indent=2)
         # pp.pprint(pipelineShots[2].Metadata, indent=2)
@@ -106,17 +107,20 @@ class TestPipeline(unittest.TestCase):
         target = YoloObjDetectionProcessor()
         target.PreLoad()
         shots = DirectoryShotsProvider.FromDir(None, folder)
-        target.Process(shots)
+        target.Process(shots, {})
         metadata0 = shots[0].Metadata['YOLO']
         metadata1 = shots[1].Metadata['YOLO']
         metadata2 = shots[2].Metadata['YOLO']
         pp.pprint(metadata0, indent=2)
-        self.assertEqual(len(metadata0), 1)
-        self.assertEqual(len(metadata1), 1)
-        self.assertEqual(len(metadata2), 1)
-        self.assertEqual(metadata0[0]['label'], 'person')
-        self.assertEqual(metadata1[0]['label'], 'person')
-        self.assertEqual(metadata2[0]['label'], 'person')
+        self.assertEqual(len(metadata0['areas']), 1)
+        self.assertEqual(len(metadata1['areas']), 1)
+        self.assertEqual(len(metadata2['areas']), 1)
+        self.assertEqual(metadata0['areas'][0]['label'], 'person')
+        self.assertEqual(metadata1['areas'][0]['label'], 'person')
+        self.assertEqual(metadata2['areas'][0]['label'], 'person')
+        self.assertEqual(metadata0['labels'], 'person')
+        self.assertEqual(metadata1['labels'], 'person')
+        self.assertEqual(metadata2['labels'], 'person')
         #pipelineShots[0].Shot.Show()
 
     def test_TrackingProcessor(self):
@@ -126,8 +130,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor()
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process(pipelineShots)
-        target.Process(pipelineShots)
+        yolo.Process(pipelineShots, {})
+        target.Process(pipelineShots, {})
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         # pipelineShots[1].Shot.Show()
@@ -139,13 +143,20 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         pipeline = ShotsPipeline('Foscam')
         pipeline.providers.append(DirectoryShotsProvider(folder))
+        pipeline.processors.append(TestProcessor({ 'YOLO': { 'labels': 'person:2 car bird' } }))
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(MailSenderProcessor(True))
         pipeline.PreLoad()
         shots = pipeline.GetShots()
-        shots[0].Metadata['YOLO'] = [self.getYoloArea('person'), self.getYoloArea('person'), self.getYoloArea('car')]
-        shots[1].Metadata['YOLO'] = [self.getYoloArea('person'), self.getYoloArea('bird'), self.getYoloArea('car')]
-        shots[2].Metadata['YOLO'] = []
+        shots[0].Metadata['YOLO'] = {}
+        shots[1].Metadata['YOLO'] = {}
+        shots[2].Metadata['YOLO'] = {}
+        shots[0].Metadata['YOLO']['labels'] = "person:2 car"
+        shots[1].Metadata['YOLO']['labels'] = "person bird car"
+        shots[2].Metadata['YOLO']['labels'] = ""
+        shots[0].Metadata['YOLO']['areas'] = [self.getYoloArea('person'), self.getYoloArea('person'), self.getYoloArea('car')]
+        shots[1].Metadata['YOLO']['areas'] = [self.getYoloArea('person'), self.getYoloArea('bird'), self.getYoloArea('car')]
+        shots[2].Metadata['YOLO']['areas'] = []
 
         result = pipeline.Process(shots)
 
@@ -333,7 +344,7 @@ class TestPipeline(unittest.TestCase):
         #self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
 
         mailMD = result[0].Metadata['IMAP']
-        self.assertEqual(mailMD["Subject"], "Foscam @08:01 person:2 (28.03.2019)")
+        self.assertEqual(mailMD["Subject"], "Foscam @08:01:22 person:2 (28.03.2019)")
         #self.assertEqual(mailMD["Body"], "/** Processing LOG **/")
         self.assertGreater(mailMD["MessageSize"], 200000)
 
@@ -349,5 +360,6 @@ class TestPipeline(unittest.TestCase):
         dictEls = json.loads(els['JSON'])
         print(els['JSON'])
         self.assertIsNotNone(dictEls['Analyse'])
-        self.assertEqual(dictEls['Analyse']['YOLO'][0]['label'], "person")
-        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01 person:2 (28.03.2019)")
+        self.assertEqual(dictEls['Analyse']['YOLO']['areas'][0]['label'], "person")
+        self.assertEqual(dictEls['Analyse']['YOLO']['labels'], "person:2")
+        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01:22 person:2 (28.03.2019)")

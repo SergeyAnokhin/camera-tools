@@ -1,5 +1,6 @@
 import cv2, logging, itertools, os, time, cv2
 import numpy as np
+from collections import Counter
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Yolo.YoloContext import YoloContext
@@ -45,7 +46,8 @@ class YoloCamShot:
         if self.ResultsBoxes.IsEmpty():
             return
 
-        self.pShot.Metadata['YOLO'] = []
+        self.pShot.Metadata['YOLO'] = {}
+        self.pShot.Metadata['YOLO']['areas'] = []
         for i in self.ResultsBoxes.indexes.flatten():
             result = {}
             box = self.ResultsBoxes.boxes[i]
@@ -58,8 +60,10 @@ class YoloCamShot:
             result['size'] = (w, h)
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
-            self.pShot.Metadata['YOLO'].append(result)
+            self.pShot.Metadata['YOLO']['areas'].append(result)
             self.log.debug(f'- Found: {result["label"]}: {result["confidence"]} {self.helper.Progress(result["confidence"])}')
+
+        self.pShot.Metadata['YOLO']['labels'] = " ".join(self.GetLabelCouterStrArr())
 
     def Draw(self):
         if self.ResultsBoxes.IsEmpty():
@@ -74,7 +78,22 @@ class YoloCamShot:
             cv2.rectangle(self.pShot.Shot.GetImage(), (x, y), (x + w, y + h), color, 2)
             cv2.putText(self.pShot.Shot.GetImage(), text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
-    
+
+    @staticmethod
+    def GetLabelCouter(pShot: PipelineShot):
+        labels = YoloCamShot.GetLabels(pShot)
+        return Counter(labels)
+
+    def GetLabelCouterStrArr(self):
+        counter = YoloCamShot.GetLabelCouter(self.pShot)
+        items = sorted(counter.items(), key = lambda x : f'{x[1]}{x[0]}', reverse = True)
+        items.sort(key = lambda c: f'{c[1]}{c[0]}', reverse = True)
+        return [f'{c[0]}{":"+str(c[1]) if c[1] > 1 else ""}' for c in items]
+
+    @staticmethod
+    def GetLabels(pShot : PipelineShot):
+        return [area["label"] for area in pShot.Metadata["YOLO"]["areas"]]
+
 class YoloObjDetectionProcessor(Processor):
     confidence = 0.4
     threshold = 0.3
@@ -97,3 +116,16 @@ class YoloObjDetectionProcessor(Processor):
         layerOutputs = yolo.Detect()
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
         yolo.Draw()
+
+    def AfterProcess(self, pShots: [], ctx):
+        labelsCount =  self.GetMaximumCountPerShot(pShots)
+        details = " ".join(labelsCount)
+        ctx[self.name] = {}
+        ctx[self.name]['labels'] = details 
+
+    def GetMaximumCountPerShot(self, pShots: []):
+        counters = [Counter(YoloCamShot.GetLabelCouter(pShot)) for pShot in pShots]
+        uniq = set(itertools.chain.from_iterable([list(c) for c in counters]))
+        maxCounters = [[x, max([c[x] for c in counters])] for x in uniq]
+        maxCounters.sort(key = lambda c: f'{c[1]}{c[0]}', reverse = True)
+        return [f'{c[0]}{":"+str(c[1]) if c[1] > 1 else ""}' for c in maxCounters]

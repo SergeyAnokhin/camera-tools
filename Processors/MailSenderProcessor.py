@@ -1,4 +1,4 @@
-import smtplib, itertools
+import smtplib
 from os.path import basename
 from collections import Counter
 from email.mime.application import MIMEApplication
@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 from Common.SecretConfig import SecretConfig
 from Processors.Processor import Processor
+from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 
 class MailSenderProcessor(Processor):
@@ -19,10 +20,11 @@ class MailSenderProcessor(Processor):
         self.secretConfig.fromJsonFile()
         self.isSimulation = isSimulation
 
-    def Process(self, pShots: []):
-        #send_mail(self, subject, text, files=None):
-        self.log.info(f'### PROCESS: ***{self.name}*** ######################')
-        subject = self.GetSubject(pShots)
+    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+        pass
+
+    def AfterProcess(self, pShots: [], ctx):
+        subject = self.GetSubject(pShots, ctx)
         body = self.GetBodyText(pShots)
 
         msg = MIMEMultipart('alternative')
@@ -117,56 +119,13 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         pShots[0].Metadata["IMAP"]["MessageSize"] = len(msg.as_string())
         return pShots
 
-    def GetSubject(self, pShots: []):
+    def GetSubject(self, pShots: [], ctx):
         dt = pShots[0].Shot.GetDatetime()
         camera = self.config.camera
         subject = f"{camera} @{dt:%H:%M:%S} "
 
-        labelsCount = self.GetMaximumCountPerShot(pShots)
-
-        details = " ".join(labelsCount)
+        details = ctx["YOLO"]["labels"] if "YOLO" in ctx and "labels" in ctx["YOLO"] else ""
         return subject + details + f' ({dt:%d.%m.%Y})'
-
-    def GetMaximumCountPerShot(self, pShots: []):
-        counters = []
-        for pShot in pShots:
-            labels = self.GetYoloLabels(pShot)
-            counters.append(Counter(labels))
-        uniq = set(itertools.chain.from_iterable([list(c) for c in counters]))
-        maxCounters = []
-        # for x in uniq:
-        #     maxCounters += [x, max([c[x] for c in counters])] 
-        maxCounters = [[x, max([c[x] for c in counters])] for x in uniq]
-        maxCounters.sort(key = lambda c: f'{c[1]}{c[0]}', reverse = True)
-        return [f'{c[0]}{":"+str(c[1]) if c[1] > 1 else ""}' for c in maxCounters]
-        # all_dict = {}
-        # for pShot in pShots:
-        #     if "YOLO" not in pShot.Metadata:
-        #         continue
-        #     current_dict = {}
-        #     for area in pShot.Metadata["YOLO"]:
-        #         label = area["label"]
-        #         if label in current_dict:
-        #             current_dict[label] += + 1
-        #         else:
-        #             current_dict[label] = 1
-
-        #     for label in current_dict:
-        #         if label in all_dict:
-        #             count = all_dict[label]
-        #             if current_dict[label] > count:
-        #                 all_dict[label] = current_dict[label]
-        #         else:
-        #             all_dict[label] = current_dict[label]
-        # #print(all_dict)
-        # results = []
-        # for label in all_dict:
-        #     count = all_dict[label]
-        #     if count == 1:
-        #         results.append(label)
-        #     else:
-        #         results.append(f'{label}:{count}')
-        # return results
 
     def MapToEmoji(self, label: str):
         mapDict = {
@@ -181,19 +140,17 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             "bear": "&#x1F43B;",
             "bird": "&#x1F426;",
         }
-        return mapDict[label] if label in mapDict else label
+        for old, new in mapDict:
+            label = label.replace(old, new)
+        return label
+        #return mapDict[label] if label in mapDict else label
         
-    def GetYoloLabels(self, pShot: PipelineShot):
-        if "YOLO" not in pShot.Metadata:
-            return []
-        return [area["label"] for area in pShot.Metadata["YOLO"]]
-
     def GetBodyText(self, pShots: []):
         body = ""
         for shot in pShots:
             body += f'#{shot.Index}: {shot.OriginalShot.filename} \n'
-            if 'YOLO' in shot.Metadata:
-                yolo = shot.Metadata['YOLO']
+            if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']['areas']:
+                yolo = shot.Metadata['YOLO']['areas']
                 for item in yolo:
                     body += f'- YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}\n'
             if 'DIFF' in shot.Metadata:
@@ -214,8 +171,8 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
                 <td>#{shot.Index}: {shot.OriginalShot.filename}</td>
                 <td></td>
             </tr>\n"""
-        if 'YOLO' in shot.Metadata:
-            yolo = shot.Metadata['YOLO']
+        if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']['areas']:
+            yolo = shot.Metadata['YOLO']['areas']
             for item in yolo:
                 body += self.GetLine(f'&#x1F9E0; YOLO: {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
                                 item["confidence"]*100, 'w3-blue')

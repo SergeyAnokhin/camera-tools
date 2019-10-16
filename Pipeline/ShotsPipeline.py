@@ -29,8 +29,9 @@ class ShotsPipeline:
         return shots
 
     def Process(self, pShots: []):
+        pipelineContext = {}
         for processor in self.processors:
-            processor.Process(pShots)
+            processor.Process(pShots, pipelineContext)
             PostProcess = getattr(processor, "PostProcess", None)
             if callable(PostProcess):
                 processor.PostProcess(pShots)
