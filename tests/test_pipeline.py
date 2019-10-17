@@ -97,7 +97,8 @@ class TestPipeline(unittest.TestCase):
         metadata = pipelineShots[0].Metadata['DIFF']
         self.assertGreater(metadata['Diff']['TotalArea'], 5000)
         self.assertLess(metadata['Diff']['TotalArea'], 6000)
-        self.assertEqual(len(metadata['boxes']), 2)
+        self.assertEqual(metadata['Diff']['Count'], 3)
+        self.assertEqual(len(metadata['boxes']), 3)
         self.assertGreater(metadata['boxes'][0]['area'], 5000)
         self.assertLess(metadata['boxes'][0]['area'], 6000)
 
@@ -109,11 +110,11 @@ class TestPipeline(unittest.TestCase):
         shots = DirectoryShotsProvider.FromDir(None, folder)
         target.Process(shots, {})
         self.assertEqual(5, len(shots))
-        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,48)
-        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,50)
-        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,52)
-        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,53)
-        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,58)
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,48))
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,50))
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,52))
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,53))
+        self.assertEqual(shots[0].Shot.GetDatetime(), datetime.datetime(2019,10,16,14,21,58))
         self.assertFalse('YOLO' in shots[0].Metadata) ['YOLO']
         self.assertFalse('YOLO' in shots[1].Metadata) ['YOLO']
         self.assertFalse('YOLO' in shots[2].Metadata) ['YOLO']

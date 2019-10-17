@@ -50,6 +50,7 @@ class DiffCamShot:
             pShot.Metadata['DIFF'][summaryName] = {}
             pShot.Metadata['DIFF'][summaryName]['TotalArea'] = totalArea
             pShot.Metadata['DIFF'][summaryName]['Areas'] = areas
+            pShot.Metadata['DIFF'][summaryName]['Count'] = len(cnts)
         self.log.debug(f'{self.helper.Progress(totalArea, 2.5e4)} Contours {summaryName}: {len(cnts)}. Total contours area : {totalArea} ({", ".join(areasStr)})')
         return cnts
 
@@ -66,7 +67,7 @@ class DiffCamShot:
 
     def DrawBoxes(self, pShot: PipelineShot, contours):
         pShot.Metadata['DIFF']['boxes'] = []
-        for c in contours[0:2]:
+        for c in contours[0:3]:
             area = int(cv2.contourArea(c))
             (x, y, w, h) = cv2.boundingRect(c)
             cv2.rectangle(pShot.Shot.GetImage(), (x, y), (x + w, y + h), (0, 255, 0), 1, 8)
