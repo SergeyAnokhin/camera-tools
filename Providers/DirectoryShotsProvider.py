@@ -22,10 +22,10 @@ class DirectoryShotsProvider(Provider):
     def GetShotsProtected(self, pShots: []):
         dt: datetime = None
         folder = self.folder if self.folder else self.config.path_from
-        if len(pShots) > 0 and 'IMAP' in pShots[0].Metadata and 'datetime' in pShots[0].Metadata['IMAP']:
+        if len(pShots) > 0 and 'PROV:IMAP' in pShots[0].Metadata and 'start' in pShots[0].Metadata['PROV:IMAP']:
             meta = pShots[0].Metadata
-            dtStr = meta['IMAP']['datetime']
-            dt = datetime.datetime.strptime(dtStr, '%Y-%m-%d %H:%M:%S')
+            dtStr = meta['PROV:IMAP']['start']
+            dt = self.helper.FromTimeStampStr(dtStr)
             self.log.debug(f'Search files: @{dt} in {folder}')
 
         # path_from: F:\inetpub\ftproot\Camera\Foscam\FI9805W_C4D6553DECE1
@@ -35,8 +35,10 @@ class DirectoryShotsProvider(Provider):
                             self.helper.FileNameByDateRange(x, dt, self.config.camera_triggered_interval_sec)
                                 and self.helper.IsImage(x),
                         self.config.ignore_dir)
-        return [PipelineShot(CamShot(f)) for f in filenames]
-        #[s.LoadImage() for s in shots]
-        # filesList = ", ".join(map(lambda f: f.filename, shots))
-        # self.log.debug(f'Found shots: {len(shots)}: {filesList}')
-        #return [PipelineShot(s) for s in shots]
+
+        for f in filenames:
+            pShot = PipelineShot(CamShot(f))
+            meta = self.CreateMetadata(pShot)
+            meta['start'] = dtStr if dtStr else 'None'
+            meta['filename'] = f
+            yield pShot

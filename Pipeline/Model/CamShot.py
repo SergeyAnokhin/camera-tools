@@ -12,6 +12,15 @@ class CamShot(FileImage):
     def GetDatetime(self, is_raise_exception = True):
         return self.helper.get_datetime(self.filename, is_raise_exception)
 
+    def GetId(self, camera: str):
+        dt = self.GetDatetime()
+        return f'{camera}@{dt:%Y%m%d_%H%M%S}'
+
+    def GetIdUtc(self, camera: str):
+        dt = self.GetDatetime()
+        dt = self.helper.ToUtcTime(dt)
+        return f'{camera}@{dt:%Y%m%d_%H%M%S}'
+
     def GrayImage(self):
         return cv2.cvtColor(self.GetImage(), cv2.COLOR_BGR2GRAY)
 

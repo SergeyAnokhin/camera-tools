@@ -5,10 +5,12 @@ import logging, os, json, datetime, shutil, threading, sys
 from Common.GmailContext import GmailContext
 from Common.ImapGmailHelper import ImapGmailHelper
 from Common.SecretConfig import SecretConfig
+from Common.CommonHelper import CommonHelper
 from OpenCV.ThreeShots import ThreeShots
 from OpenCV.YoloContext import YoloContext
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Providers.ImapShotsProvider import ImapShotsProvider
+from Providers.ElasticSearchProvider import ElasticSearchProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
@@ -35,6 +37,7 @@ camera = 'Foscam'
 isSimulation = False
 secretConfig = SecretConfig()
 secretConfig.fromJsonFile()
+helper = CommonHelper()
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
 file_error_handler.setLevel(logging.ERROR)
@@ -82,13 +85,20 @@ def getImage():
     # print(request.data)
     log.info(f'IMAGE: id={request.args.get("id")}')
     log.info(f'IMAGE: remote_addr={request.remote_addr}')
-    key = secretConfig.image_id_decode_key.encode()
     id = request.args.get("id")
     if not id:
         return ""
-    id = Fernet(key).decrypt(id.encode()).decode()
+    # id = helper.Decode(id)
+    
     log.info(f'IMAGE: id= {id}')
-    return send_file('../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate/Snap_20190206-090254-1.jpg', mimetype='image/jpeg')
+    (camera, time) = id.split('@')
+
+    provider = ElasticSearchProvider(camera, time)
+    pShots = provider.GetShotsProtected([])
+    path = pShot[0].Shot.fullname
+
+    #return send_file('../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate/Snap_20190206-090254-1.jpg', mimetype='image/jpeg')
+    return send_file(path, mimetype='image/jpeg')
 
 @app.route('/simulation', methods=['GET'])
 def simulation():

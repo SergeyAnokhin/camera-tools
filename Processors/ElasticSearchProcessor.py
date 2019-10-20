@@ -22,6 +22,12 @@ class ElasticSearchProcessor(Processor):
         file = FileInfo(pShot.Shot.fullname)
         path = self.GetArchivePath(pShot.Metadata['ARCH']['archive_destination_orig'])
         path_cv = self.GetArchivePath(pShot.Metadata['ARCH']['archive_destination'])
+        if 'PROV:IMAP' in pShot.Metadata and 'datetime' in pShot.Metadata['PROV:IMAP']:
+            source_type = 'mail'
+            event_start = pShot.Metadata['PROV:IMAP']['start']
+        elif 'PROV:IMAP' in pShot.Metadata and 'datetime' in pShot.Metadata['PROV:IMAP']:
+            source_type = 'file'
+            event_start = pShot.Metadata['PROV:DIRC']['start']
 
         dict = {
             "ext": file.get_extension(),  # 'jpg'
@@ -36,6 +42,8 @@ class ElasticSearchProcessor(Processor):
             "position": self.config.position,
             "camera": self.config.camera,
             "value": file.size(),
+            "source_type": source_type,
+            "event_start": event_start,
             "tags": [
                 "synology_cameraarchive",
                 "camera_tools"
@@ -51,14 +59,14 @@ class ElasticSearchProcessor(Processor):
         json_data = json.dumps(dict, indent=4, sort_keys=True)
         meta['JSON'] = json_data
         meta['timestamp_utc'] = file.get_timestamp_utc()
-        id = '{}@{}'.format(self.config.camera, file.get_timestamp_utc())
-        self.log.info(f'- add document: ID = {id}')
+        id = self.helper.GetEsShotId(self.config.camera, file.get_datetime_utc())
+        index = self.helper.GetEsCameraArchiveIndex(file.get_datetime_utc())
+        self.log.info(f'- add document: ID = {id} @ Index = {index}')
         self.log.info(f'    - path:    {path}')
         self.log.info(f'    - path_cv: {path_cv}')
         if not self.isSimulation:
             es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
-            res = es.index(index="cameraarchive-" + file.get_month_id_utc(),
-                        doc_type='doc', body=json_data, id=id)
+            res = es.index(index=index, doc_type='doc', body=json_data, id=id)
         else:
             self.log.debug(json_data)
 

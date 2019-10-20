@@ -1,6 +1,7 @@
 import logging
 from Pipeline.Model.PipelineShot import PipelineShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
+from Common.CommonHelper import CommonHelper
 
 class Processor:
     config: CameraArchiveConfig
@@ -9,6 +10,7 @@ class Processor:
     def __init__(self, name):
         self.name = name
         self.log = logging.getLogger(f"PROC:{name}")
+        self.helper = CommonHelper()
 
     def Preload(self, isUsed = False):
         ''' Will start on application start once '''

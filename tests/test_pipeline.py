@@ -178,7 +178,7 @@ class TestPipeline(unittest.TestCase):
 
         result = pipeline.Process(shots)
 
-        sendMeta = result[0].Metadata['IMAP']
+        sendMeta = result[0].Metadata['SMTP']
         self.assertEqual(sendMeta["Subject"], "Foscam @09:02:54 person:2 car bird (06.02.2019)")
         #self.assertEqual(sendMeta["Body"], "BODY")
         #self.assertGreater(sendMeta["MessageSize"], 200000)
@@ -362,7 +362,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(tempMD['fullname'], "temp\\20190328_080123_Foscam_cv.jpeg")
         #self.assertEqual(tempMD['original_fullname'], "temp\\20190328_080123_Foscam.jpg")
 
-        mailMD = result[0].Metadata['IMAP']
+        mailMD = result[0].Metadata['SMTP']
         self.assertEqual(mailMD["Subject"], "Foscam @08:01:22 person:2 (28.03.2019)")
         #self.assertEqual(mailMD["Body"], "/** Processing LOG **/")
         self.assertGreater(mailMD["MessageSize"], 200000)
@@ -381,4 +381,8 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(dictEls['Analyse'])
         self.assertEqual(dictEls['Analyse']['YOLO']['areas'][0]['label'], "person")
         self.assertEqual(dictEls['Analyse']['YOLO']['labels'], "person:2")
-        self.assertEqual(dictEls['Analyse']['IMAP']['Subject'], "Foscam @08:01:22 person:2 (28.03.2019)")
+        self.assertEqual(dictEls['Analyse']['SMTP']['Subject'], "Foscam @08:01:22 person:2 (28.03.2019)")
+
+    def test_ElasticSearchProvider(self):
+        self.assertTrue(False)
+

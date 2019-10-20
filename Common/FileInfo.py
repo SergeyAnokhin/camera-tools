@@ -1,7 +1,6 @@
 import os
 import re
 import datetime
-import pytz
 from Common.CommonHelper import CommonHelper
 
 
@@ -13,7 +12,6 @@ class FileInfo:
     def __init__(self, full_filename):
         self.helper = CommonHelper()
 
-        self.local = pytz.timezone("Europe/Paris")
         self.path = full_filename
         self.filename = os.path.basename(full_filename)
         self.dir = os.path.dirname(full_filename)
@@ -22,7 +20,7 @@ class FileInfo:
         _, file_extension = os.path.splitext(self.filename)
         return file_extension.replace('.', '')
 
-    def get_datetime(self):
+    def get_datetime(self) -> datetime.datetime:
         re_groups = re.search("(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)", 
             self.filename)
         if not re_groups:
@@ -38,17 +36,16 @@ class FileInfo:
 
     def get_datetime_utc(self):
         naive = self.get_datetime()
-        local_dt = self.local.localize(naive)
-        return local_dt.astimezone(pytz.utc)
+        return self.helper.ToUtcTime(naive)
 
     def get_month_id_utc(self):
-        return self.get_datetime_utc().strftime('%Y.%m')
+        return self.get_datetime_utc().strftime('%Y')
 
     def get_timestamp(self): # 'MDAlarm_20190131-153706'
-        return self.get_datetime().strftime('%Y-%m-%dT%H:%M:%S.000Z')
+        return self.helper.ToTimeStampStr(self.get_datetime())
 
     def get_timestamp_utc(self): # 'MDAlarm_20190131-153706'
-        return self.get_datetime_utc().strftime('%Y-%m-%dT%H:%M:%S.000Z')
+        return self.helper.ToTimeStampStr(self.get_datetime_utc())
 
     def size(self):
         return os.path.getsize(self.path)

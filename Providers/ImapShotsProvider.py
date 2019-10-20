@@ -48,19 +48,19 @@ class ImapShotsProvider(Provider):
             if bool(fileName):
                 memShot = CamShot(fileName)
                 dt = memShot.GetDatetime()
-                dt = dt + datetime.timedelta(0,index)
-                shot = CamShot(filePattern.format(dt, self.config.camera))
+                dtShot = dt + datetime.timedelta(0,index)
+                shot = CamShot(filePattern.format(dtShot, self.config.camera))
                 if beforeFirstSave and index == 0:
                     beforeFirstSave(shot)
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:
-                    self.log.info(f'[MAIL] Attachment already exists: {shot.fullname}')
+                    self.log.info(f'Attachment already exists: {shot.fullname}')
 
                 pShot = PipelineShot(shot, index)
                 meta = self.CreateMetadata(pShot)
-                meta["datetime"] = str(dt)
-                #self.log.info(f'Attachment time : {dt}')
+                meta["start"] = self.helper.ToTimeStampStr(dt)
+                meta["filename"] = fileName
                 result.append(pShot)
             index += 1
         return result

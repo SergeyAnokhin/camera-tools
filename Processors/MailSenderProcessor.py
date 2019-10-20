@@ -16,7 +16,7 @@ class MailSenderProcessor(Processor):
     to: [] = ['home.assistant.sergey@gmail.com', 'anokhin.sergey@gmail.com']
 
     def __init__(self, isSimulation: bool = False):
-        super().__init__("IMAP")
+        super().__init__("SMTP")
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
         self.isSimulation = isSimulation
@@ -26,7 +26,7 @@ class MailSenderProcessor(Processor):
 
     def AfterProcess(self, pShots: [], ctx):
         subject = self.GetSubject(pShots, ctx)
-        body = self.GetBodyText(pShots)
+        # body = self.GetBodyText(pShots)
 
         msg = MIMEMultipart('alternative')
         msg['From'] = self.sender
@@ -95,9 +95,9 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             # part['Content-Disposition'] = f'attachment; filename="{basename(f)}"'
             # msg.attach(part)
 
-            id = f'{self.config.camera}|{pShot.Shot.GetDatetime()}'
-            key = self.secretConfig.image_id_decode_key.encode()
-            id = Fernet(key).encrypt(id.encode()).decode()
+            dt = pShot.Shot.GetDatetime()
+            id = pShot.Shot.GetId(self.config.camera)
+            id = self.helper.Encode(id)
 
             html += f"""
             {self.GetBodyHtml(pShot)}
@@ -110,9 +110,9 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             # """
 
         html += "</div></body></html>"
-        part1 = MIMEText(body, 'plain')
+        # part1 = MIMEText(body, 'plain')
+        #msg.attach(part1)
         part2 = MIMEText(html, 'html')
-        msg.attach(part1)
         msg.attach(part2)
 
         self.log.debug(f"- Send mail: '{subject}' to {self.to}")
@@ -124,10 +124,10 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             smtp.quit() 
             smtp.close()
 
-        pShots[0].Metadata["IMAP"] = {}
-        pShots[0].Metadata["IMAP"]["Subject"] = subject
-        pShots[0].Metadata["IMAP"]["Body"] = body
-        pShots[0].Metadata["IMAP"]["MessageSize"] = len(msg.as_string())
+        pShots[0].Metadata["SMTP"] = {}
+        pShots[0].Metadata["SMTP"]["Subject"] = subject
+        # pShots[0].Metadata["SMTP"]["Body"] = body
+        pShots[0].Metadata["SMTP"]["MessageSize"] = len(msg.as_string())
         return pShots
 
     def GetSubject(self, pShots: [], ctx):

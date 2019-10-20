@@ -1,10 +1,17 @@
-import datetime, re, json, os
+import datetime, re, json, os, pytz
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
+from cryptography.fernet import Fernet
+from Common.SecretConfig import SecretConfig
 from math import log2
 
 class CommonHelper:
+
+    def __init__(self):
+        self.secretConfig = SecretConfig()
+        self.secretConfig.fromJsonFile()
+        self.local = pytz.timezone("Europe/Paris")
 
     def get_datetime(self, input: str, is_raise_exception = True):
         pattern = "(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)"
@@ -26,6 +33,16 @@ class CommonHelper:
             print(f'ERROR: Parse datetime with {input}')
             return None
 
+    def ToUtcTime(self, dt: datetime):
+        local_dt = self.local.localize(dt)
+        return local_dt.astimezone(pytz.utc)
+
+    def ToTimeStampStr(self, dt: datetime.datetime):
+        return dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+    def FromTimeStampStr(self, timestamp: str):
+        return datetime.datetime(timestamp)
+
     def RegexGroupsToDateTime(self, re_groups, add_seconds = 0):
         year = int(re_groups.group(1))
         month = int(re_groups.group(2))
@@ -38,6 +55,13 @@ class CommonHelper:
 
     def IsImage(self, filename: str):
         return filename.endswith(".jpg") or filename.endswith(".jpeg") or filename.endswith(".png")
+
+    def GetEsCameraArchiveIndex(self, datetimeUtc: datetime.datetime):
+        return f"cameraarchive-{datetimeUtc:'%Y'}"
+
+    def GetEsShotId(self, camera: str, datetimeUtc: datetime.datetime):
+        stamp = self.ToTimeStampStr(datetimeUtc)
+        return f'{camera}@{stamp}'
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
         if not start: #no filters
@@ -97,6 +121,14 @@ class CommonHelper:
                 os.unlink(file)
                 removed.append(file)
         return removed
+
+    def Encode(self, message: str):
+        key = self.secretConfig.image_id_decode_key.encode()
+        return Fernet(key).encrypt(message.encode()).decode()
+
+    def Decode(self, token: str):
+        key = self.secretConfig.image_id_decode_key.encode()
+        return Fernet(key).decrypt(token.encode()).decode()
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
