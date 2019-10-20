@@ -1,5 +1,6 @@
 import smtplib
 from os.path import basename
+from cryptography.fernet import Fernet
 from collections import Counter
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -85,19 +86,28 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 
         for pShot in pShots or []:
             f = pShot.Shot.fullname
-            with open(f, "rb") as fil:
-                part = MIMEApplication(
-                    fil.read(),
-                    Name=basename(f)
-                )
-            part.add_header('Content-ID', f'<{pShot.Shot.filename}>')
-            part['Content-Disposition'] = f'attachment; filename="{basename(f)}"'
-            msg.attach(part)
+            # with open(f, "rb") as fil:
+            #     part = MIMEApplication(
+            #         fil.read(),
+            #         Name=basename(f)
+            #     )
+            # part.add_header('Content-ID', f'<{pShot.Shot.filename}>')
+            # part['Content-Disposition'] = f'attachment; filename="{basename(f)}"'
+            # msg.attach(part)
+
+            id = f'{self.config.camera}|{pShot.Shot.GetDatetime()}'
+            key = self.secretConfig.image_id_decode_key.encode()
+            id = Fernet(key).encrypt(id.encode()).decode()
 
             html += f"""
             {self.GetBodyHtml(pShot)}
-            <img src="cid:{pShot.Shot.filename}"><br>
+            <img src="http://winserver.duckdns.org:4950/image?id={id}"><br>
             """
+
+            # html += f"""
+            # {self.GetBodyHtml(pShot)}
+            # <img src="cid:{pShot.Shot.filename}"><br>
+            # """
 
         html += "</div></body></html>"
         part1 = MIMEText(body, 'plain')

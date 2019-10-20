@@ -7,6 +7,7 @@ class SecretConfig:
     def __init__(self):
         self.gmail_username = ""
         self.gmail_password = ""
+        self.image_id_decode_key = ""
 
     def fromJsonFile(self):
         with open(self.filename, "r") as read_file:

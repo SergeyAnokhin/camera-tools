@@ -1,9 +1,10 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request, send_file
 from logging.handlers import TimedRotatingFileHandler
+from cryptography.fernet import Fernet
 import logging, os, json, datetime, shutil, threading, sys
 from Common.GmailContext import GmailContext
 from Common.ImapGmailHelper import ImapGmailHelper
+from Common.SecretConfig import SecretConfig
 from OpenCV.ThreeShots import ThreeShots
 from OpenCV.YoloContext import YoloContext
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
@@ -32,6 +33,8 @@ temp = 'temp'
 imap_folder = 'camera/foscam'
 camera = 'Foscam'
 isSimulation = False
+secretConfig = SecretConfig()
+secretConfig.fromJsonFile()
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
 file_error_handler.setLevel(logging.ERROR)
@@ -73,6 +76,19 @@ pipeline.processors.append(ElasticSearchProcessor(isSimulation))
 pipeline.PreLoad()
 
 log.info('initialization API finished @ %s', datetime.datetime.now())
+
+@app.route('/image', methods=['GET'])
+def getImage():
+    # print(request.data)
+    log.info(f'IMAGE: id={request.args.get("id")}')
+    log.info(f'IMAGE: remote_addr={request.remote_addr}')
+    key = secretConfig.image_id_decode_key.encode()
+    id = request.args.get("id")
+    if not id:
+        return ""
+    id = Fernet(key).decrypt(id.encode()).decode()
+    log.info(f'IMAGE: id= {id}')
+    return send_file('../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate/Snap_20190206-090254-1.jpg', mimetype='image/jpeg')
 
 @app.route('/simulation', methods=['GET'])
 def simulation():

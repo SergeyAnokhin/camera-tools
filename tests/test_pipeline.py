@@ -163,7 +163,7 @@ class TestPipeline(unittest.TestCase):
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(TestProcessor({ 'YOLO': { 'labels': 'person:2 car bird' } }))
         pipeline.processors.append(DiffContoursProcessor())
-        pipeline.processors.append(MailSenderProcessor(True))
+        pipeline.processors.append(MailSenderProcessor(False))
         pipeline.PreLoad()
         shots = pipeline.GetShots()
         shots[0].Metadata['YOLO'] = {}
@@ -181,7 +181,8 @@ class TestPipeline(unittest.TestCase):
         sendMeta = result[0].Metadata['IMAP']
         self.assertEqual(sendMeta["Subject"], "Foscam @09:02:54 person:2 car bird (06.02.2019)")
         #self.assertEqual(sendMeta["Body"], "BODY")
-        self.assertGreater(sendMeta["MessageSize"], 200000)
+        #self.assertGreater(sendMeta["MessageSize"], 200000)
+        self.assertIn('winserver', sendMeta["YOLO"])
 
     def getYoloArea(self, label:str):
         return {
