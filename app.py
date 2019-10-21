@@ -94,8 +94,8 @@ def getImage():
     (camera, time) = id.split('@')
 
     provider = ElasticSearchProvider(camera, time)
-    pShots = provider.GetShotsProtected([])
-    path = pShot[0].Shot.fullname
+    pShots = provider.GetShots([])
+    path = pShots[0].Shot.fullname
 
     #return send_file('../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate/Snap_20190206-090254-1.jpg', mimetype='image/jpeg')
     return send_file(path, mimetype='image/jpeg')

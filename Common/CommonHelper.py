@@ -57,7 +57,7 @@ class CommonHelper:
         return filename.endswith(".jpg") or filename.endswith(".jpeg") or filename.endswith(".png")
 
     def GetEsCameraArchiveIndex(self, datetimeUtc: datetime.datetime):
-        return f"cameraarchive-{datetimeUtc:'%Y'}"
+        return f"cameraarchive-{datetimeUtc:%Y}"
 
     def GetEsShotId(self, camera: str, datetimeUtc: datetime.datetime):
         stamp = self.ToTimeStampStr(datetimeUtc)

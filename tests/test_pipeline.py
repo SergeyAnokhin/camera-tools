@@ -8,6 +8,7 @@ import sys
 from copy import copy, deepcopy
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
+from Providers.ElasticSearchProvider import ElasticSearchProvider
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
@@ -384,5 +385,10 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(dictEls['Analyse']['SMTP']['Subject'], "Foscam @08:01:22 person:2 (28.03.2019)")
 
     def test_ElasticSearchProvider(self):
-        self.assertTrue(False)
+        # python -m unittest tests.test_pipeline.TestPipeline.test_ElasticSearchProvider
+        target = ElasticSearchProvider("Foscam", datetime.datetime(2019, 10, 20, 17, 18, 8), True)
+        result = target.GetShots([])
+        meta = result[0].Metadata['PROV:ELSE']
+        self.assertEqual("Foscam@2019-10-20T15:18:08.000Z", meta['id'])
+        self.assertEqual("cameraarchive-2019", meta['index'])
 

@@ -13,16 +13,26 @@ class ElasticSearchProvider(Provider):
         self.camera = camera
         self.datetime = datetime
         self.helper = CommonHelper()
+        self.isSimulation = isSimulation
 
     def GetShotsProtected(self, pShots: []):
-        es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
         dtUtc = self.helper.ToUtcTime(self.datetime)
         index = self.helper.GetEsCameraArchiveIndex(dtUtc)
         id = self.helper.GetEsShotId(self.camera, dtUtc)
 
-        #res = es.get(index="cameraarchive-2019.10", doc_type='doc', id='Foscam@2019-10-20T15:18:08.000Z')
-        res = es.get(index=index, doc_type='doc', id=id)
-        path_cv = print(res['_source']['path_cv']) # /CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg
+        if not self.isSimulation:
+            es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
+            #res = es.get(index="cameraarchive-2019.10", doc_type='doc', id='Foscam@2019-10-20T15:18:08.000Z')
+            res = es.get(index=index, doc_type='doc', id=id)
+            path_cv = res['_source']['path_cv'] # /CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg
+        else:
+            path_cv = "/CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg"
+
         path_cv = os.path.join("\\\\diskstation", path_cv)
         shot = CamShot(path_cv)
-        return [PipelineShot(shot)]
+        pShot = PipelineShot(shot)
+        meta = self.CreateMetadata(pShot)
+        meta['id'] = id
+        meta['index'] = index
+
+        return [pShot]
