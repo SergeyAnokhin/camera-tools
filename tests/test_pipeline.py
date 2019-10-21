@@ -1,7 +1,7 @@
 # run with :
 # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
 # python -m unittest discover     
-import unittest, datetime, logging, os, json
+import unittest, datetime, logging, os, json, subprocess
 import numpy as np
 import pprint as pp
 import sys
@@ -391,4 +391,3 @@ class TestPipeline(unittest.TestCase):
         meta = result[0].Metadata['PROV:ELSE']
         self.assertEqual("Foscam@2019-10-20T15:18:08.000Z", meta['id'])
         self.assertEqual("cameraarchive-2019", meta['index'])
-

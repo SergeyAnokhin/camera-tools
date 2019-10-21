@@ -1,4 +1,4 @@
-import datetime, re, json, os, pytz
+import datetime, re, json, os, pytz, subprocess
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -62,6 +62,14 @@ class CommonHelper:
     def GetEsShotId(self, camera: str, datetimeUtc: datetime.datetime):
         stamp = self.ToTimeStampStr(datetimeUtc)
         return f'{camera}@{stamp}'
+
+    def GetWifiName(self):
+        output = subprocess.check_output("netsh wlan show interfaces")
+        for line in output.splitlines():
+            line = line.decode("ascii",errors="ignore")
+            if " SSID " in line:
+                ssid = line.split(':')[1].strip()
+        return ssid
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
         if not start: #no filters
