@@ -22,12 +22,15 @@ class ElasticSearchProcessor(Processor):
         file = FileInfo(pShot.Shot.fullname)
         path = self.GetArchivePath(pShot.Metadata['ARCH']['archive_destination_orig'])
         path_cv = self.GetArchivePath(pShot.Metadata['ARCH']['archive_destination'])
-        if 'PROV:IMAP' in pShot.Metadata and 'datetime' in pShot.Metadata['PROV:IMAP']:
+        if 'PROV:IMAP' in pShot.Metadata and 'start' in pShot.Metadata['PROV:IMAP']:
             source_type = 'mail'
             event_start = pShot.Metadata['PROV:IMAP']['start']
-        elif 'PROV:IMAP' in pShot.Metadata and 'datetime' in pShot.Metadata['PROV:IMAP']:
+        elif 'PROV:DIRC' in pShot.Metadata and 'start' in pShot.Metadata['PROV:DIRC']:
             source_type = 'file'
             event_start = pShot.Metadata['PROV:DIRC']['start']
+        else:
+            source_type = 'unknown'
+            event_start = None
 
         dict = {
             "ext": file.get_extension(),  # 'jpg'

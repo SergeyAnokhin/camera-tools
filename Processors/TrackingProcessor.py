@@ -24,8 +24,8 @@ class TrackingProcessor(Processor):
         box_index = 0
         boxes_current = []
         shot = pShot.Shot
-        if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']['areas']:
-            self.log.warn("No data on YOLO analysis found. Ignore tracking analysys")
+        if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']:
+            self.log.warning("No data on YOLO analysis found. Ignore tracking analysys")
             return
         summary = pShot.Metadata['YOLO']['areas']
         for box_data in summary:

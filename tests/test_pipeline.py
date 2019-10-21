@@ -17,6 +17,7 @@ from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
+from Common.CommonHelper import CommonHelper
 from tests.TestProcessor import TestProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
@@ -39,6 +40,7 @@ class TestPipeline(unittest.TestCase):
         self.log.info(' ##################### ==> ')
         self.log.info('start %s: %s', __name__, datetime.datetime.now())
         self.archiver = CameraArchiveHelper()
+        self.helper = CommonHelper()
 
     def test_imapShotsProvider(self):
         target = ImapShotsProvider('temp/queue')
@@ -63,16 +65,14 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         pShots = DirectoryShotsProvider.FromDir(None, folder)
 
-        folder = '../camera-OpenCV-data/Camera/Foscam/2019-02'
-
         # Create base Shot
         for pShot in pShots:
-            pShot.Metadata['IMAP'] = {}
-            pShot.Metadata['IMAP']['datetime'] = str(pShot.Shot.GetDatetime())
+            pShot.Metadata['PROV:IMAP'] = {}
+            pShot.Metadata['PROV:IMAP']['start'] = self.helper.ToTimeStampStr(pShot.Shot.GetDatetime())
 
         target = DirectoryShotsProvider()
         target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
-        target.config.path_from = folder
+        target.config.path_from = '../camera-OpenCV-data/Camera/Foscam/2019-02'
         pShots = target.GetShots(pShots)
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
@@ -164,7 +164,7 @@ class TestPipeline(unittest.TestCase):
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(TestProcessor({ 'YOLO': { 'labels': 'person:2 car bird' } }))
         pipeline.processors.append(DiffContoursProcessor())
-        pipeline.processors.append(MailSenderProcessor(False))
+        pipeline.processors.append(MailSenderProcessor(True))
         pipeline.PreLoad()
         shots = pipeline.GetShots()
         shots[0].Metadata['YOLO'] = {}
@@ -183,7 +183,6 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(sendMeta["Subject"], "Foscam @09:02:54 person:2 car bird (06.02.2019)")
         #self.assertEqual(sendMeta["Body"], "BODY")
         #self.assertGreater(sendMeta["MessageSize"], 200000)
-        self.assertIn('winserver', sendMeta["YOLO"])
 
     def getYoloArea(self, label:str):
         return {
@@ -202,6 +201,7 @@ class TestPipeline(unittest.TestCase):
         }
 
     def test_ArchiveProcessor(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_ArchiveProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
@@ -217,7 +217,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
 
     def test_SaveToTemp(self):
-        # python -m unittest tests.test_pipeline.TestPipeline.test_Archiveage
+        # python -m unittest tests.test_pipeline.TestPipeline.test_SaveToTemp
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
@@ -239,6 +239,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(result[2].OriginalShot.fullname, "temp\\20190206_090256_Foscam.jpg")
 
     def test_ElasticSearchProcessor(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_ElasticSearchProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
         pipeline = ShotsPipeline('Foscam')
@@ -366,7 +367,7 @@ class TestPipeline(unittest.TestCase):
         mailMD = result[0].Metadata['SMTP']
         self.assertEqual(mailMD["Subject"], "Foscam @08:01:22 person:2 (28.03.2019)")
         #self.assertEqual(mailMD["Body"], "/** Processing LOG **/")
-        self.assertGreater(mailMD["MessageSize"], 200000)
+        #self.assertGreater(mailMD["MessageSize"], 200000)
 
         hassMD = result[0].Metadata['HASS']
         self.assertEqual(hassMD['hassio_location'], 'temp\\cv_Foscam_0.jpg')

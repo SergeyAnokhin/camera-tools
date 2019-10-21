@@ -101,7 +101,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 
             html += f"""
             {self.GetBodyHtml(pShot)}
-            <img src="http://winserver.duckdns.org:4950/image?id={id}"><br>
+            <img src="http://{self.secretConfig.camera_tools_host}/image?id={id}"><br>
             """
 
             # html += f"""

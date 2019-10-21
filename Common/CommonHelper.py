@@ -41,7 +41,7 @@ class CommonHelper:
         return dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     def FromTimeStampStr(self, timestamp: str):
-        return datetime.datetime(timestamp)
+        return datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.000Z')
 
     def RegexGroupsToDateTime(self, re_groups, add_seconds = 0):
         year = int(re_groups.group(1))
