@@ -7,7 +7,7 @@ class YoloDetection:
     def __init__(self, detection, shot: CamShot):
         self.detection = detection
         self.shot = shot
-        (self.ImageHeight, self.ImageWidth) = self.shot.image.shape[:2]
+        (self.ImageHeight, self.ImageWidth) = self.shot.GetImage().shape[:2]
 
     def GetClassId(self):
         scores = self.detection[5:]

@@ -42,7 +42,7 @@ class YoloCamShot:
         return layerOutputs
 
     def ProcessOutput(self, layerOutputs, minConfidence, threshold):
-        self.ResultsBoxes = YoloResultBoxes(self.pShot.Shot, layerOutputs, minConfidence, threshold)
+        self.ResultsBoxes = YoloResultBoxes(self.pShot.OriginalShot, layerOutputs, minConfidence, threshold)
         if self.ResultsBoxes.IsEmpty():
             return
 
