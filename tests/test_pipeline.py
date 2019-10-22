@@ -18,6 +18,7 @@ from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 from Common.CommonHelper import CommonHelper
+from Common.SecretConfig import SecretConfig
 from tests.TestProcessor import TestProcessor
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
@@ -189,6 +190,7 @@ class TestPipeline(unittest.TestCase):
 
         sendMeta = result[0].Metadata['SMTP']
         self.assertEqual(sendMeta["Subject"], "Foscam @09:02:54 person:2 car bird (06.02.2019)")
+        self.assertEqual(sendMeta["id"], 'Foscam@2019-02-06T09:02:56.000Z')
         #self.assertEqual(sendMeta["Body"], "BODY")
         #self.assertGreater(sendMeta["MessageSize"], 200000)
 
@@ -400,3 +402,10 @@ class TestPipeline(unittest.TestCase):
         meta = result[0].Metadata['PROV:ELSE']
         self.assertEqual("Foscam@2019-10-20T15:18:08.000Z", meta['id'])
         self.assertEqual("cameraarchive-2019", meta['index'])
+
+    def test_secretConfig(self):
+        secretConfig = SecretConfig()
+        secretConfig.fromJsonFile()
+
+        wifi = self.helper.GetWifiName()
+        

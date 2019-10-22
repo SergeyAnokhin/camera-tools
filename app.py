@@ -86,16 +86,18 @@ def getImage():
     log.info(f'IMAGE: id={request.args.get("id")}')
     log.info(f'IMAGE: remote_addr={request.remote_addr}')
     id = request.args.get("id")
+    isOriginal = True if request.args.get("original") else False
     if not id:
         return ""
-    # id = helper.Decode(id)
+    id = helper.Decode(id)
     
-    log.info(f'IMAGE: id= {id}')
-    (camera, time) = id.split('@')
+    log.info(f'IMAGE: decoded id= {id}')
+    (camera, timestamp) = id.split('@')
+    time = helper.FromTimeStampStr(timestamp)
 
     provider = ElasticSearchProvider(camera, time)
     pShots = provider.GetShots([])
-    path = pShots[0].Shot.fullname
+    path = pShots[0].Shot.fullname if not isOriginal else pShots[0].ShotOriginal.fullname
 
     #return send_file('../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate/Snap_20190206-090254-1.jpg', mimetype='image/jpeg')
     return send_file(path, mimetype='image/jpeg')

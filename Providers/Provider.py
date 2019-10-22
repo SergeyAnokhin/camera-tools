@@ -20,8 +20,6 @@ class Provider:
         self.log.info(f'<<<<<< SHOTS: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
         newPShots = self.GetShotsProtected(pShots)
 
-        #pShots = Enumerable(pShots).union(newPShots).map(lambda: p: p[0])
-        #.distinct(key = lambda: x: x.Shot.GetDatetime())
         pShots = query(pShots).union(newPShots, self.GetTime).to_list()
         # newPShots = filter(lambda s: not self.AlreadyHasShotAtThisTime(pShots, s), newPShots)
         # # newPShots.filt [s for s in newPShots if not self.AlreadyHasShotAtThisTime(pShots, s)]

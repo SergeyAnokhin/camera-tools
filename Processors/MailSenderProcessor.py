@@ -26,7 +26,6 @@ class MailSenderProcessor(Processor):
 
     def AfterProcess(self, pShots: [], ctx):
         subject = self.GetSubject(pShots, ctx)
-        # body = self.GetBodyText(pShots)
 
         msg = MIMEMultipart('alternative')
         msg['From'] = self.sender
@@ -86,22 +85,16 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 
         for pShot in pShots or []:
             f = pShot.Shot.fullname
-            # with open(f, "rb") as fil:
-            #     part = MIMEApplication(
-            #         fil.read(),
-            #         Name=basename(f)
-            #     )
-            # part.add_header('Content-ID', f'<{pShot.Shot.filename}>')
-            # part['Content-Disposition'] = f'attachment; filename="{basename(f)}"'
-            # msg.attach(part)
 
             dt = pShot.Shot.GetDatetime()
-            id = pShot.Shot.GetId(self.config.camera)
-            id = self.helper.Encode(id)
+            idSource = pShot.Shot.GetId(self.config.camera)
+            id = self.helper.Encode(idSource)
 
             html += f"""
             {self.GetBodyHtml(pShot)}
-            <img src="http://{self.secretConfig.camera_tools_host}/image?id={id}"><br>
+            <img src="http://{self.secretConfig.camera_tools_host}/image?id={id}">
+            <a href="http://{self.secretConfig.camera_tools_host}/image?id={id}&original=1">original</a>
+            <br>
             """
 
             # html += f"""
@@ -115,6 +108,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         part2 = MIMEText(html, 'html')
         msg.attach(part2)
 
+        meta0 = self.CreateMetadata(pShots[0])
         self.log.debug(f"- Send mail: '{subject}' to {self.to}")
         if not self.isSimulation:
             smtp = smtplib.SMTP('smtp.gmail.com', 587)
@@ -123,11 +117,12 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
             smtp.sendmail(self.sender, self.to, msg.as_string())
             smtp.quit() 
             smtp.close()
+        else:
+            meta0['html'] = html
+            meta0['id'] = idSource
 
-        pShots[0].Metadata["SMTP"] = {}
-        pShots[0].Metadata["SMTP"]["Subject"] = subject
-        # pShots[0].Metadata["SMTP"]["Body"] = body
-        pShots[0].Metadata["SMTP"]["MessageSize"] = len(msg.as_string())
+        meta0["Subject"] = subject
+        meta0["MessageSize"] = len(msg.as_string())
         return pShots
 
     def GetSubject(self, pShots: [], ctx):

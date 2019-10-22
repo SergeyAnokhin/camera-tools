@@ -25,12 +25,14 @@ class ElasticSearchProvider(Provider):
             #res = es.get(index="cameraarchive-2019.10", doc_type='doc', id='Foscam@2019-10-20T15:18:08.000Z')
             res = es.get(index=index, doc_type='doc', id=id)
             path_cv = res['_source']['path_cv'] # /CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg
+            path = res['_source']['path'] # /CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam.jpg
         else:
             path_cv = "/CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg"
+            path = "/CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam.jpg"
 
-        path_cv = os.path.join("\\\\diskstation", path_cv)
-        shot = CamShot(path_cv)
+        shot = CamShot(os.path.join("\\\\diskstation", path_cv))
         pShot = PipelineShot(shot)
+        pShot.OriginalShot = CamShot(os.path.join("\\\\diskstation", path))
         meta = self.CreateMetadata(pShot)
         meta['id'] = id
         meta['index'] = index

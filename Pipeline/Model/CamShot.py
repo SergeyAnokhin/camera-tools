@@ -13,8 +13,8 @@ class CamShot(FileImage):
         return self.helper.get_datetime(self.filename, is_raise_exception)
 
     def GetId(self, camera: str):
-        dt = self.GetDatetime()
-        return f'{camera}@{dt:%Y%m%d_%H%M%S}'
+        timestamp = self.helper.ToTimeStampStr(self.GetDatetime())
+        return f'{camera}@{timestamp}'
 
     def GetIdUtc(self, camera: str):
         dt = self.GetDatetime()
