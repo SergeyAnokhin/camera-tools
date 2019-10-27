@@ -42,6 +42,9 @@ class TestPipeline(unittest.TestCase):
         self.log.info('start %s: %s', __name__, datetime.datetime.now())
         self.archiver = CameraArchiveHelper()
         self.helper = CommonHelper()
+        self.helper.GetNetworkConfig()
+        CommonHelper.networkConfig['camera_live_archive'] = ""
+        CommonHelper.networkConfig['camera_archive_archive'] = ""
 
     def test_imapShotsProvider(self):
         target = ImapShotsProvider('temp/queue')
@@ -53,6 +56,7 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(shots[0].Shot.Exist())
 
     def test_DirectoryShotsProvider(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_DirectoryShotsProvider
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         shots = DirectoryShotsProvider.FromDir(None, folder)
         self.assertEqual(3, len(shots))
@@ -71,9 +75,12 @@ class TestPipeline(unittest.TestCase):
             pShot.Metadata['PROV:IMAP'] = {}
             pShot.Metadata['PROV:IMAP']['start'] = self.helper.ToTimeStampStr(pShot.Shot.GetDatetime())
 
+        CommonHelper.networkConfig = {}
+        CommonHelper.networkConfig['camera_archive_path'] = "../temp/CameraArchive"
+        CommonHelper.networkConfig['camera_live_path'] = "../camera-OpenCV-data/Camera/Foscam"
         target = DirectoryShotsProvider()
         target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
-        target.config.path_from = '../camera-OpenCV-data/Camera/Foscam/2019-02'
+        target.config.path_from = '2019-02'
         pShots = target.GetShots(pShots)
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
@@ -213,6 +220,8 @@ class TestPipeline(unittest.TestCase):
     def test_ArchiveProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_ArchiveProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        CommonHelper.networkConfig = {}
+        CommonHelper.networkConfig['camera_archive_path'] = "../temp/CameraArchive"
 
         pipeline = ShotsPipeline('Foscam')
         pipeline.providers.append(DirectoryShotsProvider(folder))
@@ -223,8 +232,8 @@ class TestPipeline(unittest.TestCase):
         result = pipeline.Process(shots)
 
         archMD = result[0].Metadata['ARCH']
-        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam_cv.jpeg')
-        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
+        self.assertEqual(archMD['archive_destination'], '../temp/CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], '../temp/CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
 
     def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_SaveToTemp
@@ -251,6 +260,7 @@ class TestPipeline(unittest.TestCase):
     def test_ElasticSearchProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_ElasticSearchProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        CommonHelper.networkConfig = {}
 
         pipeline = ShotsPipeline('Foscam')
         pipeline.providers.append(DirectoryShotsProvider(folder))
@@ -304,6 +314,7 @@ class TestPipeline(unittest.TestCase):
 
     def test_WholePipeline(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_WholePipeline
+        CommonHelper.networkConfig = {}
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
         hassioDir = "temp"
         if not os.path.exists(hassioDir):
@@ -397,6 +408,7 @@ class TestPipeline(unittest.TestCase):
 
     def test_ElasticSearchProvider(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_ElasticSearchProvider
+        CommonHelper.networkConfig = {}
         target = ElasticSearchProvider("Foscam", datetime.datetime(2019, 10, 20, 17, 18, 8), True)
         result = target.GetShots([])
         meta = result[0].Metadata['PROV:ELSE']
@@ -404,8 +416,13 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual("cameraarchive-2019", meta['index'])
 
     def test_secretConfig(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_secretConfig
         secretConfig = SecretConfig()
         secretConfig.fromJsonFile()
 
-        wifi = self.helper.GetWifiName()
-        
+        network = self.helper.GetNetworkName()
+        networkConfig = secretConfig.GetNetworkConfig(network)
+
+        print(f'network: {network}; networkConfig: {networkConfig}')
+        self.assertIsNotNone(networkConfig['elasticsearch'])
+        self.assertTrue(network in networkConfig['network'])

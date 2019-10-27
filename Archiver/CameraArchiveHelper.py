@@ -6,7 +6,6 @@ from Common.ElasticSearchHelper import ElasticSearchHelper
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Common.CommonHelper import CommonHelper
 
-
 class CameraArchiveHelper:
 
     def load_configs(self, dir, listConfig = []):
@@ -23,7 +22,7 @@ class CameraArchiveHelper:
 
     def get_files(self, config):
         files = []
-        for root, dirnames, filenames in os.walk(config.path_from):
+        for root, dirnames, filenames in os.walk(config.pathFrom()):
             if hasattr(config, 'ignore_dir') and self.dir_to_ignore(root, config.ignore_dir):
                 print('Ignore:', root)
                 continue
@@ -52,7 +51,7 @@ class CameraArchiveHelper:
         files_moved = 0
         for file in files:
             dir_relative_to = file.to.get_dir_relative(config.path_to)
-            dir_relative_frm = file.frm.get_dir_relative(config.path_from)
+            dir_relative_frm = file.frm.get_dir_relative(config.pathFrom())
             if last_file_dir_relative_to != dir_relative_to:
                 if last_file_dir_relative_to != '':
                     ext_stat = ' '.join(["{}:{}".format(k.upper(), exts[k]) for k in exts])

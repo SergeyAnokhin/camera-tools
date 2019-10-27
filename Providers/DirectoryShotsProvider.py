@@ -22,7 +22,7 @@ class DirectoryShotsProvider(Provider):
     def GetShotsProtected(self, pShots: []):
         dt: datetime = None
         dtStr = None
-        folder = self.folder if self.folder else self.config.path_from
+        folder = self.folder if self.folder else self.config.pathFrom()
         if len(pShots) > 0 and 'PROV:IMAP' in pShots[0].Metadata and 'start' in pShots[0].Metadata['PROV:IMAP']:
             meta = pShots[0].Metadata
             dtStr = meta['PROV:IMAP']['start']

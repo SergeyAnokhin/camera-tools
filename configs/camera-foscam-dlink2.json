@@ -1,6 +1,6 @@
 {
-    "path_from": "F:\\inetpub\\ftproot\\Camera\\DLinkCharles",
-    "path_to": "\\\\diskstation\\CameraArchive\\DLinkCharles",
+    "path_from": "DLinkCharles",
+    "path_to": "DLinkCharles",
     "sensor": {
         "is_external": false,
         "unit": "bytes",

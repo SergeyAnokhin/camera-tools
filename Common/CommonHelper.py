@@ -7,6 +7,8 @@ from Common.SecretConfig import SecretConfig
 from math import log2
 
 class CommonHelper:
+    network = None
+    networkConfig = {}
 
     def __init__(self):
         self.secretConfig = SecretConfig()
@@ -63,13 +65,23 @@ class CommonHelper:
         stamp = self.ToTimeStampStr(datetimeUtc)
         return f'{camera}@{stamp}'
 
-    def GetWifiName(self):
-        output = subprocess.check_output("netsh wlan show interfaces")
-        for line in output.splitlines():
-            line = line.decode("ascii",errors="ignore")
-            if " SSID " in line:
-                ssid = line.split(':')[1].strip()
-        return ssid
+    def GetNetworkName(self):
+        interface_output = subprocess.check_output("netsh interface show interface").decode("ascii",errors="ignore").lower()
+        if 'ethernet' in interface_output and 'connecte' in interface_output:
+            return 'ethernet'
+
+        wlan_output = subprocess.check_output("netsh wlan show interfaces").decode("ascii",errors="ignore").lower()
+        for line in wlan_output.splitlines():
+            if " ssid " in line:
+                return line.split(':')[1].strip()
+        return 'offline'
+
+    def GetNetworkConfig(self):
+        if not CommonHelper.network:
+            CommonHelper.network = self.GetNetworkName()
+        if not CommonHelper.networkConfig:
+            CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network)
+        return CommonHelper.networkConfig
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
         if not start: #no filters

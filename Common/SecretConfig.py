@@ -1,5 +1,5 @@
 import json
-
+from asq import query
 
 class SecretConfig:
     filename = 'configs/secret.json'
@@ -23,3 +23,8 @@ class SecretConfig:
 
     def __repr__(self):
         return 'CONFIG: = {}'.format(self.filename)
+
+    def GetNetworkConfig(self, network: str):
+        return query(self.networks) \
+            .where(lambda n: network in n['network']) \
+            .first_or_default(None)

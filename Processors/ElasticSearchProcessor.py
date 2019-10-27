@@ -11,6 +11,8 @@ class ElasticSearchProcessor(Processor):
         self.isSimulation = isSimulation
         for _ in ("boto", "elasticsearch", "urllib3"):
             logging.getLogger(_).setLevel(logging.INFO)
+        networkConfig = self.helper.GetNetworkConfig()
+        (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
 
     def GetArchivePath(self, path: str):
         path = path.replace("\\\\diskstation", '').replace('\\', '/')
@@ -68,8 +70,8 @@ class ElasticSearchProcessor(Processor):
         self.log.info(f'    - path:    {path}')
         self.log.info(f'    - path_cv: {path_cv}')
         if not self.isSimulation:
-            es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
-            res = es.index(index=index, doc_type='doc', body=json_data, id=id)
+            es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
+            es.index(index=index, doc_type='doc', body=json_data, id=id)
         else:
             self.log.debug(json_data)
 

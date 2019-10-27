@@ -14,6 +14,8 @@ class ElasticSearchProvider(Provider):
         self.datetime = datetime
         self.helper = CommonHelper()
         self.isSimulation = isSimulation
+        networkConfig = self.helper.GetNetworkConfig()
+        (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
 
     def GetShotsProtected(self, pShots: []):
         dtUtc = self.helper.ToUtcTime(self.datetime)
@@ -21,7 +23,7 @@ class ElasticSearchProvider(Provider):
         id = self.helper.GetEsShotId(self.camera, dtUtc)
 
         if not self.isSimulation:
-            es = Elasticsearch([{'host': '192.168.1.31', 'port': 9200}])
+            es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
             #res = es.get(index="cameraarchive-2019.10", doc_type='doc', id='Foscam@2019-10-20T15:18:08.000Z')
             res = es.get(index=index, doc_type='doc', id=id)
             path_cv = res['_source']['path_cv'] # /CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg

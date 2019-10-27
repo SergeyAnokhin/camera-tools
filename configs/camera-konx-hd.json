@@ -1,6 +1,6 @@
 {
-    "path_from": "F:\\inetpub\\ftproot\\Camera\\Konx\\video\\KonxHD",
-    "path_to": "\\\\diskstation\\CameraArchive\\KonxHD",
+    "path_from": "Konx\\video\\KonxHD",
+    "path_to": "KonxHD",
     "ignore_dir": ["thumbs"],
     "sensor": {
         "is_external": true,
