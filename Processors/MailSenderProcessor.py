@@ -88,12 +88,13 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 
             dt = pShot.Shot.GetDatetime()
             idSource = pShot.Shot.GetId(self.config.camera)
+            #self.log.debug(f'Encode: {idSource}')
             id = self.helper.Encode(idSource)
 
             html += f"""
             {self.GetBodyHtml(pShot)}
-            <img src="http://{self.secretConfig.camera_tools_host}/image?id={id}">
-            <a href="http://{self.secretConfig.camera_tools_host}/image?id={id}&original=1">original</a>
+            <img src="http://{self.secretConfig.camera_tools_host}/image?id={id}"><br>
+            | <a target="_blank" href="http://{self.secretConfig.camera_tools_host}/image?id={id}&original=1">Original</a> |
             <br>
             """
 

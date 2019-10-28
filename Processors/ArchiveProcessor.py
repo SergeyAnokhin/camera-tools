@@ -27,6 +27,8 @@ class ArchiveProcessor(Processor):
         self.log.info(f'    - CV   Move: {dest}')
         self.log.info(f'    - ORIG Move: {dest_orig}')
         dest_path = os.path.dirname(dest)
+        meta['archive_destination'] = dest
+        meta['archive_destination_orig'] = dest_orig
         if not self.isSimulation:
             if not os.path.exists(dest_path):
                 self.log.debug(f'- create archive directory: {dest_path}')
@@ -34,7 +36,5 @@ class ArchiveProcessor(Processor):
             pShot.Shot.Move2(dest)
             pShot.OriginalShot.Move2(dest_orig)
         else:
-            meta['archive_destination'] = dest
-            meta['archive_destination_orig'] = dest_orig
             if not os.path.exists(dest_path):
                 self.log.debug(f'- create archive directory (Simulation): {dest_path}')

@@ -40,6 +40,7 @@ class ImapShotsProvider(Provider):
     def SaveAttachments(self, mail, filePattern: str, beforeFirstSave: None):
         index = 0
         result = []
+        first_dt = None
         for part in mail.walk():
             if(part.get_content_maintype() != 'image'):
                 continue
@@ -47,11 +48,13 @@ class ImapShotsProvider(Provider):
 
             if bool(fileName):
                 memShot = CamShot(fileName)
-                dt = memShot.GetDatetime()
-                dtShot = dt + datetime.timedelta(0,index)
+                dtShot = memShot.GetDatetime()
+                #dtShot = dt + datetime.timedelta(0,index)
                 shot = CamShot(filePattern.format(dtShot, self.config.camera))
-                if beforeFirstSave and index == 0:
-                    beforeFirstSave(shot)
+                if index == 0:
+                    first_dt = dtShot
+                    if beforeFirstSave:
+                        beforeFirstSave(shot)
                 if not shot.Exist() :
                     shot.Write(part.get_payload(decode=True))
                 else:
@@ -59,7 +62,7 @@ class ImapShotsProvider(Provider):
 
                 pShot = PipelineShot(shot, index)
                 meta = self.CreateMetadata(pShot)
-                meta["start"] = self.helper.ToTimeStampStr(dt)
+                meta["start"] = self.helper.ToTimeStampStr(first_dt)
                 meta["filename"] = fileName
                 result.append(pShot)
             index += 1

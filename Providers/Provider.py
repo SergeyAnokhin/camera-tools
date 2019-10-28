@@ -19,7 +19,9 @@ class Provider:
     def GetShots(self, pShots: []):
         self.log.info(f'<<<<<< SHOTS: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
         newPShots = self.GetShotsProtected(pShots)
-
+        for i,s in enumerate(newPShots):
+            self.log.debug(f'   <+++ #{s.Index} {s.Shot.filename} @{s.Shot.GetDatetime():%H:%M:%S} (full: {s.Shot.fullname})')
+    
         pShots = query(pShots).union(newPShots, self.GetTime).to_list()
         # newPShots = filter(lambda s: not self.AlreadyHasShotAtThisTime(pShots, s), newPShots)
         # # newPShots.filt [s for s in newPShots if not self.AlreadyHasShotAtThisTime(pShots, s)]
@@ -27,7 +29,6 @@ class Provider:
         # pShots.sort(key = lambda s: s.Shot.GetDatetime())
         for i,s in enumerate(pShots):
             s.Index = i
-            self.log.debug(f'   <<< #{s.Index} {s.Shot.filename} @{s.Shot.GetDatetime():%H:%M:%S} (full: {s.Shot.fullname})')
 
         return pShots
 
