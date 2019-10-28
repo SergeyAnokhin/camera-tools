@@ -79,6 +79,7 @@ class CommonHelper:
     def GetNetworkConfig(self):
         if not CommonHelper.network:
             CommonHelper.network = self.GetNetworkName()
+            print('!!! Current network: {CommonHelper.network} !!!')
         if not CommonHelper.networkConfig:
             CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network)
         return CommonHelper.networkConfig

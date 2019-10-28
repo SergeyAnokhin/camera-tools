@@ -22,6 +22,21 @@ from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 from Pipeline.ShotsPipeline import ShotsPipeline
 
+def InitPipeline():
+    pipeline.providers.clear()
+    pipeline.processors.clear()
+    pipeline.providers.append(ImapShotsProvider())
+    pipeline.providers.append(DirectoryShotsProvider())
+    pipeline.processors.append(DiffContoursProcessor())
+    pipeline.processors.append(YoloObjDetectionProcessor())
+    pipeline.processors.append(TrackingProcessor())
+    pipeline.processors.append(SaveToTempProcessor())           
+    pipeline.processors.append(MailSenderProcessor())
+    pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
+    pipeline.processors.append(ArchiveProcessor(isSimulation))
+    pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
+    pipeline.PreLoad()
+
 
 '''
 run locally :
@@ -66,17 +81,7 @@ print('start: {}'.format(datetime.datetime.now()))
 lock = threading.Lock()
 
 pipeline = ShotsPipeline(camera)
-pipeline.providers.append(ImapShotsProvider())
-pipeline.providers.append(DirectoryShotsProvider())
-pipeline.processors.append(DiffContoursProcessor())
-pipeline.processors.append(YoloObjDetectionProcessor())
-pipeline.processors.append(TrackingProcessor())
-pipeline.processors.append(SaveToTempProcessor())           
-pipeline.processors.append(MailSenderProcessor())
-pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
-pipeline.processors.append(ArchiveProcessor(isSimulation))
-pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
-pipeline.PreLoad()
+InitPipeline()
 
 log.info('initialization API finished @ %s', datetime.datetime.now())
 
@@ -111,6 +116,7 @@ def simulation():
         isSimulation = True
     msg = f'Simulation: {"ON" if isSimulation else "OFF"}'
     log.info(msg)
+    InitPipeline()
     return msg
 
 @app.route('/', methods=['GET'])
