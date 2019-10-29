@@ -47,6 +47,7 @@ class TestPipeline(unittest.TestCase):
         CommonHelper.networkConfig['camera_archive_archive'] = ""
 
     def test_imapShotsProvider(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_imapShotsProvider
         target = ImapShotsProvider('temp/queue')
         target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
         shots = target.GetShots([])
@@ -54,6 +55,10 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(shots[0].Shot.filename)
         self.assertIsNotNone(shots[0].Shot.fullname)
         self.assertIsNotNone(shots[0].Shot.Exist())
+        #self.assertEqual(shots[0].Metadata['PROV:IMAP']['filename'], 'Snap_20191028-192355-0.jpg')
+        start = shots[0].Metadata['PROV:IMAP']['start']
+        self.assertEqual(shots[1].Metadata['PROV:IMAP']['start'], start)
+        self.assertEqual(shots[2].Metadata['PROV:IMAP']['start'], start)
 
     def test_DirectoryShotsProvider(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_DirectoryShotsProvider
@@ -163,7 +168,62 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Sergey_and_Olivia_tracking'
         yolo = YoloObjDetectionProcessor()
         yolo.PreLoad()
-        target = TrackingProcessor()
+        target = TrackingProcessor(isDebug=True)
+        pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
+        yolo.Process(pipelineShots, {})
+        target.Process(pipelineShots, {})
+        metadata1 = pipelineShots[1].Metadata["TRAC"]
+        pp.pprint(metadata1, indent=2)
+        #pipelineShots[1].Shot.Show()
+        self.assertEqual(15, metadata1[0]['angle'])
+        self.assertEqual(138, metadata1[0]['distance'])
+        self.assertEqual("372 x 122", metadata1[0]['center'])
+        self.assertEqual(16, metadata1[1]['angle'])
+        self.assertEqual(90, metadata1[1]['distance'])
+        self.assertEqual("230 x 146", metadata1[1]['center'])
+
+        metadata2 = pipelineShots[2].Metadata["TRAC"]
+        pp.pprint(metadata2, indent=2)
+        self.assertEqual(28, metadata2[0]['angle'])
+        self.assertEqual(68, metadata2[0]['distance'])
+        self.assertEqual("432 x 89", metadata2[0]['center'])
+        self.assertEqual(10, metadata2[1]['angle'])
+        self.assertEqual(94, metadata2[1]['distance'])
+        self.assertEqual("323 x 129", metadata2[1]['center'])
+
+    def test_TrackingProcessor2(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor2
+        folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
+        pipeline = ShotsPipeline('Foscam')
+        pipeline.providers.append(DirectoryShotsProvider(folder))
+        pipeline.processors.append(YoloObjDetectionProcessor())
+        pipeline.processors.append(TrackingProcessor(isDebug=True))
+        pipeline.PreLoad()
+        shots = pipeline.GetShots()
+        result = pipeline.Process(shots)
+
+        metadata1 = result[1].Metadata["TRAC"]
+        pp.pprint(metadata1, indent=2)
+        #result[1].Shot.Show()
+        self.assertEqual(1, len(metadata1))
+        self.assertEqual(25, metadata1[0]['angle'])
+        self.assertEqual(94, metadata1[0]['distance'])
+        self.assertEqual("289 x 101", metadata1[0]['center'])
+
+        metadata2 = result[2].Metadata["TRAC"]
+        pp.pprint(metadata2, indent=2)
+        #result[2].Shot.Show()
+        self.assertEqual(1, len(metadata2))
+        self.assertEqual(10, metadata2[0]['angle'])
+        self.assertEqual(89, metadata2[0]['distance'])
+        self.assertEqual("377 x 84", metadata2[0]['center'])
+
+    def test_TrackingProcessor_SizeError(self):
+        # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor_SizeError
+        folder = '../camera-OpenCV-data/Camera/Foscam/Morning_Sergey_Tracking_Error'
+        yolo = YoloObjDetectionProcessor()
+        yolo.PreLoad()
+        target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
         yolo.Process(pipelineShots, {})
         target.Process(pipelineShots, {})

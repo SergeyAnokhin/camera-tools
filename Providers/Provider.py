@@ -18,7 +18,7 @@ class Provider:
 
     def GetShots(self, pShots: []):
         self.log.info(f'<<<<<< SHOTS: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
-        newPShots = self.GetShotsProtected(pShots)
+        newPShots = list(self.GetShotsProtected(pShots))
         for i,s in enumerate(newPShots):
             self.log.debug(f'   <+++ #{s.Index} {s.Shot.filename} @{s.Shot.GetDatetime():%H:%M:%S} (full: {s.Shot.fullname})')
     

@@ -8,15 +8,19 @@ from Common.CommonHelper import CommonHelper
 
 class TrackingBox:
     def __init__(self):
-        id = 0
-        image = []
+        self.id = 0
+        self.image = []
+
+    def GetShape(self):
+        return f'{len(self.image)}x{len(self.image[0])}'
 
 class TrackingProcessor(Processor):
 
-    def __init__(self):
+    def __init__(self, isDebug=False):
         super().__init__("TRAC")
         self.boxes_last = []
         self.helper = CommonHelper()
+        self.isDebug = isDebug
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         super().ProcessShot(pShot, pShots)
@@ -28,6 +32,7 @@ class TrackingProcessor(Processor):
             self.log.warning("No data on YOLO analysis found. Ignore tracking analysys")
             return
         summary = pShot.Metadata['YOLO']['areas']
+        
         for box_data in summary:
             (x, y) = box_data['center_coordinate']
             (w, h) = box_data['size']
@@ -36,7 +41,7 @@ class TrackingProcessor(Processor):
             pos_left_top = (x - box_size // 2, y - box_size // 2)
             pos_right_bottom = (x + box_size // 2, y + box_size // 2)
             box = TrackingBox()
-            box.image = self.ExtractBox(shot.image, box_data)
+            box.image = self.ExtractBox(shot.GetImage(), box_data)
             box.id = box_index
             box.center = (x, y)
 
@@ -60,6 +65,8 @@ class TrackingProcessor(Processor):
                 pShot.Metadata['TRAC'][box.id] = {}
                 pShot.Metadata['TRAC'][box.id]['distance'] = int(dist)
                 pShot.Metadata['TRAC'][box.id]['angle'] = int(angle)
+                if self.isDebug:
+                    pShot.Metadata['TRAC'][box.id]['center'] = f'{box.center[0]} x {box.center[1]}'
 
             text = f'box: ID{box.id}'
             cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
@@ -84,8 +91,13 @@ class TrackingProcessor(Processor):
     def ExtractBox(self, image, box_data):
         (x, y) = box_data['center_coordinate']
         (w, h) = box_data['size']
-
-        return image[(y - h // 2):(y + h // 2),(x - w // 2):(x + w // 2)]
+        self.log.debug(f"ExtractBox: Box center_coordinate {box_data['center_coordinate']}")
+        self.log.debug(f"ExtractBox: Box size {box_data['size']}")
+        self.log.debug(f"ExtractBox: Box start {(y - h // 2)}x{(y + h // 2)} end {(x - w // 2)}x{(x + w // 2)}")
+        self.log.debug(f"ExtractBox: Image size {len(image)}x{len(image[0])}")
+        result = image[(y - h // 2):(y + h // 2),(x - w // 2):(x + w // 2)]
+        self.log.debug(f"ExtractBox: Result size {len(result)}")
+        return result
 
     def CompareBox(self, boxes_last: [], template: TrackingBox):
         if len(boxes_last) == 0:
@@ -94,8 +106,9 @@ class TrackingProcessor(Processor):
         coeffs = []
         for box_last in boxes_last:
             box_resized = self.ResizeForBiggerThanTemplate(box_last.image, template.image)
-            # print(f'Resize: {box_last.shape} => {box_resized.shape}')
-            # print(f'Template size: {template.shape}')
+            self.log.debug(f'Resize: {box_last.GetShape()} => {box_resized.shape}')
+            self.log.debug(f'Template size: {len(template.image)}')
+            self.log.debug(f' corrsize.height <= img.rows + templ.rows - 1 && corrsize.width <= img.cols + templ.cols ')
             matchTempArr = cv2.matchTemplate(box_resized, template.image, cv2.TM_CCOEFF_NORMED)
             matchTemp = max(map(max, matchTempArr))
 
