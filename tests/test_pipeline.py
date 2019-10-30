@@ -26,8 +26,10 @@ from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 
 class TestPipeline(unittest.TestCase):
+    log: logging.Logger = None
 
-    def setUp(self):
+    def __init__(self, *args, **kwargs):
+        super(TestPipeline, self).__init__(*args, **kwargs)
         file_handler = logging.FileHandler(filename='test.log', mode='w')
         stdout_handler = logging.StreamHandler(sys.stdout)
         handlers = [file_handler, stdout_handler]
@@ -36,15 +38,30 @@ class TestPipeline(unittest.TestCase):
             level=logging.DEBUG, 
             datefmt='%H:%M:%S',
             handlers=handlers)
-
         self.log = logging.getLogger("TEST")
-        self.log.info(' ##################### ==> ')
-        self.log.info('start %s: %s', __name__, datetime.datetime.now())
+        TestPipeline.log = self.log
         self.archiver = CameraArchiveHelper()
         self.helper = CommonHelper()
         self.helper.GetNetworkConfig()
         CommonHelper.networkConfig['camera_live_archive'] = ""
         CommonHelper.networkConfig['camera_archive_archive'] = ""
+        self.log.info('')
+        self.log.info(' ############################ ')
+        self.log.info(' ### SETUP ################## ')
+        self.log.info(' ############################ ')
+
+    def setUp(self):
+        self.log.info(f' ### SETUP {self._testMethodName} ################## ==> ')
+        self.log.info('start %s: %s', __name__, datetime.datetime.now())
+
+    def tearDown(self):
+        self.log.info(f' ### TEARDOWN {self._testMethodName} ############### <== ')
+
+    @classmethod
+    def tearDownClass(self):
+        TestPipeline.log.info(' ############################ ')
+        TestPipeline.log.info(' ### TEARDOWN ############### ')
+        TestPipeline.log.info(' ############################ ')
 
     def test_imapShotsProvider(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_imapShotsProvider
@@ -174,7 +191,7 @@ class TestPipeline(unittest.TestCase):
         target.Process(pipelineShots, {})
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
-        #pipelineShots[1].Shot.Show()
+        pipelineShots[1].Shot.Show()
         self.assertEqual(15, metadata1[0]['angle'])
         self.assertEqual(138, metadata1[0]['distance'])
         self.assertEqual("372 x 122", metadata1[0]['center'])
@@ -486,3 +503,6 @@ class TestPipeline(unittest.TestCase):
         print(f'network: {network}; networkConfig: {networkConfig}')
         self.assertIsNotNone(networkConfig['elasticsearch'])
         self.assertTrue(network in networkConfig['network'])
+
+if __name__ == '__main__':
+    unittest.main()

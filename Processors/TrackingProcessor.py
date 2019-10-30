@@ -4,15 +4,8 @@ from scipy.spatial import distance
 import pprint as pp
 from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Processor import Processor
+from Processors.Tracking.TrackingBox import TrackingBox
 from Common.CommonHelper import CommonHelper
-
-class TrackingBox:
-    def __init__(self):
-        self.id = 0
-        self.image = []
-
-    def GetShape(self):
-        return f'{len(self.image)}x{len(self.image[0])}'
 
 class TrackingProcessor(Processor):
 
@@ -25,7 +18,6 @@ class TrackingProcessor(Processor):
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         super().ProcessShot(pShot, pShots)
         pShot.Metadata['TRAC'] = {}
-        box_index = 0
         boxes_current = []
         shot = pShot.Shot
         if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']:
@@ -33,32 +25,17 @@ class TrackingProcessor(Processor):
             return
         summary = pShot.Metadata['YOLO']['areas']
         
-        for box_data in summary:
-            (x, y) = box_data['center_coordinate']
-            (w, h) = box_data['size']
+        for box_index, box_data in enumerate(summary):
 
-            box_size = 10
-            pos_left_top = (x - box_size // 2, y - box_size // 2)
-            pos_right_bottom = (x + box_size // 2, y + box_size // 2)
-            box = TrackingBox()
-            box.image = self.ExtractBox(shot.GetImage(), box_data)
+            box = TrackingBox(box_data)
+            box.ExtractBox(shot.GetImage())
             box.id = box_index
-            box.center = (x, y)
-
-            color = 128
-            pos_text = (x, y - 5)
-            angle = 0
-            dist = 0
 
             boxes_current.append(box)
-            box_index += 1
             bestMatched = self.CompareBox(self.boxes_last, box)
             if bestMatched != None:
                 cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
                 (x, y) = bestMatched.center
-                pos_left_top = (x - box_size // 2, y - box_size // 2)
-                pos_right_bottom = (x + box_size // 2, y + box_size // 2)
-                cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
                 box.id = bestMatched.id
                 angle = self.angle(box.center, bestMatched.center)
                 dist = distance.euclidean(box.center, bestMatched.center)
@@ -68,9 +45,9 @@ class TrackingProcessor(Processor):
                 if self.isDebug:
                     pShot.Metadata['TRAC'][box.id]['center'] = f'{box.center[0]} x {box.center[1]}'
 
-            text = f'box: ID{box.id}'
-            cv2.rectangle(shot.image, pos_left_top, pos_right_bottom, color, 1)
-            cv2.putText(shot.image, text, pos_text, cv2.FONT_HERSHEY_SIMPLEX,
+            color = 128
+            cv2.rectangle(shot.image, box.point_left_top, box.point_right_bottom, color, 1)
+            cv2.putText(shot.image, f'box: ID{box.id}', box.pos_text, cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, color, 2)
 
         self.boxes_last = boxes_current
@@ -87,17 +64,6 @@ class TrackingProcessor(Processor):
 
         angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
         return np.degrees(angle)
-
-    def ExtractBox(self, image, box_data):
-        (x, y) = box_data['center_coordinate']
-        (w, h) = box_data['size']
-        self.log.debug(f"ExtractBox: Box center_coordinate {box_data['center_coordinate']}")
-        self.log.debug(f"ExtractBox: Box size {box_data['size']}")
-        self.log.debug(f"ExtractBox: Box start {(y - h // 2)}x{(y + h // 2)} end {(x - w // 2)}x{(x + w // 2)}")
-        self.log.debug(f"ExtractBox: Image size {len(image)}x{len(image[0])}")
-        result = image[(y - h // 2):(y + h // 2),(x - w // 2):(x + w // 2)]
-        self.log.debug(f"ExtractBox: Result size {len(result)}")
-        return result
 
     def CompareBox(self, boxes_last: [], template: TrackingBox):
         if len(boxes_last) == 0:
