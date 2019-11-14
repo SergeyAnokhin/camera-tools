@@ -194,19 +194,19 @@ class TestPipeline(unittest.TestCase):
         pipelineShots[1].Shot.Show()
         self.assertEqual(15, metadata1[0]['angle'])
         self.assertEqual(138, metadata1[0]['distance'])
-        self.assertEqual("372 x 122", metadata1[0]['center'])
+        self.assertEqual("372x122", metadata1[0]['center'])
         self.assertEqual(16, metadata1[1]['angle'])
         self.assertEqual(90, metadata1[1]['distance'])
-        self.assertEqual("230 x 146", metadata1[1]['center'])
+        self.assertEqual("230x146", metadata1[1]['center'])
 
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
         self.assertEqual(28, metadata2[0]['angle'])
         self.assertEqual(68, metadata2[0]['distance'])
-        self.assertEqual("432 x 89", metadata2[0]['center'])
+        self.assertEqual("432x89", metadata2[0]['center'])
         self.assertEqual(10, metadata2[1]['angle'])
         self.assertEqual(94, metadata2[1]['distance'])
-        self.assertEqual("323 x 129", metadata2[1]['center'])
+        self.assertEqual("323x129", metadata2[1]['center'])
 
     def test_TrackingProcessor2(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor2
@@ -225,7 +225,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(1, len(metadata1))
         self.assertEqual(25, metadata1[0]['angle'])
         self.assertEqual(94, metadata1[0]['distance'])
-        self.assertEqual("289 x 101", metadata1[0]['center'])
+        self.assertEqual("289x101", metadata1[0]['center'])
 
         metadata2 = result[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
@@ -233,7 +233,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(1, len(metadata2))
         self.assertEqual(10, metadata2[0]['angle'])
         self.assertEqual(89, metadata2[0]['distance'])
-        self.assertEqual("377 x 84", metadata2[0]['center'])
+        self.assertEqual("377x84", metadata2[0]['center'])
 
     def test_TrackingProcessor_SizeError(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor_SizeError

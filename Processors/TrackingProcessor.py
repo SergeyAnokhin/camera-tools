@@ -1,7 +1,7 @@
 import cv2, logging
 import numpy as np
-from scipy.spatial import distance
 import pprint as pp
+from asq import query
 from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Processor import Processor
 from Processors.Tracking.TrackingBox import TrackingBox
@@ -17,9 +17,49 @@ class TrackingProcessor(Processor):
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         super().ProcessShot(pShot, pShots)
-        pShot.Metadata['TRAC'] = {}
-        boxes_current = []
+        meta = self.CreateMetadata(pShot)
         shot = pShot.Shot
+        prevPShot = self.GetPreviousShot(pShot, pShots)
+        if not prevPShot:
+            return
+        boxes_last = list(self.GetTrackingBoxes(prevPShot))
+        boxes = self.GetTrackingBoxes(pShot)
+        # if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']:
+        #     self.log.warning("No data on YOLO analysis found. Ignore tracking analysys")
+        #     return
+        # summary = pShot.Metadata['YOLO']['areas']
+        
+        # for box_index, box_data in enumerate(summary):
+
+        #     box = TrackingBox(box_data)
+        #     box.ExtractBox(shot.GetImage())
+        #     box.id = box_index
+        for box in boxes:
+
+            #boxes_current.append(box)
+            bestMatched:TrackingBox = box.CompareBox(boxes_last)
+            if bestMatched != None:
+                #cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
+                box.DrawLine(shot.GetImage(), bestMatched)
+                box.id = bestMatched.id
+                meta[box.id] = {}
+                meta[box.id]['distance'] = int(box.Distance(bestMatched))
+                meta[box.id]['angle'] = int(box.angle(bestMatched))
+                if self.isDebug:
+                    meta[box.id]['center'] = box.GetCenter()
+
+            box.DrawStartPoint(shot.GetImage())
+
+        #self.boxes_last = boxes_current
+
+    def GetPreviousShot(self, pShot: PipelineShot, pShots: []) -> PipelineShot:
+        index = pShot.Index
+        if index == 0:
+            return None
+        return query(pShots) \
+            .first_or_default(lambda p: p.Index == index + 1, None)
+
+    def GetTrackingBoxes(self, pShot):
         if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']:
             self.log.warning("No data on YOLO analysis found. Ignore tracking analysys")
             return
@@ -28,74 +68,6 @@ class TrackingProcessor(Processor):
         for box_index, box_data in enumerate(summary):
 
             box = TrackingBox(box_data)
-            box.ExtractBox(shot.GetImage())
+            box.ExtractBox(pShot.Shot.GetImage())
             box.id = box_index
-
-            boxes_current.append(box)
-            bestMatched = self.CompareBox(self.boxes_last, box)
-            if bestMatched != None:
-                cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
-                (x, y) = bestMatched.center
-                box.id = bestMatched.id
-                angle = self.angle(box.center, bestMatched.center)
-                dist = distance.euclidean(box.center, bestMatched.center)
-                pShot.Metadata['TRAC'][box.id] = {}
-                pShot.Metadata['TRAC'][box.id]['distance'] = int(dist)
-                pShot.Metadata['TRAC'][box.id]['angle'] = int(angle)
-                if self.isDebug:
-                    pShot.Metadata['TRAC'][box.id]['center'] = f'{box.center[0]} x {box.center[1]}'
-
-            color = 128
-            cv2.rectangle(shot.image, box.point_left_top, box.point_right_bottom, color, 1)
-            cv2.putText(shot.image, f'box: ID{box.id}', box.pos_text, cv2.FONT_HERSHEY_SIMPLEX,
-                0.5, color, 2)
-
-        self.boxes_last = boxes_current
-
-    def angle(self, p0, p1=np.array([0,0]), p2=None):
-        ''' compute angle (in degrees) for p0p1p2 corner
-        Inputs:
-            p0,p1,p2 - points in the form of [x,y]
-        '''
-        if p2 is None:
-            p2 = p1 + np.array([1, 0])
-        v0 = np.array(p0) - np.array(p1)
-        v1 = np.array(p2) - np.array(p1)
-
-        angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
-        return np.degrees(angle)
-
-    def CompareBox(self, boxes_last: [], template: TrackingBox):
-        if len(boxes_last) == 0:
-            return
-
-        coeffs = []
-        for box_last in boxes_last:
-            box_resized = self.ResizeForBiggerThanTemplate(box_last.image, template.image)
-            self.log.debug(f'Resize: {box_last.GetShape()} => {box_resized.shape}')
-            self.log.debug(f'Template size: {len(template.image)}')
-            self.log.debug(f' corrsize.height <= img.rows + templ.rows - 1 && corrsize.width <= img.cols + templ.cols ')
-            matchTempArr = cv2.matchTemplate(box_resized, template.image, cv2.TM_CCOEFF_NORMED)
-            matchTemp = max(map(max, matchTempArr))
-
-            hist1 = cv2.calcHist([box_last.image],[0],None,[256],[0,256])
-            hist2 = cv2.calcHist([template.image],[0],None,[256],[0,256])
-            hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
-
-            compCoeff = matchTemp * 0.2 + hist * 0.8
-            report = f'- MATCH: B{box_last.id} vs B{template.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f} {self.helper.Progress(compCoeff)}'
-            self.log.debug(report)
-            coeffs.append(compCoeff)
-
-        maxValue = max(coeffs)
-        maxIndex = coeffs.index(maxValue)
-        return boxes_last[maxIndex]
-        
-    def ResizeForBiggerThanTemplate(self, image, template):
-        factors = [x/y for x, y in zip(template.shape[0:2], image.shape[0:2])]
-        #print('>fact: ', factors)
-        zoom = max(factors)
-        zoom = zoom if zoom > 1 else 1
-        #print('>Zoom: ', zoom)
-        imageResized = cv2.resize(image, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
-        return imageResized
+            yield box
