@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import logging, sys
+import logging, sys, datetime
 
 from django.contrib import admin
 from django.urls import path
@@ -57,6 +57,21 @@ def getImageFromCameraArchive():
     log.info(f'======= end endpoint /image ID: {id} ============================================================================')
     return send_file(path, mimetype='image/jpeg')
 
+def InitPipeline():
+    pipeline.providers.clear()
+    pipeline.processors.clear()
+    pipeline.providers.append(ImapShotsProvider())
+    pipeline.providers.append(DirectoryShotsProvider())
+    pipeline.processors.append(DiffContoursProcessor())
+    pipeline.processors.append(YoloObjDetectionProcessor())
+    pipeline.processors.append(TrackingProcessor())
+    pipeline.processors.append(SaveToTempProcessor())           
+    pipeline.processors.append(MailSenderProcessor())
+    pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
+    pipeline.processors.append(ArchiveProcessor(isSimulation))
+    pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
+    pipeline.PreLoad()
+
 urlpatterns = [
     path('test/', test),
     path('camera_archive/', getImageFromCameraArchive),
@@ -80,27 +95,14 @@ log.info('|#####################################################################
 log.info('|####### start API @ %s ###################################################################################|', datetime.datetime.now())
 log.info('|##########################################################################################################|')
 
-camera = 'Foscam'
-pipeline = ShotsPipeline(camera)
-InitPipeline()
 isSimulation = False
 secretConfig = SecretConfig()
 secretConfig.fromJsonFile()
 helper = CommonHelper()
 
+camera = 'Foscam'
+pipeline = ShotsPipeline(camera)
+InitPipeline()
+
 log.info('initialization API finished @ %s', datetime.datetime.now())
 
-def InitPipeline():
-    pipeline.providers.clear()
-    pipeline.processors.clear()
-    pipeline.providers.append(ImapShotsProvider())
-    pipeline.providers.append(DirectoryShotsProvider())
-    pipeline.processors.append(DiffContoursProcessor())
-    pipeline.processors.append(YoloObjDetectionProcessor())
-    pipeline.processors.append(TrackingProcessor())
-    pipeline.processors.append(SaveToTempProcessor())           
-    pipeline.processors.append(MailSenderProcessor())
-    pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
-    pipeline.processors.append(ArchiveProcessor(isSimulation))
-    pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
-    pipeline.PreLoad()

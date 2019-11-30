@@ -2,7 +2,7 @@ import os, pytz, logging, cv2, shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
-from scipy.misc import imsave
+#from scipy.misc import imsave # cannot install in docker
 
 class FileImage:
 
@@ -39,10 +39,10 @@ class FileImage:
             self.UpdateFullName(fullname)
         image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
         self.log.info(f"Save image: => {self.fullname}")
-        if self.filenameExtension == 'png':
-            imsave(self.fullname,image,params)
-        else:
-            cv2.imwrite(self.fullname,image,params)
+        # if self.filenameExtension == 'png':
+        #     imsave(self.fullname,image,params)
+        # else:
+        cv2.imwrite(self.fullname,image,params)
 
     def SetImage(self, image):
         self.log.info(f"Set image from array: {len(image)}x{len(image[0])}")

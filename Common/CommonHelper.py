@@ -1,4 +1,4 @@
-import datetime, re, json, os, pytz, subprocess
+import datetime, re, json, os, pytz, subprocess, sys
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -66,24 +66,34 @@ class CommonHelper:
         return f'{camera}@{stamp}'
 
     def GetNetworkName(self):
-        interface_output = subprocess.check_output("netsh interface show interface").decode("ascii",errors="ignore").lower()
-        if 'ethernet' in interface_output and 'connecte' in interface_output:
-            return 'ethernet'
+        print(f'/// Platform: {sys.platform} ///')
+        if sys.platform == "win32":
+            interface_output = subprocess.check_output("netsh interface show interface").decode("ascii",errors="ignore").lower()
+            if 'ethernet' in interface_output and 'connecte' in interface_output:
+                return 'ethernet'
 
-        wlan_output = subprocess.check_output("netsh wlan show interfaces").decode("ascii",errors="ignore").lower()
-        for line in wlan_output.splitlines():
-            if " ssid " in line:
-                return line.split(':')[1].strip()
-        return 'offline'
+            wlan_output = subprocess.check_output("netsh wlan show interfaces").decode("ascii",errors="ignore").lower()
+            for line in wlan_output.splitlines():
+                if " ssid " in line:
+                    return line.split(':')[1].strip()
+            return 'offline'
+        elif sys.platform == "linux":
+            interface_output = os.environ["host_net_interfaces"].lower()
+            if 'ethernet' in interface_output and 'connecte' in interface_output:
+                return 'ethernet'
+            host_wifi_name = os.environ["host_wifi_name"].lower()
+            if host_wifi_name:
+                return host_wifi_name
+            return 'offline'
 
     def GetNetworkConfig(self):
         if not CommonHelper.network:
             CommonHelper.network = self.GetNetworkName()
-            print(f'!!! Current network: {CommonHelper.network} !!!')
+            print(f'/// Current network: {CommonHelper.network} ///')
         if not CommonHelper.networkConfig:
             CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network)
             (elasticsearch_host, elasticsearch_port) = CommonHelper.networkConfig['elasticsearch'].split(':')
-            print(f'Elasticsearch connection: http://{elasticsearch_host}:{elasticsearch_port}')
+            print(f'/// Elasticsearch connection: http://{elasticsearch_host}:{elasticsearch_port} ///')
         return CommonHelper.networkConfig
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):
