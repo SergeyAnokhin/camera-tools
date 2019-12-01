@@ -67,24 +67,13 @@ class CommonHelper:
 
     def GetNetworkName(self):
         print(f'/// Platform: {sys.platform} ///')
-        if sys.platform == "win32":
-            interface_output = subprocess.check_output("netsh interface show interface").decode("ascii",errors="ignore").lower()
-            if 'ethernet' in interface_output and 'connecte' in interface_output:
-                return 'ethernet'
-
-            wlan_output = subprocess.check_output("netsh wlan show interfaces").decode("ascii",errors="ignore").lower()
-            for line in wlan_output.splitlines():
-                if " ssid " in line:
-                    return line.split(':')[1].strip()
-            return 'offline'
-        elif sys.platform == "linux":
-            interface_output = os.environ["host_net_interfaces"].lower()
-            if 'ethernet' in interface_output and 'connecte' in interface_output:
-                return 'ethernet'
-            host_wifi_name = os.environ["host_wifi_name"].lower()
-            if host_wifi_name:
-                return host_wifi_name
-            return 'offline'
+        interface_output = os.environ["host_net_interfaces"].lower()
+        if 'ethernet' in interface_output and 'connecte' in interface_output:
+            return 'ethernet'
+        host_wifi_name = os.environ["host_wifi_name"].lower()
+        if host_wifi_name:
+            return host_wifi_name
+        return 'offline'
 
     def GetNetworkConfig(self):
         if not CommonHelper.network:

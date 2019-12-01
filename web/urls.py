@@ -16,8 +16,9 @@ Including another URLconf
 import logging, sys, datetime
 
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponse
+from django.urls import path, re_path
+from django.http import HttpResponse, HttpRequest
+from django.views.generic.base import RedirectView
 
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
@@ -39,13 +40,13 @@ from Common.CommonHelper import CommonHelper
 def test(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def getImageFromCameraArchive():
-    id = request.args.get("id")
+def getImageFromCameraArchive(request: HttpRequest):
+    id = request.GET.get('id')
     if not id:
         return ""
     id = helper.Decode(id)
     log.info(f'====== start endpoint /image ID: {id} ============================================================================')
-    isOriginal = True if request.args.get("original") else False
+    isOriginal = True if request.GET.get("original") else False
     (camera, timestamp) = id.split('@')
     time = helper.FromTimeStampStr(timestamp)
 
@@ -53,9 +54,24 @@ def getImageFromCameraArchive():
     pShots = provider.GetShots([])
     path = pShots[0].Shot.fullname if not isOriginal else pShots[0].OriginalShot.fullname
 
-    log.debug(f'Send file @{request.remote_addr}: {path} ')
+    remote_addr = get_client_ip(request)
+    log.debug(f'Send file @{remote_addr}: {path} ')
     log.info(f'======= end endpoint /image ID: {id} ============================================================================')
     return send_file(path, mimetype='image/jpeg')
+
+def send_file(path: str, mimetype):
+    print(path)
+    path = path.replace("\\\\diskstation", "/mnt")
+    with open(path, "rb") as f:
+        return HttpResponse(f.read(), content_type="image/jpeg")
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 def InitPipeline():
     pipeline.providers.clear()
@@ -76,6 +92,7 @@ urlpatterns = [
     path('test/', test),
     path('camera_archive/', getImageFromCameraArchive),
     path('admin/', admin.site.urls),
+    re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
 ]
 
 file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
