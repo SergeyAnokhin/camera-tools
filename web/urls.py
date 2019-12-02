@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import logging, sys, datetime
+import logging, sys, datetime, threading
 
 from django.contrib import admin
 from django.urls import path, re_path
@@ -88,8 +88,29 @@ def InitPipeline():
     pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
     pipeline.PreLoad()
 
+def analyseV2(request: HttpRequest):
+    ### INIT
+    log.info('====== start endpoint /V2/analyse ============================================================================')
+
+    ### RUN
+    shots = pipeline.GetShots()
+
+    try:
+        log.info(' ... wait lock ...')
+        lock.acquire()
+        result = pipeline.Process(shots)
+    except Exception:
+        log.error("Pipeline processing error ", exc_info=True)
+        return 'Error'
+    finally:
+        lock.release()
+        log.info('======= end endpoint /V2/analyse ============================================================================')
+    return 'OK' # json.dumps(result[0].Metadata)
+    ### FINISH
+
 urlpatterns = [
     path('test/', test),
+    path('V2/analyse', analyseV2),
     path('camera_archive/', getImageFromCameraArchive),
     path('admin/', admin.site.urls),
     re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
@@ -108,14 +129,15 @@ logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s',
     handlers=handlers)
 
 log = logging.getLogger("API")
-log.info('|##########################################################################################################|')
-log.info('|####### start API @ %s ###################################################################################|', datetime.datetime.now())
-log.info('|##########################################################################################################|')
+log.info('|################################################################################|')
+log.info('|####### start API @ %s #################################|', datetime.datetime.now())
+log.info('|################################################################################|')
 
 isSimulation = False
 secretConfig = SecretConfig()
 secretConfig.fromJsonFile()
 helper = CommonHelper()
+lock = threading.Lock()
 
 camera = 'Foscam'
 pipeline = ShotsPipeline(camera)

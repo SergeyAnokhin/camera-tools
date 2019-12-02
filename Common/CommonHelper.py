@@ -79,10 +79,13 @@ class CommonHelper:
         if not CommonHelper.network:
             CommonHelper.network = self.GetNetworkName()
             print(f'/// Current network: {CommonHelper.network} ///')
+        computername = os.environ["COMPUTERNAME"].lower()
+        platform = sys.platform
         if not CommonHelper.networkConfig:
-            CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network)
+            CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network, computername, platform)
             (elasticsearch_host, elasticsearch_port) = CommonHelper.networkConfig['elasticsearch'].split(':')
             print(f'/// Elasticsearch connection: http://{elasticsearch_host}:{elasticsearch_port} ///')
+            print(f'/// Network config name: {CommonHelper.networkConfig["name"]} ///')
         return CommonHelper.networkConfig
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):

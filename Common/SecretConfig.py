@@ -24,7 +24,9 @@ class SecretConfig:
     def __repr__(self):
         return 'CONFIG: = {}'.format(self.filename)
 
-    def GetNetworkConfig(self, network: str):
+    def GetNetworkConfig(self, network: str, computername: str, platform: str):
         return query(self.networks) \
-            .where(lambda n: network in n['network']) \
+            .where(lambda n: network in n['network'] \
+                and (not n['computername'] or n['computername'] == computername) \
+                and (not n['platform'] or n['platform'] == platform)) \
             .first_or_default(None)
