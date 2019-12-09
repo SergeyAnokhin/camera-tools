@@ -12,7 +12,8 @@ class ElasticSearchProcessor(Processor):
         for _ in ("boto", "elasticsearch", "urllib3"):
             logging.getLogger(_).setLevel(logging.INFO)
         networkConfig = self.helper.GetNetworkConfig()
-        (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
+        if networkConfig['elasticsearch']:
+            (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
 
     def GetArchivePath(self, path: str):
         path = path.replace("\\\\diskstation", '').replace('\\', '/')
@@ -69,9 +70,13 @@ class ElasticSearchProcessor(Processor):
         self.log.info(f'- add document: ID = {id} @ Index = {index}')
         self.log.info(f'    - path:    {path}')
         self.log.info(f'    - path_cv: {path_cv}')
-        if not self.isSimulation:
+        if not self.isSimulation and self.elasticsearch_host:
             es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
             es.index(index=index, doc_type='doc', body=json_data, id=id)
         else:
+            if self.isSimulation:
+                self.log.debug("Simulation mode. Indexation ignored")
+            if not self.elasticsearch_host:
+                self.log.debug("Elasticsearch host not defined. Indexation ignored")
             self.log.debug(json_data)
 

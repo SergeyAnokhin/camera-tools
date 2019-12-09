@@ -66,26 +66,33 @@ class CommonHelper:
         return f'{camera}@{stamp}'
 
     def GetNetworkName(self):
-        print(f'/// Platform: {sys.platform} ///')
-        interface_output = os.environ["host_net_interfaces"].lower()
+        print(f'/// Platform: {sys.platform + " ":/<61}')
+        interface_output = os.environ.get("host_net_interfaces")
+        if interface_output:
+            interface_output = interface_output.lower()
         if 'ethernet' in interface_output and 'connecte' in interface_output:
             return 'ethernet'
-        host_wifi_name = os.environ["host_wifi_name"].lower()
+        host_wifi_name = os.environ.get("host_wifi_name")
         if host_wifi_name:
-            return host_wifi_name
+            return host_wifi_name.lower()
         return 'offline'
 
     def GetNetworkConfig(self):
+        computername = os.environ["COMPUTERNAME"].lower()
         if not CommonHelper.network:
             CommonHelper.network = self.GetNetworkName()
-            print(f'/// Current network: {CommonHelper.network} ///')
-        computername = os.environ["COMPUTERNAME"].lower()
+            print(f'/// Current network: {CommonHelper.network + " ":/<54}')
+            print(f'/// Computer name:   {computername + " ":/<54}')
         platform = sys.platform
         if not CommonHelper.networkConfig:
             CommonHelper.networkConfig = self.secretConfig.GetNetworkConfig(self.network, computername, platform)
-            (elasticsearch_host, elasticsearch_port) = CommonHelper.networkConfig['elasticsearch'].split(':')
-            print(f'/// Elasticsearch connection: http://{elasticsearch_host}:{elasticsearch_port} ///')
-            print(f'/// Network config name: {CommonHelper.networkConfig["name"]} ///')
+            elasticsearch = CommonHelper.networkConfig['elasticsearch']
+            if elasticsearch:
+                (elasticsearch_host, elasticsearch_port) = elasticsearch.split(':')
+                print(f'/// Elasticsearch connection: http://{elasticsearch_host + ":" + elasticsearch_port + " ":/<38}')
+            else:
+                print(f'/// Elasticsearch connection: {" NONE ":/^45}')
+            print(f'/// Network config name: {CommonHelper.networkConfig["name"] + " ":/<50}')
         return CommonHelper.networkConfig
 
     def FileNameByDateRange(self, filename: str, start: datetime, seconds: int):

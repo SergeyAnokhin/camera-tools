@@ -130,7 +130,7 @@ logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s',
 
 log = logging.getLogger("API")
 log.info('|################################################################################|')
-log.info('|####### start API @ %s #################################|', datetime.datetime.now())
+log.info(f'|####### start API @ {str(datetime.datetime.now()) + " ":#<60}|')
 log.info('|################################################################################|')
 
 isSimulation = False

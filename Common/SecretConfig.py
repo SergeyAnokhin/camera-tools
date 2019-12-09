@@ -26,7 +26,7 @@ class SecretConfig:
 
     def GetNetworkConfig(self, network: str, computername: str, platform: str):
         return query(self.networks) \
-            .where(lambda n: network in n['network'] \
-                and (not n['computername'] or n['computername'] == computername) \
-                and (not n['platform'] or n['platform'] == platform)) \
+            .where(lambda n: network in n.get('network') \
+                and (not n.get('computername') or n.get('computername') == computername) \
+                and (not n.get('platform') or n.get('platform') == platform)) \
             .first_or_default(None)
