@@ -1,4 +1,4 @@
-import cv2, logging, itertools, os, time, cv2
+import cv2, logging, itertools, os, time, cv2, threading
 import numpy as np
 from collections import Counter
 from Pipeline.Model.CamShot import CamShot
@@ -105,17 +105,27 @@ class YoloObjDetectionProcessor(Processor):
 
     def __init__(self):
         super().__init__("YOLO")
+        self.isPreloaded = False
+        self.preLoadLock = threading.Lock()
 
     def PreLoad(self):
         super().Preload(True)
         #self.yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
         self.yolo = YoloContext('../camera-OpenCV-data/weights/yolo-coco')
-        self.yolo.PreLoad()
-        self.log.debug("Confidence: %s", self.confidence)
-        self.log.debug("Threshold: %s", self.threshold)
+        self.log.debug("...Lazy preloading")
+        self.log.debug(f"Confidence: {self.confidence}")
+        self.log.debug(f"Threshold: {self.threshold}")
+
+    def PreLoadEnsure(self):
+        self.preLoadLock.acquire()
+        if not self.isPreloaded:
+            self.yolo.PreLoad()
+            self.isPreloaded = True
+        self.preLoadLock.release()
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         super().ProcessShot(pShot, pShots)
+        self.PreLoadEnsure()
         yolo = YoloCamShot(pShot, self.yolo)
         layerOutputs = yolo.Detect()
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)

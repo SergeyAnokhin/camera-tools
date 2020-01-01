@@ -8,7 +8,6 @@ class ArchiveProcessor(Processor):
     def __init__(self, isSimulation: bool = False):
         super().__init__("ARCH")
         self.isSimulation = isSimulation
-        self.networkConfig = self.helper.GetNetworkConfig()
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):
         meta = self.CreateMetadata(pShot)

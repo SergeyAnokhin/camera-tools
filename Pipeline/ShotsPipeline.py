@@ -1,3 +1,4 @@
+import logging
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 from Pipeline.Model.PipelineShot import PipelineShot
@@ -8,10 +9,10 @@ from Pipeline.Model.PipelineShot import PipelineShot
 
 class ShotsPipeline:
 
-    def __init__(self, camera: str):
+    def __init__(self, camera: str, logger: logging.Logger):
         self.processors = []
         self.providers = []
-        self.archiver = CameraArchiveHelper()
+        self.archiver = CameraArchiveHelper(logger)
         self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
     def PreLoad(self):

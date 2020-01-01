@@ -25,6 +25,14 @@ class SecretConfig:
         return 'CONFIG: = {}'.format(self.filename)
 
     def GetNetworkConfig(self, network: str, computername: str, platform: str):
+        # for n in self.networks:
+        #     print(f'========== Name: {n["name"]} =>')
+        #     print(n.get("network")[0])
+        #     print(network in n.get("network")[0])
+        #     print(f'Network: {network in n.get("network")} / {n.get("network")}')
+        #     print(f'Computername: {not n.get("computername") or n.get("computername") == computername}')
+        #     print(f'Platform: {not n.get("platform") or n.get("platform") == platform}')
+
         return query(self.networks) \
             .where(lambda n: network in n.get('network') \
                 and (not n.get('computername') or n.get('computername') == computername) \

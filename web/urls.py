@@ -13,57 +13,38 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import logging, sys, datetime, threading
+import logging, sys, datetime, threading, os, coloredlogs
 
 from django.contrib import admin
 from django.urls import path, re_path
 from django.http import HttpResponse, HttpRequest
 from django.views.generic.base import RedirectView
 
-from Pipeline.ShotsPipeline import ShotsPipeline
-from Providers.DirectoryShotsProvider import DirectoryShotsProvider
-from Providers.ImapShotsProvider import ImapShotsProvider
+from web.ApiContext import ApiContext
+from Common.AppSettings import AppSettings
 from Providers.ElasticSearchProvider import ElasticSearchProvider
-from Processors.DiffContoursProcessor import DiffContoursProcessor
-from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
-from Processors.TrackingProcessor import TrackingProcessor
-from Processors.ArchiveProcessor import ArchiveProcessor
-from Processors.SaveToTempProcessor import SaveToTempProcessor
-from Processors.MailSenderProcessor import MailSenderProcessor
-from Processors.HassioProcessor import HassioProcessor
-from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 
-from Common.SecretConfig import SecretConfig
-from Common.CommonHelper import CommonHelper
+class logit(object):
 
+    def __init__(self, func):
+        self.func = func
 
-def test(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    def __call__(self, *args):
+        # log_string = self.func.__name__ + " was called"
+        # print(log_string)
+        # # Open the logfile and append
+        # with open(self._logfile, 'a') as opened_file:
+        #     # Now we log to the specified logfile
+        #     opened_file.write(log_string + '\n')
+        # # Now, send a notification
+        # self.notify()
 
-def getImageFromCameraArchive(request: HttpRequest):
-    id = request.GET.get('id')
-    if not id:
-        return ""
-    id = helper.Decode(id)
-    log.info(f'====== start endpoint /image ID: {id} ============================================================================')
-    isOriginal = True if request.GET.get("original") else False
-    (camera, timestamp) = id.split('@')
-    time = helper.FromTimeStampStr(timestamp)
+        # return base func
+        log.info(f'<h3> ▶️ start endpoint: === 🔗 /{self.func.__name__} === ▶️ </h3>')
+        result = self.func(*args)
+        log.info(f'<h3> ⏹️ end endpoint: === 🔗 /{self.func.__name__} === ⏹️ </h3>')
+        return result
 
-    provider = ElasticSearchProvider(camera, time)
-    pShots = provider.GetShots([])
-    path = pShots[0].Shot.fullname if not isOriginal else pShots[0].OriginalShot.fullname
-
-    remote_addr = get_client_ip(request)
-    log.debug(f'Send file @{remote_addr}: {path} ')
-    log.info(f'======= end endpoint /image ID: {id} ============================================================================')
-    return send_file(path, mimetype='image/jpeg')
-
-def send_file(path: str, mimetype):
-    print(path)
-    path = path.replace("\\\\diskstation", "/mnt")
-    with open(path, "rb") as f:
-        return HttpResponse(f.read(), content_type="image/jpeg")
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -73,75 +54,77 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def InitPipeline():
-    pipeline.providers.clear()
-    pipeline.processors.clear()
-    pipeline.providers.append(ImapShotsProvider())
-    pipeline.providers.append(DirectoryShotsProvider())
-    pipeline.processors.append(DiffContoursProcessor())
-    pipeline.processors.append(YoloObjDetectionProcessor())
-    pipeline.processors.append(TrackingProcessor())
-    pipeline.processors.append(SaveToTempProcessor())           
-    pipeline.processors.append(MailSenderProcessor())
-    pipeline.processors.append(HassioProcessor('temp' if isSimulation else None))        
-    pipeline.processors.append(ArchiveProcessor(isSimulation))
-    pipeline.processors.append(ElasticSearchProcessor(isSimulation)) 
-    pipeline.PreLoad()
+def send_file(path: str, mimetype):
+    print(path)
+    path = path.replace("\\\\diskstation", "/mnt")
+    with open(path, "rb") as f:
+        return HttpResponse(f.read(), content_type="image/jpeg")
 
-def analyseV2(request: HttpRequest):
-    ### INIT
-    log.info('====== start endpoint /V2/analyse ============================================================================')
+### API : /test/ ###
+@logit
+def test(request):
+    return HttpResponse(f"Hello, world. Used settings: {AppSettings.USED_SETTINGS}")
 
+### API : /camera_archive/archiving ###
+@logit
+def archiving(request: HttpRequest):
+    cameras = request.GET.get("cameras")
+    archiveHelper = ApiContext.CameraArchive
+    # ['FoscamHut', 'FoscamPTZ', 'Foscam', 'FoscamPlay', 'DLinkCharles', 'DLinkFranck', 'KonxHD']
+    configs = archiveHelper.load_configs('configs', cameras.split(','))    
+    for config in configs:
+        log.info('#################################################')
+        files = archiveHelper.get_files(config)
+        archiveHelper.move_files(files, config)
+
+    return HttpResponse("Done")
+
+### API : /camera_archive/image ###
+@logit
+def getImageFromCameraArchive(request: HttpRequest):
+    id = request.GET.get('id')
+    if not id:
+        return ""
+    id = ApiContext.Helper.Decode(id)
+    isOriginal = True if request.GET.get("original") else False
+    (camera, timestamp) = id.split('@')
+    time = ApiContext.Helper.FromTimeStampStr(timestamp)
+
+    provider = ElasticSearchProvider(camera, time)
+    pShots = provider.GetShots([])
+    path = pShots[0].Shot.fullname if not isOriginal else pShots[0].OriginalShot.fullname
+
+    remote_addr = get_client_ip(request)
+    log.debug(f'Send file @{remote_addr}: {path} ')
+    return send_file(path, mimetype='image/jpeg')
+
+### API : /V3/analyse ###
+@logit
+def analyseV3(request: HttpRequest):
     ### RUN
-    shots = pipeline.GetShots()
+    shots = ApiContext.Pipeline.GetShots()
 
     try:
         log.info(' ... wait lock ...')
         lock.acquire()
-        result = pipeline.Process(shots)
+        ApiContext.Pipeline.Process(shots)
     except Exception:
         log.error("Pipeline processing error ", exc_info=True)
         return 'Error'
     finally:
         lock.release()
-        log.info('======= end endpoint /V2/analyse ============================================================================')
     return 'OK' # json.dumps(result[0].Metadata)
     ### FINISH
 
 urlpatterns = [
     path('test/', test),
-    path('V2/analyse', analyseV2),
-    path('camera_archive/', getImageFromCameraArchive),
+    path('V3/analyse', analyseV3),
+    path('camera_archive/image', getImageFromCameraArchive),
+    path('camera_archive/archiving', archiving),
     path('admin/', admin.site.urls),
     re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
 ]
 
-file_error_handler = logging.FileHandler(filename='camera-tools-error.log')
-file_error_handler.setLevel(logging.ERROR)
-file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='midnight', backupCount=7)
-file_handler.suffix = '_%Y-%m-%d.log'
-stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [file_handler, stdout_handler, file_error_handler]
-
-logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
-    level=logging.DEBUG, 
-    datefmt='%H:%M:%S',
-    handlers=handlers)
-
-log = logging.getLogger("API")
-log.info('|################################################################################|')
-log.info(f'|####### start API @ {str(datetime.datetime.now()) + " ":#<60}|')
-log.info('|################################################################################|')
-
-isSimulation = False
-secretConfig = SecretConfig()
-secretConfig.fromJsonFile()
-helper = CommonHelper()
+ApiContext("TODO")
+log = ApiContext.Log
 lock = threading.Lock()
-
-camera = 'Foscam'
-pipeline = ShotsPipeline(camera)
-InitPipeline()
-
-log.info('initialization API finished @ %s', datetime.datetime.now())
-

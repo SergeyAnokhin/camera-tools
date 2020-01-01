@@ -1,7 +1,8 @@
 # run with :
 # python -m unittest tests.test_pipeline.TestPipeline.test_DiffContoursProcessor
 # python -m unittest discover     
-import unittest, datetime, logging, os, json, subprocess
+import logging, unittest, datetime, os, json, subprocess
+import logging.handlers
 import numpy as np
 import pprint as pp
 import sys
@@ -40,15 +41,18 @@ class TestPipeline(unittest.TestCase):
             handlers=handlers)
         self.log = logging.getLogger("TEST")
         TestPipeline.log = self.log
-        self.archiver = CameraArchiveHelper()
+        self.archiver = CameraArchiveHelper(self.log)
         self.helper = CommonHelper()
-        self.helper.GetNetworkConfig()
+        #self.helper.GetNetworkConfig()
         CommonHelper.networkConfig['camera_live_archive'] = ""
         CommonHelper.networkConfig['camera_archive_archive'] = ""
         self.log.info('')
         self.log.info(' ############################ ')
         self.log.info(' ### SETUP ################## ')
         self.log.info(' ############################ ')
+        from Common import HtmlLogger
+        html_handler = HtmlLogger.HTMLFileHandler('camera-tools.html')
+        html_handler.suffix = '_%Y-%m-%d.html'
 
     def setUp(self):
         self.log.info(f' ### SETUP {self._testMethodName} ################## ==> ')

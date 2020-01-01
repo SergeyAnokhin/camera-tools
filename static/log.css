@@ -1,0 +1,102 @@
+body, html {
+    background: #eeeeee;
+    width: 1000px;
+    font-family: Fira Code;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #FFFFFF;
+    border-bottom: 1px dotted #888888;
+}
+
+pre {
+    font-family: Fira Code;
+    margin: 0;
+}
+
+.time {
+    white-space: pre;
+    max-width: 120px;
+    overflow: hidden;
+}
+
+.level {
+    max-width: 30px;
+}
+
+.name {
+    max-width: 70px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.time_microsecond {
+    color: rgb(54, 54, 54);
+    font-size: 8px;
+}
+
+.err {
+    color: #EE1100;
+    font-weight: bold
+}
+
+.warn {
+    color: rgb(197, 158, 3);
+    font-weight: bold
+}
+
+.info {
+    color: rgb(0, 0, 0);
+}
+
+.debug {
+    color: rgb(54, 54, 54);
+    font-size: 8px;
+}
+
+div.blueRows {
+    font-family: "Fira Code", Times, serif;
+    border: 1px solid #FFFFFF;
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.Tab.blueRows .TabCell, .Tab.blueRows {
+    border: 1px solid #FFFFFF;
+    padding: 3px 2px;
+}
+
+.TabBody {
+    font-size: 12px;
+}
+
+.Tab.blueRows .TabRow:nth-child(even) {
+    background: #D0E4F5;
+}
+
+.Tab.blueRows .TabHeading {
+    background: #0B6FA4;
+    border-bottom: 5px solid #FFFFFF;
+}
+
+/* Tab.com */
+
+.Tab {
+    display: table;
+}
+
+.TabRow {
+    display: table-row;
+}
+
+.TabCell, .TabHead {
+    display: table-cell;
+}
+
+.TabBody {
+    display: table-row-group;
+}

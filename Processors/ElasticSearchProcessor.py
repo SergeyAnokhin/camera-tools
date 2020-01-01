@@ -11,9 +11,6 @@ class ElasticSearchProcessor(Processor):
         self.isSimulation = isSimulation
         for _ in ("boto", "elasticsearch", "urllib3"):
             logging.getLogger(_).setLevel(logging.INFO)
-        networkConfig = self.helper.GetNetworkConfig()
-        if networkConfig['elasticsearch']:
-            (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
 
     def GetArchivePath(self, path: str):
         path = path.replace("\\\\diskstation", '').replace('\\', '/')
