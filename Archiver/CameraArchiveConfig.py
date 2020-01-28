@@ -38,6 +38,13 @@ class CameraArchiveConfig:
         return 'CONFIG: {}: = {}'.format(self.camera, self.path_from)
 
     def pathFrom(self):
+        from django.conf import settings
+
+        dd = settings.CAMERA_ARCHIVE_PATH
+
+        print(dd)
+        print(AppSettings.CAMERA_ARCHIVE_PATH)
+        print(self.path_to)
         return os.path.join(AppSettings.CAMERA_LIVE_PATH, self.path_from)
 
     def pathTo(self):

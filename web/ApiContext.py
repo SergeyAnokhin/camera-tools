@@ -69,6 +69,7 @@ class ApiContext:
 
 
         coloredlogs.DEFAULT_DATE_FORMAT = '%H:%M:%S'
+        coloredlogs.CAN_USE_BOLD_FONT = True
         coloredlogs.DEFAULT_FIELD_STYLES = {
             'asctime': {'color': 'green'}, 
             'hostname': {'color': 'black'}, 
@@ -77,25 +78,26 @@ class ApiContext:
             'programname': {'color': 'cyan'}
         }
         coloredlogs.DEFAULT_LEVEL_STYLES = {
-            'critical': {'color': 'red', 'bold': True}, 
+            'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
             'debug': {'color': 'black', 'bold': True}, 
             'error': {'color': 'red'}, 
             'info': {'color': 'black', 'faint': True}, 
+            'warning': {'color': 'yellow'},
+
             'notice': {'color': 'magenta'}, 
             'spam': {'color': 'green', 'faint': True}, 
             'success': {'color': 'green', 'bold': True}, 
             'verbose': {'color': 'blue'}, 
-            'warning': {'color': 'yellow'}
         }
         coloredlogs.install(logger=self.log)
         coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s')
 
         # Some examples.
-        self.log.debug("this is a debugging message")
-        self.log.info("this is an informational message")
-        self.log.warning("this is a warning message")
-        self.log.error("this is an error message")
-        self.log.critical("this is a critical message")
+        # self.log.debug("this is a debugging message")
+        # self.log.info("this is an informational message")
+        # self.log.warning("this is a warning message")
+        # self.log.error("this is an error message")
+        # self.log.critical("this is a critical message")
 
         self.isSimulation = False
         self.secretConfig = SecretConfig()

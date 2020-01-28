@@ -1,6 +1,7 @@
 import os, shutil
 from Processors.Processor import Processor
 from Pipeline.Model.PipelineShot import PipelineShot
+from Common.AppSettings import AppSettings
 
 class HassioProcessor(Processor):
     '''
@@ -8,7 +9,7 @@ class HassioProcessor(Processor):
     '''
     def __init__(self, overidePath = None):
         super().__init__("HASS")
-        self.hassLocation = "\\\\192.168.1.36\\config\\www\\snapshot"
+        self.hassLocation = AppSettings.HASSIO_PATH
         if overidePath != None:
             self.hassLocation = overidePath
 

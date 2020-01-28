@@ -97,8 +97,8 @@ class CommonHelper:
     def Progress(self, current, total = 1, maxLenth = 20):
         current = current if current <=total else total
         limitChar = "|"
-        progress = "#" * int(round(current / total * maxLenth))
-        rest = "-" * int(round((1 - current / total) * maxLenth))
+        progress = "◼️" * int(round(current / total * maxLenth))
+        rest = "◻️" * int(round((1 - current / total) * maxLenth))
         return f'{limitChar}{progress}{rest}{limitChar}'
 
     def WalkFiles(self, path: str, condition, ignoreDirs: [] = None):

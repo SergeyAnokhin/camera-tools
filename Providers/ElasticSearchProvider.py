@@ -5,6 +5,7 @@ from datetime import datetime
 from elasticsearch import Elasticsearch
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
+from Common.AppSettings import AppSettings
 
 class ElasticSearchProvider(Provider):
 
@@ -14,8 +15,7 @@ class ElasticSearchProvider(Provider):
         self.datetime = datetime
         self.helper = CommonHelper()
         self.isSimulation = isSimulation
-        networkConfig = self.helper.GetNetworkConfig()
-        (self.elasticsearch_host, self.elasticsearch_port) = networkConfig['elasticsearch'].split(':')
+        (self.elasticsearch_host, self.elasticsearch_port) = AppSettings.ELASTICSEARCH_HOST.split(':')
 
     def GetShotsProtected(self, pShots: []):
         dtUtc = self.helper.ToUtcTime(self.datetime)
@@ -32,9 +32,9 @@ class ElasticSearchProvider(Provider):
             path_cv = "/CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam_cv.jpeg"
             path = "/CameraArchive/Foscam/2019-10/20/20191020_171808_Foscam.jpg"
 
-        shot = CamShot(os.path.join("\\\\diskstation", path_cv.lstrip('/').lstrip('\\')))
+        shot = CamShot(os.path.join(AppSettings.CAMERA_ARCHIVE_PATH, path_cv.lstrip('/').lstrip('\\')))
         pShot = PipelineShot(shot)
-        pShot.OriginalShot = CamShot(os.path.join("\\\\diskstation", path.lstrip('/').lstrip('\\')))
+        pShot.OriginalShot = CamShot(os.path.join(AppSettings.CAMERA_ARCHIVE_PATH, path.lstrip('/').lstrip('\\')))
         meta = self.CreateMetadata(pShot)
         meta['id'] = id
         meta['index'] = index

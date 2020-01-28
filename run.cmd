@@ -18,4 +18,4 @@ for /f "tokens=1-5" %%a in (temp\netsh_wlan_show_interfaces.txt) do (
 echo Wi-Fi status: %host_net_interfaces%
 echo Wi-Fi Name: %host_wifi_name%
 
-python manage.py runserver localhost:8000 --settings=web.settings.test
+python manage.py runserver localhost:8000 --settings=web.settings.dev_offline_with_docker_es

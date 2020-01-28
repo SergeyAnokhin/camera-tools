@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.http import HttpResponse, HttpRequest
 from django.views.generic.base import RedirectView
+from django.conf.urls import url, include
 
 from web.ApiContext import ApiContext
 from Common.AppSettings import AppSettings
@@ -40,9 +41,9 @@ class logit(object):
         # self.notify()
 
         # return base func
-        log.info(f'<h3> ▶️ start endpoint: === 🔗 /{self.func.__name__} === ▶️ </h3>')
+        log.info(f'⬛ ⬛ ⬛  ⏩  start endpoint:  /{self.func.__name__} ⬛ ⬛ ⬛ ')
         result = self.func(*args)
-        log.info(f'<h3> ⏹️ end endpoint: === 🔗 /{self.func.__name__} === ⏹️ </h3>')
+        log.info(f'⬛ ⬛ ⬛  ⛔  end endpoint:    /{self.func.__name__} ⬛ ⬛ ⬛ ')
         return result
 
 
@@ -64,6 +65,16 @@ def send_file(path: str, mimetype):
 @logit
 def test(request):
     return HttpResponse(f"Hello, world. Used settings: {AppSettings.USED_SETTINGS}")
+
+### API : /process/get_dns_data ###
+@logit
+def processGetDnsData(request):
+    return HttpResponse(f"Get Dns Data")
+
+### API : /process/move_mobile_photos ###
+@logit
+def processMoveMobilePhotos(request):
+    return HttpResponse(f"processMoveMobilePhotos")
 
 ### API : /camera_archive/archiving ###
 @logit
@@ -113,16 +124,20 @@ def analyseV3(request: HttpRequest):
         return 'Error'
     finally:
         lock.release()
-    return 'OK' # json.dumps(result[0].Metadata)
+    return HttpResponse("Done") # json.dumps(result[0].Metadata)
     ### FINISH
 
 urlpatterns = [
     path('test/', test),
+    path('process/get_dns_data', processGetDnsData),
+    path('process/move_mobile_photos', processMoveMobilePhotos),
     path('V3/analyse', analyseV3),
+    path('image/', getImageFromCameraArchive),
     path('camera_archive/image', getImageFromCameraArchive),
     path('camera_archive/archiving', archiving),
     path('admin/', admin.site.urls),
     re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    # path('elastic_dsl/', include('web.elastic_dsl.urls')), 
 ]
 
 ApiContext("TODO")

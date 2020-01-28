@@ -3,6 +3,7 @@ from Processors.Processor import Processor
 from Pipeline.Model.PipelineShot import PipelineShot
 from Common.FileInfo import FileInfo
 from elasticsearch import Elasticsearch
+from Common.AppSettings import AppSettings
 
 class ElasticSearchProcessor(Processor):
 
@@ -11,6 +12,7 @@ class ElasticSearchProcessor(Processor):
         self.isSimulation = isSimulation
         for _ in ("boto", "elasticsearch", "urllib3"):
             logging.getLogger(_).setLevel(logging.INFO)
+        (self.elasticsearch_host, self.elasticsearch_port) = AppSettings.ELASTICSEARCH_HOST.split(':')
 
     def GetArchivePath(self, path: str):
         path = path.replace("\\\\diskstation", '').replace('\\', '/')

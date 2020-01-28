@@ -19,10 +19,10 @@ class Processor:
 
     def Process(self, pShots: [], pipelineContext: dict):
         ''' Main Process '''
-        self.log.info(f'@@@ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@ {"(Simulation)" if self.isSimulation else ""}')
+        self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@ {"(Simulation)" if self.isSimulation else ""}')
         for i in range(len(pShots)):
             pShot = pShots[i]
-            self.log.debug(f"====== {pShot.Shot.filename} ======")
+            self.log.debug(f"   === 🎞️  {pShot.Shot.filename} ======")
             self.ProcessShot(pShot, pShots)
         self.AfterProcess(pShots, pipelineContext)
 
