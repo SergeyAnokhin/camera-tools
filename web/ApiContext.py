@@ -1,4 +1,4 @@
-import logging, sys, threading, datetime, locale, coloredlogs
+import logging, sys, threading, datetime, locale, coloredlogs, time, os
 
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
@@ -43,6 +43,7 @@ class ApiContext:
         #     ApiContext.Instance.val = arg
 
     def InitPrivate(self):
+
         file_error_handler = logging.FileHandler(filename='camera-tools-error.log', encoding='utf-8')
         file_error_handler.setLevel(logging.ERROR)
         file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='midnight',
@@ -62,9 +63,9 @@ class ApiContext:
 
         self.log = logging.getLogger("API")
         ApiContext.Log = self.log
-        self.log.info('|############################################################|')
-        self.log.info(f'|####### start API @ {str(datetime.datetime.now()) + " ":#<40}|')
-        self.log.info('|############################################################|')
+        self.log.info('ℹ️ |############################################################|')
+        self.log.info(f'ℹ️ |####### start API @ {str(datetime.datetime.now()) + " ":#<40}|')
+        self.log.info('ℹ️ |############################################################|')
         self.log.info("USED_SETTINGS: " + AppSettings.USED_SETTINGS)
 
 
@@ -79,18 +80,18 @@ class ApiContext:
         }
         coloredlogs.DEFAULT_LEVEL_STYLES = {
             'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
-            'debug': {'color': 'black', 'bold': True}, 
+            'debug': {'color': 1, 'bold': True}, 
             'error': {'color': 'red'}, 
             'info': {'color': 'black', 'faint': True}, 
             'warning': {'color': 'yellow'},
-
             'notice': {'color': 'magenta'}, 
             'spam': {'color': 'green', 'faint': True}, 
             'success': {'color': 'green', 'bold': True}, 
             'verbose': {'color': 'blue'}, 
         }
-        coloredlogs.install(logger=self.log)
-        coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s')
+        coloredlogs.COLOREDLOGS_LEVEL_STYLES='spam=22;debug=1;verbose=34;notice=220;warning=202;success=118,bold;error=124;critical=background=red'
+        coloredlogs.install(logger=self.log, isatty=True)
+        coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s', isatty=True)
 
         # Some examples.
         # self.log.debug("this is a debugging message")

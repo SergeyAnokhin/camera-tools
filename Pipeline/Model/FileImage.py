@@ -1,4 +1,4 @@
-import os, pytz, logging, cv2, shutil
+import os, logging, cv2, shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -8,7 +8,7 @@ class FileImage:
 
     def __init__(self, fullname: str = None):
         self.log = logging.getLogger('IMAG')
-        self.local = pytz.timezone("Europe/Paris")
+        # self.local = pytz.timezone("Europe/Paris")
         self.image = []
         self.UpdateFullName(fullname)
 
