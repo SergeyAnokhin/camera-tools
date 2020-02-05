@@ -20,6 +20,7 @@ import os
 try:
     from .secret import *
 except:
+    ALLOWED_HOSTS = ['192.168.99.100', 'localhost', '192.168.1.31']
     print("secret config not found")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -34,9 +35,6 @@ SECRET_KEY = '*********************************************'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['192.168.99.100', 'localhost', '192.168.1.31']
-
 
 # Application definition
 
