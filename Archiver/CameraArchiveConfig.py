@@ -41,4 +41,4 @@ class CameraArchiveConfig:
         return os.path.join(AppSettings.CAMERA_LIVE_PATH, self.path_from)
 
     def pathTo(self):
-        return os.path.join(AppSettings.CAMERA_ARCHIVE_PATH, self.path_to)
+        return self.path_to

@@ -16,6 +16,7 @@ class ElasticSearchProcessor(Processor):
 
     def GetArchivePath(self, path: str):
         path = path.replace("\\\\diskstation", '').replace('\\', '/')
+        path = path.replace("/mnt", "")
         return path
 
     def ProcessShot(self, pShot: PipelineShot, pShots: []):

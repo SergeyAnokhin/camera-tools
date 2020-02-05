@@ -1,7 +1,12 @@
 ### from winserver
 from .defaults import *
-USED_SETTINGS = "production"
+
+USED_SETTINGS = __name__
 DEBUG = False
-HASSIO_PATH = "\\\\192.168.1.36\\config\\www\\snapshot"
+ELASTICSEARCH_HOST = 'elasticsearch:9200'
+# 172.19.0.2:9300
+CAMERA_LIVE_PATH = "/mnt/Camera"
+CAMERA_ARCHIVE_PATH = "/mnt"
+HASSIO_PATH = "/mnt/Hassio"
 
 print("Import settings: " + USED_SETTINGS)

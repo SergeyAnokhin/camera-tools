@@ -2,6 +2,7 @@ import os
 from Processors.Processor import Processor
 from Common.SecretConfig import SecretConfig
 from Pipeline.Model.PipelineShot import PipelineShot
+from Common.AppSettings import AppSettings
 
 class ArchiveProcessor(Processor):
 
@@ -13,8 +14,8 @@ class ArchiveProcessor(Processor):
         meta = self.CreateMetadata(pShot)
         dt = pShot.Shot.GetDatetime()
 
-        path = os.path.join(self.config.pathTo(), dt.strftime('%Y-%m'),
-            dt.strftime('%d'))
+        path = os.path.join(AppSettings.CAMERA_ARCHIVE_PATH, os.path.join('CameraArchive', os.path.join(self.config.pathTo(), dt.strftime('%Y-%m'),
+            dt.strftime('%d'))))
         filename_date = dt.strftime('%Y%m%d_%H%M%S')
         filename = f'{filename_date}_{self.config.camera}_cv.jpeg'
         filename_orig = f'{filename_date}_{self.config.camera}.jpg'

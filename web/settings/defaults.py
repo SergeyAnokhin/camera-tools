@@ -35,7 +35,7 @@ SECRET_KEY = '*********************************************'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.99.100', 'localhost']
+ALLOWED_HOSTS = ['192.168.99.100', 'localhost', '192.168.1.31']
 
 
 # Application definition
@@ -135,3 +135,5 @@ STATIC_URL = '/static/'
 
 USED_SETTINGS = "default"
 #print("Import settings: " + USED_SETTINGS)
+
+CAMERA_ARCHIVE_NAS_PATH = "/CameraArchive"
