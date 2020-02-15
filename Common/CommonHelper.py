@@ -1,4 +1,4 @@
-import datetime, re, json, os, pytz, subprocess, sys
+import datetime, re, json, os, pytz, subprocess, sys, coloredlogs, logging
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -131,6 +131,32 @@ class CommonHelper:
     def Decode(self, token: str):
         key = self.secretConfig.image_id_decode_key.encode()
         return Fernet(key).decrypt(token.encode()).decode()
+
+    def installColoredLog(self, log: logging.Logger):
+        coloredlogs.DEFAULT_DATE_FORMAT = '%H:%M:%S'
+        coloredlogs.CAN_USE_BOLD_FONT = True
+        coloredlogs.DEFAULT_FIELD_STYLES = {
+            'asctime': {'color': 'green'}, 
+            'hostname': {'color': 'black'}, 
+            'levelname': {'color': 'magenta', 'bold': True, 'underline': True}, 
+            'name': {'color': 'blue'}, 
+            'programname': {'color': 'cyan'}
+        }
+        coloredlogs.DEFAULT_LEVEL_STYLES = {
+            'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
+            'debug': {'color': 1, 'bold': True}, 
+            'error': {'color': 'red'}, 
+            'info': {'color': 'black', 'faint': True}, 
+            'warning': {'color': 'yellow'},
+            'notice': {'color': 'magenta'}, 
+            'spam': {'color': 'green', 'faint': True}, 
+            'success': {'color': 'green', 'bold': True}, 
+            'verbose': {'color': 'blue'}, 
+        }
+        coloredlogs.COLOREDLOGS_LEVEL_STYLES='spam=22;debug=1;verbose=34;notice=220;warning=202;success=118,bold;error=124;critical=background=red'
+        coloredlogs.install(logger=log, isatty=True)
+        coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s', isatty=True)
+
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):

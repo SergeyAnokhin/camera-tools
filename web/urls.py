@@ -76,6 +76,11 @@ def processGetDnsData(request):
 def processMoveMobilePhotos(request):
     return HttpResponse(f"processMoveMobilePhotos")
 
+### API : /process/process_extract_dns_adguard_data ###
+@logit
+def processExtractDnsAdguardData(request):
+    return HttpResponse(f"processExtractDnsAdguardData")
+
 ### API : /camera_archive/archiving ###
 @logit
 def archiving(request: HttpRequest):
@@ -131,6 +136,7 @@ urlpatterns = [
     path('test/', test),
     path('process/get_dns_data', processGetDnsData),
     path('process/move_mobile_photos', processMoveMobilePhotos),
+    path('process/extract_dns_adguard_data', processExtractDnsAdguardData),
     path('V3/analyse', analyseV3),
     path('image/', getImageFromCameraArchive),
     path('camera_archive/image', getImageFromCameraArchive),

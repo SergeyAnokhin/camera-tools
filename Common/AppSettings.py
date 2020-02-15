@@ -4,19 +4,25 @@ class GmailSettings:
     USERNAME = getattr(settings, "GMAIL_USERNAME", None)
     PASSWORD = getattr(settings, "GMAIL_PASSWORD", None)
 
+class DnsAdGuardSettings:
+    API_QUERY_LOG  = getattr(settings, "DNS_ADGUARD_API_QUERY_LOG", None)
+    API_AUTH       = getattr(settings, "DNS_ADGUARD_API_AUTH", None)
+
 class AppSettings:
-    USED_SETTINGS           = getattr(settings, "USED_SETTINGS", None)
+    USED_SETTINGS              = getattr(settings, "USED_SETTINGS", None)
 
     # Secret
-    IMAGE_ID_DECODE_KEY     = getattr(settings, "IMAGE_ID_DECODE_KEY", None)
-    HOST                    = getattr(settings, "HOST", None)
-    ELASTICSEARCH_HOST      = getattr(settings, "ELASTICSEARCH_HOST", None)
-    GMAIL                   = GmailSettings()
+    IMAGE_ID_DECODE_KEY        = getattr(settings, "IMAGE_ID_DECODE_KEY", None)
+    HOST                       = getattr(settings, "HOST", None)
+    ELASTICSEARCH_HOST         = getattr(settings, "ELASTICSEARCH_HOST", None)
+    GMAIL                      = GmailSettings()
 
-    CAMERA_LIVE_PATH        = getattr(settings, "CAMERA_LIVE_PATH", None)
-    CAMERA_ARCHIVE_PATH     = getattr(settings, "CAMERA_ARCHIVE_PATH", None)
-    CAMERA_ARCHIVE_NAS_PATH = getattr(settings, "CAMERA_ARCHIVE_NAS_PATH", None)
-    HASSIO_PATH             = getattr(settings, "HASSIO_PATH", None)
+    CAMERA_LIVE_PATH           = getattr(settings, "CAMERA_LIVE_PATH", None)
+    CAMERA_ARCHIVE_PATH        = getattr(settings, "CAMERA_ARCHIVE_PATH", None)
+    CAMERA_ARCHIVE_NAS_PATH    = getattr(settings, "CAMERA_ARCHIVE_NAS_PATH", None)
+    HASSIO_PATH                = getattr(settings, "HASSIO_PATH", None)
+
+    DNS_ADGUARD                = DnsAdGuardSettings()
 
     def __init__(self):
         print("AppSettings init. User Settings: " + getattr(settings, "USED_SETTINGS", None)) 

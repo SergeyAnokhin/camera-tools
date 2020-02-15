@@ -67,31 +67,7 @@ class ApiContext:
         self.log.info(f'ℹ️ |####### start API @ {str(datetime.datetime.now()) + " ":#<40}|')
         self.log.info('ℹ️ |############################################################|')
         self.log.info("USED_SETTINGS: " + AppSettings.USED_SETTINGS)
-
-
-        coloredlogs.DEFAULT_DATE_FORMAT = '%H:%M:%S'
-        coloredlogs.CAN_USE_BOLD_FONT = True
-        coloredlogs.DEFAULT_FIELD_STYLES = {
-            'asctime': {'color': 'green'}, 
-            'hostname': {'color': 'black'}, 
-            'levelname': {'color': 'magenta', 'bold': True, 'underline': True}, 
-            'name': {'color': 'blue'}, 
-            'programname': {'color': 'cyan'}
-        }
-        coloredlogs.DEFAULT_LEVEL_STYLES = {
-            'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
-            'debug': {'color': 1, 'bold': True}, 
-            'error': {'color': 'red'}, 
-            'info': {'color': 'black', 'faint': True}, 
-            'warning': {'color': 'yellow'},
-            'notice': {'color': 'magenta'}, 
-            'spam': {'color': 'green', 'faint': True}, 
-            'success': {'color': 'green', 'bold': True}, 
-            'verbose': {'color': 'blue'}, 
-        }
-        coloredlogs.COLOREDLOGS_LEVEL_STYLES='spam=22;debug=1;verbose=34;notice=220;warning=202;success=118,bold;error=124;critical=background=red'
-        coloredlogs.install(logger=self.log, isatty=True)
-        coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s', isatty=True)
+        self.Helper.installColoredLog(self.log)
 
         # Some examples.
         # self.log.debug("this is a debugging message")
