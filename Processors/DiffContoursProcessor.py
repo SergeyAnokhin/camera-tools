@@ -93,10 +93,10 @@ class DiffContoursProcessor(Processor):
     def __init__(self):
         super().__init__("DIFF")
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
         others = pShots.copy()
         others.remove(pShot)
-        super().ProcessShot(pShot, others)
+        super().ProcessItem(pShot, others)
         diff = DiffCamShot()
         return diff.Process(pShot, others)
 

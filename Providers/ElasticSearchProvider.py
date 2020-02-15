@@ -1,5 +1,5 @@
 import os
-from Providers.Provider import Provider
+from Providers.Provider import PipelineShotProvider
 from Common.CommonHelper import CommonHelper
 from datetime import datetime
 from elasticsearch import Elasticsearch
@@ -7,7 +7,7 @@ from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
 from Common.AppSettings import AppSettings
 
-class ElasticSearchProvider(Provider):
+class ElasticSearchProvider(PipelineShotProvider):
 
     def __init__(self, camera: str, datetime: datetime, isSimulation = False):
         super().__init__("ELSE")

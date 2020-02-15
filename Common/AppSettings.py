@@ -5,8 +5,8 @@ class GmailSettings:
     PASSWORD = getattr(settings, "GMAIL_PASSWORD", None)
 
 class DnsAdGuardSettings:
-    API_QUERY_LOG  = getattr(settings, "DNS_ADGUARD_API_QUERY_LOG", None)
-    API_AUTH       = getattr(settings, "DNS_ADGUARD_API_AUTH", None)
+    API_QUERY_LOG  = getattr(settings, "DNS_ADGUARD_API_QUERY_LOG", "")
+    API_AUTH       = getattr(settings, "DNS_ADGUARD_API_AUTH", "")
 
 class AppSettings:
     USED_SETTINGS              = getattr(settings, "USED_SETTINGS", None)
@@ -21,6 +21,7 @@ class AppSettings:
     CAMERA_ARCHIVE_PATH        = getattr(settings, "CAMERA_ARCHIVE_PATH", None)
     CAMERA_ARCHIVE_NAS_PATH    = getattr(settings, "CAMERA_ARCHIVE_NAS_PATH", None)
     HASSIO_PATH                = getattr(settings, "HASSIO_PATH", None)
+    DNS_HOST                   = getattr(settings, "DNS_HOST", None)
 
     DNS_ADGUARD                = DnsAdGuardSettings()
 

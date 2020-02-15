@@ -19,11 +19,11 @@ yolo = YoloContext('..\\camera-OpenCV-data\\weights\\yolov3-tiny')
 
 shots = ThreeShots.FromDir(None, temp)
 
-yoloResult = yolo.ProcessShot(shots.shot1)
+yoloResult = yolo.ProcessItem(shots.shot1)
 yolo.drawRegions(shots.shot1.image_contours, yoloResult)
-yoloResult = yolo.ProcessShot(shots.shot2)
+yoloResult = yolo.ProcessItem(shots.shot2)
 yolo.drawRegions(shots.shot2.image_contours, yoloResult)
-yoloResult = yolo.ProcessShot(shots.shot3)
+yoloResult = yolo.ProcessItem(shots.shot3)
 yolo.drawRegions(shots.shot3.image_contours, yoloResult)
 
 shots.CalcContours()

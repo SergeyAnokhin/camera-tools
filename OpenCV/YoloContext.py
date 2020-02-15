@@ -45,7 +45,7 @@ class YoloContext:
         self.layers = self.net.getLayerNames()
         self.layers = [self.layers[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
 
-    def ProcessShot(self, shot: Shot):
+    def ProcessItem(self, shot: Shot):
 
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and

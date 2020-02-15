@@ -1,0 +1,154 @@
+{
+    "data": [
+        {
+            "answer": [
+                {
+                    "ttl": 60,
+                    "type": "A",
+                    "value": "143.204.226.24"
+                },
+                {
+                    "ttl": 60,
+                    "type": "A",
+                    "value": "143.204.226.33"
+                },
+                {
+                    "ttl": 60,
+                    "type": "A",
+                    "value": "143.204.226.38"
+                },
+                {
+                    "ttl": 60,
+                    "type": "A",
+                    "value": "143.204.226.68"
+                }
+            ],
+            "client": "192.168.1.47",
+            "elapsedMs": "8.869936000000001",
+            "question": {
+                "class": "IN",
+                "host": "www.cloudmqtt.com",
+                "type": "A"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T13:26:59.352091797+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 300,
+                    "type": "CNAME",
+                    "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+                },
+                {
+                    "ttl": 8285,
+                    "type": "A",
+                    "value": "54.76.137.235"
+                }
+            ],
+            "client": "192.168.1.11",
+            "elapsedMs": "20.263144",
+            "question": {
+                "class": "IN",
+                "host": "m23.cloudmqtt.com",
+                "type": "A"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T10:41:16.176426407+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 300,
+                    "type": "CNAME",
+                    "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+                },
+                {
+                    "ttl": 10124,
+                    "type": "A",
+                    "value": "54.76.137.235"
+                }
+            ],
+            "client": "192.168.1.11",
+            "elapsedMs": "11.733213",
+            "question": {
+                "class": "IN",
+                "host": "m23.cloudmqtt.com",
+                "type": "A"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T10:10:37.580807933+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 300,
+                    "type": "CNAME",
+                    "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+                },
+                {
+                    "ttl": 604800,
+                    "type": "A",
+                    "value": "54.76.137.235"
+                }
+            ],
+            "client": "192.168.1.11",
+            "elapsedMs": "22.188145",
+            "question": {
+                "class": "IN",
+                "host": "m23.cloudmqtt.com",
+                "type": "A"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T09:59:22.000508875+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 295,
+                    "type": "CNAME",
+                    "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+                },
+                {
+                    "ttl": 604800,
+                    "type": "A",
+                    "value": "54.76.137.235"
+                }
+            ],
+            "client": "192.168.1.12",
+            "elapsedMs": "11.859513999999999",
+            "question": {
+                "class": "IN",
+                "host": "m23.cloudmqtt.com",
+                "type": "A"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T00:17:10.8947977+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 300,
+                    "type": "CNAME",
+                    "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+                }
+            ],
+            "client": "192.168.1.12",
+            "elapsedMs": "12.183472",
+            "question": {
+                "class": "IN",
+                "host": "m23.cloudmqtt.com",
+                "type": "AAAA"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-02-15T00:17:05.783066408+01:00"
+        }
+    ],
+    "oldest": "2020-02-14T22:36:28.294967515+01:00"
+}

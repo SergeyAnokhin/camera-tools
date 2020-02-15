@@ -13,7 +13,7 @@ class HassioProcessor(Processor):
         if overidePath != None:
             self.hassLocation = overidePath
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
         meta = self.CreateMetadata(pShot)
         camera = self.config.camera
         dest = os.path.join(self.hassLocation, f'cv_{camera}_{pShot.Index}.jpg')

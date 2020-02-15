@@ -15,8 +15,8 @@ class TrackingProcessor(Processor):
         self.helper = CommonHelper()
         self.isDebug = isDebug
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
-        super().ProcessShot(pShot, pShots)
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
+        super().ProcessItem(pShot, pShots)
         meta = self.CreateMetadata(pShot)
         shot = pShot.Shot
         prevPShot = self.GetPreviousShot(pShot, pShots)

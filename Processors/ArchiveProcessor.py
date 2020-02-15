@@ -10,7 +10,7 @@ class ArchiveProcessor(Processor):
         super().__init__("ARCH")
         self.isSimulation = isSimulation
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
         meta = self.CreateMetadata(pShot)
         dt = pShot.Shot.GetDatetime()
 

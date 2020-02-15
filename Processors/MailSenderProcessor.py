@@ -21,7 +21,7 @@ class MailSenderProcessor(Processor):
         self.secretConfig.fromJsonFile()
         self.isSimulation = isSimulation
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
         pass
 
     def AfterProcess(self, pShots: [], ctx):

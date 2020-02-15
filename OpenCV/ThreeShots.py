@@ -37,9 +37,9 @@ class ThreeShots:
         return shots
 
     def Analyse(self):
-        self.yoloContext.ProcessShot(self.shot1)
-        self.yoloContext.ProcessShot(self.shot2)
-        self.yoloContext.ProcessShot(self.shot3)
+        self.yoloContext.ProcessItem(self.shot1)
+        self.yoloContext.ProcessItem(self.shot2)
+        self.yoloContext.ProcessItem(self.shot3)
 
         self.CalcContours()
 

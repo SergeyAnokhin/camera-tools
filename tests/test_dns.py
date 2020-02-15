@@ -1,8 +1,13 @@
-import logging, unittest, sys, datetime, requests, re, os
-from Common.CommonHelper import CommonHelper
+import logging, unittest, sys, datetime, os, json
+from django.conf import settings
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.production")
-from Common.AppSettings import AppSettings
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.test")
+from Common.CommonHelper import CommonHelper
+from Pipeline.Pipeline import Pipeline
+from Providers.DnsAdGuardProvider import DnsAdGuardProvider
+from Processors.ElasticSearchDnsProcessor import ElasticSearchDnsProcessor
+
+# from Common.AppSettings import AppSettings
 
 class TestDns(unittest.TestCase):
 
@@ -19,9 +24,9 @@ class TestDns(unittest.TestCase):
         self.log = logging.getLogger("TEST")
         TestDns.log = self.log
 
-        helper = CommonHelper()
+        self.helper = CommonHelper()
 
-        helper.installColoredLog(self.log)
+        self.helper.installColoredLog(self.log)
         self.log.info(f'start {__name__}: ⏱️ {datetime.datetime.now()}')
 
     def setUp(self):
@@ -38,44 +43,57 @@ class TestDns(unittest.TestCase):
         # TestPipeline.log.info(' ### TEARDOWN ############### ')
         # TestPipeline.log.info(' ############################ ')
 
-    def test_basic(self):
-        # python -m unittest tests.test_dns.TestDns.test_basic
-        url = AppSettings.DNS_ADGUARD.API_QUERY_LOG
+    def test_provider(self):
+        # python -m unittest tests.test_dns.TestDns.test_provider
+        pipeline = Pipeline(self.log)
+        pipeline.providers.append(DnsAdGuardProvider())
 
-        headers = {
-            'Authorization': AppSettings.DNS_ADGUARD.API_AUTH,
-            'User-Agent': "PostmanRuntime/7.20.1",
-            'Accept': "*/*",
-            'Cache-Control': "no-cache",
-            'Accept-Encoding': "gzip, deflate",
-            'Connection': "keep-alive",
-            'cache-control': "no-cache"
-            }
+        context = {}
+        pipeline.Get(context)
+        data = context['data']
 
-        response = requests.request("GET", url, headers=headers)
-        json = response.json()
+        self.assertEqual(len(data), 6)
+        self.assertEqual(data[5]['client'], '192.168.1.12')
+        self.assertEqual(data[5]['elapsedMs'], 12.18)
+        self.assertEqual(data[5]['@timestamp'], '2020-02-14T23:17:05.783Z')
+        self.assertEqual(data[5]['_id'], 'dns-2020.02')
+        self.assertEqual(data[5]['_index'], '192.168.1.12@2020-02-14T23:17:05.783Z_m23.cloudmqtt.com')
 
-        data = json['data']
-        oldestMinutes = self.OldestDateTimeMinutes(json['oldest'])
-        if oldestMinutes > 20:
-            self.log.debug(f'Oldest (minutes): {oldestMinutes} (⏱️ {json["oldest"]})')
-        else:
-            self.log.error(f'Oldest (minutes): {oldestMinutes} (⏱️ {json["oldest"]})')
-        self.log.debug(f"Data symbols : {len(response.text)}")
-        self.log.debug(f"Data (items) : {len(data)}")
+    def test_processor(self):
+        # python -m unittest tests.test_dns.TestDns.test_processor
+        provider_output = """
+{
+    "answer": [
+        {
+            "ttl": 300,
+            "type": "CNAME",
+            "value": "ec2-54-76-137-235.eu-west-1.compute.amazonaws.com."
+        }
+    ],
+    "client": "192.168.1.12",
+    "elapsedMs": 12.18,
+    "question": {
+        "class": "IN",
+        "host": "m23.cloudmqtt.com",
+        "type": "AAAA"
+    },
+    "reason": "NotFilteredNotFound",
+    "status": "NOERROR",
+    "id": 12,
+    "client_ip": "192.168.1.12",
+    "@timestamp": "2020-02-14T23:17:05.783Z",
+    "tags": [
+        "camera_tools"
+    ],
+    "_id": "dns-2020.02",
+    "_index": "192.168.1.12@2020-02-14T23:17:05.783Z_m23.cloudmqtt.com"
+}        
+        """
+        pipeline = Pipeline(self.log)
+        pipeline.processors.append(ElasticSearchDnsProcessor())
 
-        for item in data:
-            self.log.debug(f"- {item['client']} / {item['question']['host']} / {item['reason']} ")
-
-    def OldestDateTimeMinutes(self, oldestStr: str):
-        pattern = re.compile("\.(\d{6})\d+(\D)")
-        oldest = pattern.sub(r".\1\2", oldestStr)
-        dt = datetime.datetime.fromisoformat(oldest)
-        dt = dt.replace(tzinfo=None)
-        now = datetime.datetime.now()
-        return (now - dt).total_seconds() / 60
-
-    def test_basic2(self):
-        # python -m unittest tests.test_dns.TestDns.test_basic2
-        pass
+        context = {
+            "data": [json.loads(provider_output)]
+        }
+        pipeline.Process(context)
 

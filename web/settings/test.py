@@ -6,6 +6,8 @@ ELASTICSEARCH_HOST = None
 CAMERA_LIVE_PATH = "C:\\Src\\temp\\CameraArchive"
 CAMERA_ARCHIVE_PATH = "C:\\Src\\camera-OpenCV-data\\Camera"
 HASSIO_PATH = "temp"
+DNS_ADGUARD_API_QUERY_LOG = "tests/data/dns_adguard_querylog.json"
+DNS_HOST = "8.8.8.8"
 
 ELASTICSEARCH_DSL={
     'default': {

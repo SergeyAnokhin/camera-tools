@@ -123,8 +123,8 @@ class YoloObjDetectionProcessor(Processor):
             self.isPreloaded = True
         self.preLoadLock.release()
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
-        super().ProcessShot(pShot, pShots)
+    def ProcessItem(self, pShot: PipelineShot, pShots: []):
+        super().ProcessItem(pShot, pShots)
         self.PreLoadEnsure()
         yolo = YoloCamShot(pShot, self.yolo)
         layerOutputs = yolo.Detect()

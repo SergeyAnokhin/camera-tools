@@ -1,40 +1,44 @@
 import logging
-from Pipeline.Model.PipelineShot import PipelineShot
-from Archiver.CameraArchiveConfig import CameraArchiveConfig
-from Common.CommonHelper import CommonHelper
+# from Pipeline.Model.PipelineShot import PipelineShot
+# from Archiver.CameraArchiveConfig import CameraArchiveConfig
+# from Common.CommonHelper import CommonHelper
 
 class Processor:
-    config: CameraArchiveConfig
+#     config: CameraArchiveConfig
     isSimulation: bool = False
 
-    def __init__(self, name):
+    def __init__(self, name, isSimulation = False):
         self.name = name
         self.log = logging.getLogger(f"PROC:{name}")
-        self.helper = CommonHelper()
+        self.isSimulation = isSimulation
 
     def Preload(self, isUsed = False):
         ''' Will start on application start once '''
         if isUsed:
             self.log.info('=== PRELOAD ===')
 
-    def Process(self, pShots: [], pipelineContext: dict):
+    def Process(self, context: dict):
         ''' Main Process '''
-        self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@ {"(Simulation)" if self.isSimulation else ""}')
-        for i in range(len(pShots)):
-            pShot = pShots[i]
-            self.log.debug(f"   === 🎞️  {pShot.Shot.filename} ======")
-            self.ProcessShot(pShot, pShots)
-        self.AfterProcess(pShots, pipelineContext)
+        self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@')
+        data = context['data']
+        for item in data:
+            self.BeforeProcessItem(item, context)
+            self.ProcessItem(item, context)
+        self.AfterProcess(context)
 
-    def CreateMetadata(self, pShot: PipelineShot):
-        pShot.Metadata[self.name] = {}
-        return pShot.Metadata[self.name]
+    def CreateMetadata(self, item_id, context: dict):
+        if 'meta' not in context:
+            context['meta'] = {}    
+        if self.name not in context['meta']:
+            context['meta'][self.name] = {}
+        context['meta'][self.name][item_id] = {}
+        return context['meta'][self.name][item_id]
 
-    def ProcessShot(self, pShot: PipelineShot, otherPShots: []):
+    def ProcessItem(self, item, context):
         pass
 
-    def AfterProcess(self, pShots: [], ctx):
+    def AfterProcess(self, ctx):
         pass
 
-    def PostProcess(self, pShots: []):
+    def BeforeProcessItem(self, item, ctx):
         pass

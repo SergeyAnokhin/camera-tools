@@ -2,25 +2,18 @@ import logging
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 from Pipeline.Model.PipelineShot import PipelineShot
-# using cases :
-# 1. New mail comes
-# 2. Re-index whole archive
-# 3. (?) Process video
+from Pipeline.Pipeline import Pipeline
+from Processors.Processor import Processor
 
-class ShotsPipeline:
+class ShotsPipeline(Pipeline):
 
-    def __init__(self, camera: str, logger: logging.Logger):
-        self.processors = []
-        self.providers = []
+    def __init__(self, camera: str, logger: logging.Logger, isSimulation=False):
+        super().__init__(logger, isSimulation)
         self.archiver = CameraArchiveHelper(logger)
         self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
-    def PreLoad(self):
-        for processor in self.processors:
-            processor.config = self.config
-            PreLoad = getattr(processor, "PreLoad", None)
-            if callable(PreLoad):
-                processor.PreLoad()
+    def PreLoadProtected(self, processor: Processor):
+        processor.config = self.config
 
     def GetShots(self):
         shots = []

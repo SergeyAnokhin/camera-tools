@@ -6,9 +6,9 @@ from Common.CommonHelper import CommonHelper
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Pipeline.Model.PipelineShot import PipelineShot
-from Providers.Provider import Provider
+from Providers.Provider import PipelineShotProvider
 
-class ImapShotsProvider(Provider):
+class ImapShotsProvider(PipelineShotProvider):
 
     def __init__(self, tempFolder = 'temp'):
         super().__init__("IMAP")

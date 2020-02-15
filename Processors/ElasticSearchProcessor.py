@@ -1,17 +1,17 @@
 import json, logging
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 from Common.FileInfo import FileInfo
 from elasticsearch import Elasticsearch
 from Common.AppSettings import AppSettings
 
-class ElasticSearchProcessor(Processor):
+class ElasticSearchProcessor(PipelineShotProcessor):
 
     def __init__(self, isSimulation: bool = False):
         super().__init__("ELSE")
         self.isSimulation = isSimulation
-        for _ in ("boto", "elasticsearch", "urllib3"):
-            logging.getLogger(_).setLevel(logging.INFO)
+        # for _ in ("boto", "elasticsearch", "urllib3"):
+        #     logging.getLogger(_).setLevel(logging.INFO)
         (self.elasticsearch_host, self.elasticsearch_port) = AppSettings.ELASTICSEARCH_HOST.split(':')
 
     def GetArchivePath(self, path: str):
@@ -19,7 +19,7 @@ class ElasticSearchProcessor(Processor):
         path = path.replace("/mnt", "")
         return path
 
-    def ProcessShot(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, context: dict):
         meta = self.CreateMetadata(pShot)
         #fullfilename_ftp = file.to.path.replace("\\\\diskstation", '').replace('\\', '/')
         file = FileInfo(pShot.Shot.fullname)
@@ -35,7 +35,7 @@ class ElasticSearchProcessor(Processor):
             source_type = 'unknown'
             event_start = None
 
-        dict = {
+        raw = {
             "ext": file.get_extension(),  # 'jpg'
             "volume": "/volume2",
             # "/CameraArchive/Foscam/2019-02/06/20190206_090254_Foscam.jpg",
@@ -56,13 +56,13 @@ class ElasticSearchProcessor(Processor):
             ]
         }
 
-        dict['Analyse'] = {}
+        raw['Analyse'] = {}
         for metaKey in pShot.Metadata:
             if metaKey == self.name:
                 continue
-            dict['Analyse'][metaKey] = pShot.Metadata[metaKey]
+            raw['Analyse'][metaKey] = pShot.Metadata[metaKey]
 
-        json_data = json.dumps(dict, indent=4, sort_keys=True)
+        json_data = json.dumps(raw, indent=4, sort_keys=True)
         meta['JSON'] = json_data
         meta['timestamp_utc'] = file.get_timestamp_utc()
         id = self.helper.GetEsShotId(self.config.camera, file.get_datetime_utc())
@@ -79,4 +79,6 @@ class ElasticSearchProcessor(Processor):
             if not self.elasticsearch_host:
                 self.log.debug("Elasticsearch host not defined. Indexation ignored")
             self.log.debug(json_data)
+            meta["_index"] = index 
+            meta["_id"] = id
 
