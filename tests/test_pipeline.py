@@ -7,6 +7,7 @@ import numpy as np
 import pprint as pp
 import sys
 from copy import copy, deepcopy
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.test")
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Providers.ElasticSearchProvider import ElasticSearchProvider

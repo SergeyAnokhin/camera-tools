@@ -8,7 +8,7 @@ from Providers.Provider import Provider
 class PipelineShotProvider(Provider):
     config: CameraArchiveConfig
 
-    def __init__(self, name, isSimulation: bool):
+    def __init__(self, name, isSimulation = False):
         super().__init__(name, isSimulation)
 
     def CreateMetadata(self, pShot: PipelineShot):

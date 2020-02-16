@@ -1,5 +1,5 @@
 import os
-from Providers.Provider import PipelineShotProvider
+from Providers.PipelineShotProvider import PipelineShotProvider
 from Common.CommonHelper import CommonHelper
 from datetime import datetime
 from elasticsearch import Elasticsearch

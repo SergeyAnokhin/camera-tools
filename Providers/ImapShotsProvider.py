@@ -6,7 +6,7 @@ from Common.CommonHelper import CommonHelper
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Pipeline.Model.PipelineShot import PipelineShot
-from Providers.Provider import PipelineShotProvider
+from Providers.PipelineShotProvider import PipelineShotProvider
 
 class ImapShotsProvider(PipelineShotProvider):
 

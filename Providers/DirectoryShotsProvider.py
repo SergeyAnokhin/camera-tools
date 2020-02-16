@@ -1,7 +1,7 @@
 import os, logging, datetime
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
-from Providers.Provider import PipelineShotProvider
+from Providers.PipelineShotProvider import PipelineShotProvider
 from Common.CommonHelper import CommonHelper
 
 class DirectoryShotsProvider(PipelineShotProvider):

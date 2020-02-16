@@ -2,7 +2,7 @@ import logging
 from Pipeline.Model.PipelineShot import PipelineShot
 from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Common.CommonHelper import CommonHelper
-from Processor import Processor
+from Processors.Processor import Processor
 
 class PipelineShotProcessor(Processor):
     config: CameraArchiveConfig
