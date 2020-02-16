@@ -3,7 +3,7 @@ from Archiver.CameraArchiveConfig import CameraArchiveConfig
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 from Pipeline.Model.PipelineShot import PipelineShot
 from Pipeline.Pipeline import Pipeline
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 
 class ShotsPipeline(Pipeline):
 
@@ -12,7 +12,7 @@ class ShotsPipeline(Pipeline):
         self.archiver = CameraArchiveHelper(logger)
         self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
-    def PreLoadProtected(self, processor: Processor):
+    def PreLoadProtected(self, processor: PipelineShotProcessor):
         processor.config = self.config
 
     def GetShots(self):
@@ -23,9 +23,9 @@ class ShotsPipeline(Pipeline):
         return shots
 
     def Process(self, pShots: []):
-        pipelineContext = {}
+        pipelineContext = { 'data': pShots }
         for processor in self.processors:
-            processor.Process(pShots, pipelineContext)
+            processor.Process(pipelineContext)
             PostProcess = getattr(processor, "PostProcess", None)
             if callable(PostProcess):
                 processor.PostProcess(pShots)

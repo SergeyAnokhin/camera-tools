@@ -15,7 +15,9 @@ class ElasticSearchProvider(PipelineShotProvider):
         self.datetime = datetime
         self.helper = CommonHelper()
         self.isSimulation = isSimulation
-        (self.elasticsearch_host, self.elasticsearch_port) = AppSettings.ELASTICSEARCH_HOST.split(':')
+        (self.elasticsearch_host, self.elasticsearch_port) = (None, None)
+        if AppSettings.ELASTICSEARCH_HOST:
+            (self.elasticsearch_host, self.elasticsearch_port) = AppSettings.ELASTICSEARCH_HOST.split(':')
 
     def GetShotsProtected(self, pShots: []):
         dtUtc = self.helper.ToUtcTime(self.datetime)

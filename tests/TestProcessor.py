@@ -6,5 +6,6 @@ class TestProcessor(Processor):
         super().__init__("TEST")
         self.Context = ctx
 
-    def AfterProcess(self, pShots: [], ctx: dict):
+    def AfterProcess(self, ctx: dict):
+        pShots = ctx['data']
         ctx.update(self.Context)

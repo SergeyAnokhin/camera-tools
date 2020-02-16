@@ -26,47 +26,37 @@ from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
+from .TestHelper import TestHelper
 
 class TestPipeline(unittest.TestCase):
     log: logging.Logger = None
 
     def __init__(self, *args, **kwargs):
         super(TestPipeline, self).__init__(*args, **kwargs)
-        file_handler = logging.FileHandler(filename='test.log', mode='w')
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        handlers = [file_handler, stdout_handler]
-
-        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
-            level=logging.DEBUG, 
-            datefmt='%H:%M:%S',
-            handlers=handlers)
-        self.log = logging.getLogger("TEST")
+        self.testHelper = TestHelper()
+        self.log = self.testHelper.CreateLog(TestPipeline.__name__)
         TestPipeline.log = self.log
         self.archiver = CameraArchiveHelper(self.log)
         self.helper = CommonHelper()
-        #self.helper.GetNetworkConfig()
-        CommonHelper.networkConfig['camera_live_archive'] = ""
-        CommonHelper.networkConfig['camera_archive_archive'] = ""
-        self.log.info('')
-        self.log.info(' ############################ ')
-        self.log.info(' ### SETUP ################## ')
-        self.log.info(' ############################ ')
-        from Common import HtmlLogger
-        html_handler = HtmlLogger.HTMLFileHandler('camera-tools.html')
-        html_handler.suffix = '_%Y-%m-%d.html'
+        # self.log.info('')
+        # self.log.info(' ############################ ')
+        # self.log.info(' ### SETUP ################## ')
+        # self.log.info(' ############################ ')
+        # from Common import HtmlLogger
+        # html_handler = HtmlLogger.HTMLFileHandler('camera-tools.html')
+        # html_handler.suffix = '_%Y-%m-%d.html'
 
     def setUp(self):
-        self.log.info(f' ### SETUP {self._testMethodName} ################## ==> ')
-        self.log.info('start %s: %s', __name__, datetime.datetime.now())
+        self.testHelper.setUp(self.log, self._testMethodName)
 
     def tearDown(self):
-        self.log.info(f' ### TEARDOWN {self._testMethodName} ############### <== ')
+        self.testHelper.tearDown(self.log, self._testMethodName)
 
-    @classmethod
-    def tearDownClass(self):
-        TestPipeline.log.info(' ############################ ')
-        TestPipeline.log.info(' ### TEARDOWN ############### ')
-        TestPipeline.log.info(' ############################ ')
+    # @classmethod
+    # def tearDownClass(self):
+    #     TestPipeline.log.info(' ############################ ')
+    #     TestPipeline.log.info(' ### TEARDOWN ############### ')
+    #     TestPipeline.log.info(' ############################ ')
 
     def test_imapShotsProvider(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_imapShotsProvider
@@ -123,7 +113,7 @@ class TestPipeline(unittest.TestCase):
         target = DiffContoursProcessor()
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
 
-        target.Process(pipelineShots, {})
+        target.Process({ 'data': pipelineShots })
         # pp.pprint(pipelineShots[0].Metadata, indent=2)
         # pp.pprint(pipelineShots[1].Metadata, indent=2)
         # pp.pprint(pipelineShots[2].Metadata, indent=2)
@@ -142,7 +132,7 @@ class TestPipeline(unittest.TestCase):
         # python -m unittest tests.test_pipeline.TestPipeline.test_YoloObjDetectionProcessor_noObjects
         # INIT
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_No_Objects'
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(TestProcessor({ 'YOLO': { 'labels': 'person:2 car bird' } }))
         pipeline.processors.append(YoloObjDetectionProcessor())
@@ -169,7 +159,7 @@ class TestPipeline(unittest.TestCase):
         target = YoloObjDetectionProcessor()
         target.PreLoad()
         shots = DirectoryShotsProvider.FromDir(None, folder)
-        target.Process(shots, {})
+        target.Process({ 'data': shots })
         metadata0 = shots[0].Metadata['YOLO']
         metadata1 = shots[1].Metadata['YOLO']
         metadata2 = shots[2].Metadata['YOLO']
@@ -192,8 +182,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process(pipelineShots, {})
-        target.Process(pipelineShots, {})
+        yolo.Process({ 'data': pipelineShots })
+        target.Process({ 'data': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         pipelineShots[1].Shot.Show()
@@ -216,7 +206,7 @@ class TestPipeline(unittest.TestCase):
     def test_TrackingProcessor2(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor2
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(YoloObjDetectionProcessor())
         pipeline.processors.append(TrackingProcessor(isDebug=True))
@@ -247,8 +237,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process(pipelineShots, {})
-        target.Process(pipelineShots, {})
+        yolo.Process({ 'data': pipelineShots })
+        target.Process({ 'data': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         # pipelineShots[1].Shot.Show()
@@ -258,7 +248,7 @@ class TestPipeline(unittest.TestCase):
     def test_MailSend(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(TestProcessor({ 'YOLO': { 'labels': 'person:2 car bird' } }))
         pipeline.processors.append(DiffContoursProcessor())
@@ -305,7 +295,7 @@ class TestPipeline(unittest.TestCase):
         CommonHelper.networkConfig = {}
         CommonHelper.networkConfig['camera_archive_path'] = "../temp/CameraArchive"
 
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(ArchiveProcessor(True))
         pipeline.PreLoad()
@@ -321,7 +311,7 @@ class TestPipeline(unittest.TestCase):
         # python -m unittest tests.test_pipeline.TestPipeline.test_SaveToTemp
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
 
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(SaveToTempProcessor(True))
@@ -344,7 +334,7 @@ class TestPipeline(unittest.TestCase):
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
         CommonHelper.networkConfig = {}
 
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         pipeline.processors.append(DiffContoursProcessor())
         pipeline.processors.append(ArchiveProcessor(True))
@@ -403,7 +393,7 @@ class TestPipeline(unittest.TestCase):
             os.mkdir(hassioDir)
 
         ## INIT
-        pipeline = ShotsPipeline('Foscam')
+        pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
         # # proceccor : Analyse() GetJsonResult() Draw()  
         #pipeline.processors.append(ZonesProcessor())
@@ -497,17 +487,5 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual("Foscam@2019-10-20T15:18:08.000Z", meta['id'])
         self.assertEqual("cameraarchive-2019", meta['index'])
 
-    def test_secretConfig(self):
-        # python -m unittest tests.test_pipeline.TestPipeline.test_secretConfig
-        secretConfig = SecretConfig()
-        secretConfig.fromJsonFile()
-
-        network = self.helper.GetNetworkName()
-        networkConfig = secretConfig.GetNetworkConfig(network)
-
-        print(f'network: {network}; networkConfig: {networkConfig}')
-        self.assertIsNotNone(networkConfig['elasticsearch'])
-        self.assertTrue(network in networkConfig['network'])
-
-if __name__ == '__main__':
-    unittest.main()
+# if __name__ == '__main__':
+#     unittest.main()

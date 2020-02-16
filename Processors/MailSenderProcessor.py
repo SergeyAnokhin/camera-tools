@@ -24,7 +24,8 @@ class MailSenderProcessor(Processor):
     def ProcessItem(self, pShot: PipelineShot, pShots: []):
         pass
 
-    def AfterProcess(self, pShots: [], ctx):
+    def AfterProcess(self, ctx):
+        pShots = ctx['data']
         subject = self.GetSubject(pShots, ctx)
 
         msg = MIMEMultipart('alternative')

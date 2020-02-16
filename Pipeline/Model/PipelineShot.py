@@ -6,3 +6,4 @@ class PipelineShot:
         self.OriginalShot = shot.Clone() # image read only
         self.Metadata = {} # put analyse result metadata by processor
         self.Index = index
+        self.Id = shot.filename

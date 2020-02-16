@@ -1,10 +1,10 @@
 import os, cv2
 from datetime import datetime  
 from datetime import timedelta 
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 
-class SaveToTempProcessor(Processor):
+class SaveToTempProcessor(PipelineShotProcessor):
     '''
         Save analysed files to temp \n
         original: temp/20190203_085908_{camera}.jpg \n

@@ -131,7 +131,8 @@ class YoloObjDetectionProcessor(Processor):
         yolo.ProcessOutput(layerOutputs, self.confidence, self.threshold)
         yolo.Draw()
 
-    def AfterProcess(self, pShots: [], ctx):
+    def AfterProcess(self, ctx):
+        pShots = ctx['data']
         labelsCount =  self.GetMaximumCountPerShot(pShots)
         details = " ".join(labelsCount)
         ctx[self.name] = {}

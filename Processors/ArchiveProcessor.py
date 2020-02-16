@@ -1,16 +1,16 @@
 import os
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Common.SecretConfig import SecretConfig
 from Pipeline.Model.PipelineShot import PipelineShot
 from Common.AppSettings import AppSettings
 
-class ArchiveProcessor(Processor):
+class ArchiveProcessor(PipelineShotProcessor):
 
     def __init__(self, isSimulation: bool = False):
         super().__init__("ARCH")
         self.isSimulation = isSimulation
 
-    def ProcessItem(self, pShot: PipelineShot, pShots: []):
+    def ProcessItem(self, pShot: PipelineShot, ctx: dict):
         meta = self.CreateMetadata(pShot)
         dt = pShot.Shot.GetDatetime()
 

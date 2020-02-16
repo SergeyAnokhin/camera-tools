@@ -1,11 +1,11 @@
 import logging, unittest, sys, datetime, os, json
 from django.conf import settings
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.test")
 from Common.CommonHelper import CommonHelper
 from Pipeline.Pipeline import Pipeline
 from Providers.DnsAdGuardProvider import DnsAdGuardProvider
 from Processors.ElasticSearchDnsProcessor import ElasticSearchDnsProcessor
+from tests.TestHelper import TestHelper
 
 # from Common.AppSettings import AppSettings
 
@@ -13,37 +13,14 @@ class TestDns(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestDns, self).__init__(*args, **kwargs)
-        file_error_handler = logging.FileHandler(filename='test-error.log', encoding='utf-8')
-        file_error_handler.setLevel(logging.ERROR)
-        file_handler = logging.FileHandler(filename='test.log', mode='w', encoding='utf-8')
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        handlers = [file_handler, stdout_handler, file_error_handler]
-
-        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
-            level=logging.DEBUG, 
-            datefmt='%H:%M:%S',
-            handlers=handlers)
-        self.log = logging.getLogger("TEST")
-        TestDns.log = self.log
-
-        self.helper = CommonHelper()
-
-        self.helper.installColoredLog(self.log)
-        self.log.info(f'start {__name__}: ⏱️ {datetime.datetime.now()}')
+        self.testHelper = TestHelper()
+        self.log = self.testHelper.CreateLog(TestDns.__name__)
 
     def setUp(self):
-        self.log.info(f'⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ')
-        self.log.info(f'⬛ ⬛ ⬛  ⏩  SETUP   ⏩   {self._testMethodName} ⬛ ⬛ ⬛ ')
+        self.testHelper.setUp(self.log, self._testMethodName)
 
     def tearDown(self):
-        self.log.info(f'⬛ ⬛ ⬛  ⛔  TEARDOWN ⛔  {self._testMethodName} ⬛ ⬛ ⬛ ')
-
-    @classmethod
-    def tearDownClass(self):
-        pass
-        # TestPipeline.log.info(' ############################ ')
-        # TestPipeline.log.info(' ### TEARDOWN ############### ')
-        # TestPipeline.log.info(' ############################ ')
+        self.testHelper.tearDown(self.log, self._testMethodName)
 
     def test_provider(self):
         # python -m unittest tests.test_dns.TestDns.test_provider
