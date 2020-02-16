@@ -9,11 +9,11 @@ class Provider:
         self.isSimulation = isSimulation
 
     def Get(self, context: dict):
-        self.log.info(f'<<<<<< SHOTS: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
+        self.log.info(f'<<<<<< PROVIDER: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
         data = self.GetProtected(context)
         for i in data:
             self.PostProcess(i, context)
-        self.log.info(f'<<<<<< SHOTS: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
+        self.log.info(f'<<<<<< PROVIDER: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
 
     def PostProcess(self, i, context: dict):
         pass

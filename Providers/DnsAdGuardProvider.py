@@ -15,7 +15,7 @@ class DnsAdGuardProvider(Provider):
 
     def GetProtected(self, data):
         if AppSettings.DNS_ADGUARD.API_QUERY_LOG.startswith("http"):
-            url = f"{AppSettings.DNS_ADGUARD.API_QUERY_LOG}?filter_domain=cloudmqtt"
+            url = f"{AppSettings.DNS_ADGUARD.API_QUERY_LOG}"
 
             headers = {
                 'Authorization': AppSettings.DNS_ADGUARD.API_AUTH,
@@ -48,7 +48,7 @@ class DnsAdGuardProvider(Provider):
         self.log.debug("Source: " + json.dumps(i, indent=4))
         match = self.pattern_id.search(i["client"])
         if match:
-            i["id"] = int(match.group(1))
+            i["client_id"] = int(match.group(1))
         i["client_ip"] = i["client"]
 
         # DNS reverse lookup
@@ -57,7 +57,7 @@ class DnsAdGuardProvider(Provider):
             answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False) # 
             i["client"] = answer[0].target.labels[0].decode("utf-8") 
         except resolver.NXDOMAIN as err:
-            self.log.warn(f"Cant resolve IP: {i['client_ip']}. {err}")
+            self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
         
         dt = self.ParseDateTime(i["time"])
         del(i["time"])
@@ -66,8 +66,8 @@ class DnsAdGuardProvider(Provider):
         i["@timestamp"] = dtStr
         i["tags"] = ["camera_tools"]
         i["elapsedMs"] = round(float(i["elapsedMs"]), 2)
-        i['_id'] = f"dns-{dt:%Y.%m}"
-        i['_index'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
+        i['_index'] = f"dns-{dt:%Y.%m}"
+        i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
 
         if "data" not in context:
             context['data'] = []    
