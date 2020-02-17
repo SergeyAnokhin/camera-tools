@@ -3,11 +3,11 @@ import numpy as np
 import pprint as pp
 from asq import query
 from Pipeline.Model.PipelineShot import PipelineShot
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Processors.Tracking.TrackingBox import TrackingBox
 from Common.CommonHelper import CommonHelper
 
-class TrackingProcessor(Processor):
+class TrackingProcessor(PipelineShotProcessor):
 
     def __init__(self, isDebug=False):
         super().__init__("TRAC")
@@ -15,8 +15,9 @@ class TrackingProcessor(Processor):
         self.helper = CommonHelper()
         self.isDebug = isDebug
 
-    def ProcessItem(self, pShot: PipelineShot, pShots: []):
-        super().ProcessItem(pShot, pShots)
+    def ProcessItem(self, pShot: PipelineShot, ctx: dict):
+        super().ProcessItem(pShot, ctx)
+        pShots = ctx['data']
         meta = self.CreateMetadata(pShot)
         shot = pShot.Shot
         prevPShot = self.GetPreviousShot(pShot, pShots)

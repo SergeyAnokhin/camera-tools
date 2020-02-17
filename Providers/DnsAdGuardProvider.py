@@ -58,6 +58,8 @@ class DnsAdGuardProvider(Provider):
             i["client"] = answer[0].target.labels[0].decode("utf-8") 
         except resolver.NXDOMAIN as err:
             self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
+        except IndexError as err:
+            self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
         
         dt = self.ParseDateTime(i["time"])
         del(i["time"])

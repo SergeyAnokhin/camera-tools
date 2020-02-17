@@ -7,11 +7,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 from Common.SecretConfig import SecretConfig
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 
-class MailSenderProcessor(Processor):
+class MailSenderProcessor(PipelineShotProcessor):
     sender: str = 'home.assistant.sergey@gmail.com'
     to: [] = ['home.assistant.sergey@gmail.com', 'anokhin.sergey@gmail.com']
 
