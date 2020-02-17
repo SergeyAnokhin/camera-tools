@@ -24,8 +24,8 @@ class ArchiveProcessor(PipelineShotProcessor):
         dest_orig = os.path.join(path, filename_orig)
 
         # pShot.Shot.filename = pShot.Shot.filenameWithoutExtension + "_cv" + pShot.Shot.filenameExtension
-        self.log.info(f'    - CV   Move: {dest}')
-        self.log.info(f'    - ORIG Move: {dest_orig}')
+        self.log.info(f'    - CV   Move To: {dest}')
+        self.log.info(f'    - ORIG Move To: {dest_orig}')
         dest_path = os.path.dirname(dest)
         meta['archive_destination'] = dest
         meta['archive_destination_orig'] = dest_orig

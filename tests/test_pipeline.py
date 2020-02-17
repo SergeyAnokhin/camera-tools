@@ -26,7 +26,8 @@ from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Model.PipelineShot import PipelineShot
 from Pipeline.Model.CamShot import CamShot
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
-from .TestHelper import TestHelper
+from tests.TestHelper import TestHelper
+from Common.AppSettings import AppSettings
 
 class TestPipeline(unittest.TestCase):
     log: logging.Logger = None
@@ -292,8 +293,6 @@ class TestPipeline(unittest.TestCase):
     def test_ArchiveProcessor(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_ArchiveProcessor
         folder = '../camera-OpenCV-data/Camera/Foscam/Day_Lilia_Gate'
-        CommonHelper.networkConfig = {}
-        CommonHelper.networkConfig['camera_archive_path'] = "../temp/CameraArchive"
 
         pipeline = ShotsPipeline('Foscam', self.log)
         pipeline.providers.append(DirectoryShotsProvider(folder))
@@ -304,8 +303,10 @@ class TestPipeline(unittest.TestCase):
         result = pipeline.Process(shots)
 
         archMD = result[0].Metadata['ARCH']
-        self.assertEqual(archMD['archive_destination'], '../temp/CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam_cv.jpeg')
-        self.assertEqual(archMD['archive_destination_orig'], '../temp/CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
+        self.assertEqual(archMD['archive_destination'], 
+            AppSettings.CAMERA_ARCHIVE_PATH + '\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], 
+            AppSettings.CAMERA_ARCHIVE_PATH + '\\CameraArchive\\Foscam\\2019-02\\06\\20190206_090254_Foscam.jpg')
 
     def test_SaveToTemp(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_SaveToTemp

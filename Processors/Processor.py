@@ -19,7 +19,7 @@ class Processor:
 
     def Process(self, context: dict):
         ''' Main Process '''
-        self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** @@@@@@@@@@@@@@@@@@@@@@@@')
+        self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** {"(Simulation)" if self.isSimulation else ""}@@@@@@@@@@@@@@@@@@@@@@@@')
         data = context['data']
         for item in data:
             self.BeforeProcessItem(item, context)

@@ -7,8 +7,8 @@ from Processors.Processor import Processor
 class PipelineShotProcessor(Processor):
     config: CameraArchiveConfig
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, isSimulation=False):
+        super().__init__(name, isSimulation)
         self.helper = CommonHelper()
 
     def CreateMetadata(self, pShot: PipelineShot):

@@ -12,3 +12,6 @@ for suite in suites._tests:
                 print(m.id())
         except:
             pass
+# Run ALL Tests ==>
+# python c:\Users\star0\.vscode\extensions\ms-python.python-2020.2.63072\pythonFiles\visualstudio_py_testlauncher.py --us=./tests --up=test_*.py --uvInt=2 --result-port=58879
+# Check Output "Python Test Log"
