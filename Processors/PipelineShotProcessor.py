@@ -12,7 +12,8 @@ class PipelineShotProcessor(Processor):
         self.helper = CommonHelper()
 
     def CreateMetadata(self, pShot: PipelineShot):
-        pShot.Metadata[self.name] = {}
+        if self.name not in pShot.Metadata:
+            pShot.Metadata[self.name] = {}
         return pShot.Metadata[self.name]
 
     def BeforeProcessItem(self, pShot, ctx):

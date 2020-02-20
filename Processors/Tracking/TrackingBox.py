@@ -10,10 +10,11 @@ class TrackingBox:
     def __init__(self, box_data):
         self.log = logging.getLogger(f"PROC:TRAC:TBox")
         self.helper = CommonHelper()
-        self.id = 0
         self.image = []
+        self.object_id = None
         (self.w, self.h) = box_data['size']
         self.center = box_data['center_coordinate']
+        self.id = f"{self.center[0]}x{self.center[1]}"
         (self.x, self.y) = self.center
         (self.point_left_top, self.point_right_bottom) = self.TransformCenterToLimits(self.x, self.y, self.point_size, self.point_size)
         (self.box_left_top, self.box_right_bottom) = self.TransformCenterToLimits(self.x, self.y, self.h, self.w)
@@ -28,14 +29,14 @@ class TrackingBox:
         return self.PointToStr(self.x, self.y)
 
     def ExtractBox(self, image):
-        self.log.debug(f"ExtractBox: Box center_coordinate {self.PointToStr(self.x, self.y)} size {self.PointToStr(self.w, self.h)}")
-        self.log.debug(f"ExtractBox: Box Y {self.box_left_top[1]}:{self.box_right_bottom[1]} " + \
-                                        f"X {self.box_left_top[0]}:{self.box_right_bottom[0]}")
-        self.log.debug(f"ExtractBox: Image size {self.GetShape()}")
+        # self.log.debug(f"ExtractBox: Box center_coordinate {self.PointToStr(self.x, self.y)} size {self.PointToStr(self.w, self.h)}")
+        # self.log.debug(f"ExtractBox: Box Y {self.box_left_top[1]}:{self.box_right_bottom[1]} " + \
+        #                                 f"X {self.box_left_top[0]}:{self.box_right_bottom[0]}")
+        # self.log.debug(f"ExtractBox: Image size {self.GetShape()}")
         result = image[
                 self.box_left_top[1]:self.box_right_bottom[1],
                 self.box_left_top[0]:self.box_right_bottom[0]]
-        self.log.debug(f"ExtractBox: Result size {self.GetShape()}")
+        # self.log.debug(f"ExtractBox: Result size {self.GetShape()}")
         self.image = result
 
     def PointToStr(self, x, y):
@@ -53,26 +54,30 @@ class TrackingBox:
 
         coeffs = []
         for box_last in boxes_last:
-            box_resized = self.ResizeForBiggerThanTemplate(box_last.image, self.image)
-            self.log.debug(f'Resize: {box_last.GetShape()} => {box_resized.shape[0:1]}')
-            self.log.debug(f'Template size: {self.GetShape()}')
-            self.log.debug(f' corrsize.height <= img.rows + templ.rows - 1 && corrsize.width <= img.cols + templ.cols ')
-            matchTempArr = cv2.matchTemplate(box_resized, self.image, cv2.TM_CCOEFF_NORMED)
-            matchTemp = max(map(max, matchTempArr))
-
-            hist1 = cv2.calcHist([box_last.image],[0],None,[256],[0,256])
-            hist2 = cv2.calcHist([self.image],[0],None,[256],[0,256])
-            hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
-
-            compCoeff = matchTemp * 0.2 + hist * 0.8
-            report = f'- MATCH: B{box_last.id} vs B{self.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f} {self.helper.Progress(compCoeff)}'
-            self.log.debug(report)
+            compCoeff = self.GetMatchingCoeff(box_last)
             coeffs.append(compCoeff)
 
         maxValue = max(coeffs)
         maxIndex = coeffs.index(maxValue)
         return boxes_last[maxIndex]
-        
+
+    def GetMatchingCoeff(self, box: 'TrackingBox') -> float:
+        box_resized = self.ResizeForBiggerThanTemplate(box.image, self.image)
+        # self.log.debug(f'Resize: {box_last.GetShape()} => {box_resized.shape[0:1]}')
+        # self.log.debug(f'Template size: {self.GetShape()}')
+        # self.log.debug(f' corrsize.height <= img.rows + templ.rows - 1 && corrsize.width <= img.cols + templ.cols ')
+        matchTempArr = cv2.matchTemplate(box_resized, self.image, cv2.TM_CCOEFF_NORMED)
+        matchTemp = max(map(max, matchTempArr))
+
+        hist1 = cv2.calcHist([box.image],[0],None,[256],[0,256])
+        hist2 = cv2.calcHist([self.image],[0],None,[256],[0,256])
+        hist = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+
+        compCoeff = matchTemp * 0.2 + hist * 0.8
+        # report = f'- MATCH: B{box.id} vs B{self.id} = T:{matchTemp:.2f} = H:{hist:.2f} = C:{compCoeff:.2f} {self.helper.Progress(compCoeff)}'
+        # self.log.debug(report)
+        return compCoeff
+
     def ResizeForBiggerThanTemplate(self, img, template):
         factors = [x/y for x, y in zip(template.shape[0:2], img.shape[0:2])]
         zoom = max(factors)
@@ -86,7 +91,7 @@ class TrackingBox:
     def DrawStartPoint(self, img):
         color = 128
         cv2.rectangle(img, self.point_left_top, self.point_right_bottom, color, 1)
-        cv2.putText(img, f'box: ID{self.id}', self.pos_text, cv2.FONT_HERSHEY_SIMPLEX, \
+        cv2.putText(img, f'box: ID{self.object_id}', self.pos_text, cv2.FONT_HERSHEY_SIMPLEX, \
             0.5, color, 2)
 
     def angle(self, box: 'TrackingBox'):
@@ -106,3 +111,6 @@ class TrackingBox:
 
     def Distance(self, box: 'TrackingBox'):
         return distance.euclidean(self.center, box.center)
+
+    def __str__(self):
+        return f'<BOX id="{self.id}"{f" (object_id:{self.object_id})" if self.object_id!=None else ""}>'

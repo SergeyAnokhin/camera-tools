@@ -27,7 +27,7 @@ class DirectoryShotsProvider(PipelineShotProvider):
             meta = pShots[0].Metadata
             dtStr = meta['PROV:IMAP']['start']
             dt = self.helper.FromTimeStampStr(dtStr)
-            self.log.debug(f'Search files: @{dt} in {folder}')
+            self.log.debug(f'Search files: ⏱️ {dt} in 📁 {folder}')
         else:
             self.log.warning("No event start time found in metadata['PROV:IMAP']")
 

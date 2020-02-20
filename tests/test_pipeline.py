@@ -93,12 +93,9 @@ class TestPipeline(unittest.TestCase):
             pShot.Metadata['PROV:IMAP'] = {}
             pShot.Metadata['PROV:IMAP']['start'] = self.helper.ToTimeStampStr(pShot.Shot.GetDatetime())
 
-        CommonHelper.networkConfig = {}
-        CommonHelper.networkConfig['camera_archive_path'] = "../temp/CameraArchive"
-        CommonHelper.networkConfig['camera_live_path'] = "../camera-OpenCV-data/Camera/Foscam"
         target = DirectoryShotsProvider()
         target.config = self.archiver.load_configs('configs', [ 'Foscam' ])[0]
-        target.config.path_from = '2019-02'
+        target.config.path_from = 'Foscam\\2019-02'
         pShots = target.GetShots(pShots)
 
         # search in C:\Src\camera-OpenCV-data\Camera\Foscam\2019-02\06
@@ -187,22 +184,36 @@ class TestPipeline(unittest.TestCase):
         target.Process({ 'data': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
+        pipelineShots[0].Shot.Show()
         pipelineShots[1].Shot.Show()
-        self.assertEqual(15, metadata1[0]['angle'])
-        self.assertEqual(138, metadata1[0]['distance'])
-        self.assertEqual("372x122", metadata1[0]['center'])
-        self.assertEqual(16, metadata1[1]['angle'])
-        self.assertEqual(90, metadata1[1]['distance'])
-        self.assertEqual("230x146", metadata1[1]['center'])
+        self.assertEqual(15, metadata1['372x122']['angle'])
+        self.assertEqual(138, metadata1['372x122']['distance'])
+        self.assertEqual("372x122", metadata1['372x122']['center'])
+        self.assertEqual(16, metadata1['230x146']['angle'])
+        self.assertEqual(90, metadata1['230x146']['distance'])
+        self.assertEqual("230x146", metadata1['230x146']['center'])
 
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
-        self.assertEqual(28, metadata2[0]['angle'])
-        self.assertEqual(68, metadata2[0]['distance'])
-        self.assertEqual("432x89", metadata2[0]['center'])
-        self.assertEqual(10, metadata2[1]['angle'])
-        self.assertEqual(94, metadata2[1]['distance'])
-        self.assertEqual("323x129", metadata2[1]['center'])
+        pipelineShots[2].Shot.Show()
+        self.assertEqual(10, metadata2["323x129"]['angle'])
+        self.assertEqual(94, metadata2["323x129"]['distance'])
+        self.assertEqual("323x129", metadata2["323x129"]['center'])
+        self.assertEqual(28, metadata2["432x89"]['angle'])
+        self.assertEqual(68, metadata2["432x89"]['distance'])
+        self.assertEqual("432x89", metadata2["432x89"]['center'])
+
+    def test_TrackingProcessor_Day_3Person_2person_same_color(self):
+        # TODO : camera-OpenCV-data\Camera\Foscam\Day_3Person_2person_same_color
+        self.assertTrue(False)
+
+    def test_TrackingProcessor_Day_3Person_2stay(self):
+        # TODO : camera-OpenCV-data\Camera\Foscam\Day_3Person_2stay
+        self.assertTrue(False)
+
+    def test_TrackingProcessor_Morning_3Person_car(self):
+        # TODO : camera-OpenCV-data\Camera\Foscam\Morning_3Person_car
+        self.assertTrue(False)
 
     def test_TrackingProcessor2(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor2

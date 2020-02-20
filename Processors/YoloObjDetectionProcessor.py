@@ -5,7 +5,7 @@ from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
 from Processors.Yolo.YoloContext import YoloContext
 from Processors.Yolo.YoloDetection import YoloDetection
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Common.CommonHelper import CommonHelper
 
 class YoloResultBoxes:
@@ -36,7 +36,7 @@ class YoloCamShot:
         #self.log.debug("start detect objects on: {}".format(self.shot.filename))
         blob = cv2.dnn.blobFromImage(self.pShot.OriginalShot.GetImage(), 1 / 255.0, (416, 416), swapRB=True, crop=False)
         self.yolo.net.setInput(blob)
-        start = time.time()
+        #start = time.time()
         layerOutputs = self.yolo.net.forward(self.yolo.layers)
         #self.log.debug("detection took {:.3f} seconds".format(time.time() - start))
         return layerOutputs
@@ -57,6 +57,7 @@ class YoloCamShot:
             result['area'] = w * h
             result['profile_proportion'] = round(h / w, 2)
             result['center_coordinate'] = (center_x, center_y)
+            result['id'] = f"{center_x}x{center_y}"
             result['size'] = (w, h)
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
@@ -98,7 +99,7 @@ class YoloCamShot:
     def GetLabels(pShot : PipelineShot):
         return [area["label"] for area in pShot.Metadata["YOLO"]["areas"]]
 
-class YoloObjDetectionProcessor(Processor):
+class YoloObjDetectionProcessor(PipelineShotProcessor):
     confidence = 0.4
     threshold = 0.3
     yolo: YoloContext
