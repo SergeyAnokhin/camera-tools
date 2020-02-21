@@ -63,15 +63,20 @@ class FileImage:
         self.EnsureImage()
         return self.image
 
-    def Show(self):
+    def Show(self, title_add = ""):
         plt.figure(figsize=(8, 6.025))
         self.gs1 = gridspec.GridSpec(1, 1, left=0, right=1, top=1,
                                      bottom=0, wspace=0, hspace=0)
+        fig = plt.gcf()
+        fig.canvas.set_window_title(self.filename + title_add)
+
         self.EnsureImage()
         plt.subplot(self.gs1[0])
         plt.axis("off")
         plt.imshow(self.image, interpolation="bilinear")
         plt.margins(0)
+
+
         plt.show()
 
     # def Move(self, dest: str):

@@ -89,10 +89,13 @@ class TrackingBox:
         cv2.line(img,self.center,box.center,(255,0,0),3)
 
     def DrawStartPoint(self, img):
-        color = 128
+        color = (128, 50, 50)
+        color_bg = (255, 200, 200)
         cv2.rectangle(img, self.point_left_top, self.point_right_bottom, color, 1)
-        cv2.putText(img, f'box: ID{self.object_id}', self.pos_text, cv2.FONT_HERSHEY_SIMPLEX, \
-            0.5, color, 2)
+        cv2.putText(img, f'ID{self.object_id}', self.pos_text, cv2.FONT_HERSHEY_SIMPLEX, \
+            0.5, color_bg, 2)
+        cv2.putText(img, f'ID{self.object_id}', self.pos_text, cv2.FONT_HERSHEY_SIMPLEX, \
+            0.5, color, 1)
 
     def angle(self, box: 'TrackingBox'):
         ''' compute angle (in degrees) for p0p1p2 corner
@@ -114,3 +117,6 @@ class TrackingBox:
 
     def __str__(self):
         return f'<BOX id="{self.id}"{f" (object_id:{self.object_id})" if self.object_id!=None else ""}>'
+
+    def ToStringShort(self):
+        return f'{self.id}{f"o{self.object_id}" if self.object_id!=None else ""}'

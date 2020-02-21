@@ -22,6 +22,7 @@ class AppSettings:
     CAMERA_ARCHIVE_NAS_PATH    = getattr(settings, "CAMERA_ARCHIVE_NAS_PATH", None)
     HASSIO_PATH                = getattr(settings, "HASSIO_PATH", None)
     DNS_HOST                   = getattr(settings, "DNS_HOST", None)
+    SOURCE_IMAGE_PATTARN       = getattr(settings, "SOURCE_IMAGE_PATTARN", None)
 
     DNS_ADGUARD                = DnsAdGuardSettings()
 

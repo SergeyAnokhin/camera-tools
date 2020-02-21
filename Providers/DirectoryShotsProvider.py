@@ -1,8 +1,9 @@
-import os, logging, datetime
+import os, logging, datetime, asq, re
 from Pipeline.Model.CamShot import CamShot
 from Pipeline.Model.PipelineShot import PipelineShot
 from Providers.PipelineShotProvider import PipelineShotProvider
 from Common.CommonHelper import CommonHelper
+from Common.AppSettings import AppSettings
 
 class DirectoryShotsProvider(PipelineShotProvider):
 
@@ -10,14 +11,21 @@ class DirectoryShotsProvider(PipelineShotProvider):
         super().__init__("DIRC")
         self.helper = CommonHelper()
         self.folder = folder
+        self.SourceImagePattern = re.compile(AppSettings.SOURCE_IMAGE_PATTARN)
 
     def FromDir(self, folder: str):
         self = DirectoryShotsProvider()
-        shots = [CamShot(os.path.join(folder, f)) for f in os.listdir(folder)]   
+        shots = asq.query(os.listdir(folder)) \
+                .where(lambda f: self.IsSourceImage(f)) \
+                .select(lambda f: CamShot(os.path.join(folder, f))) \
+                .to_list()
         self.log.debug("Loaded {} shots from directory {}".format(len(shots), folder)) 
         for s in shots:
             s.LoadImage()
         return [PipelineShot(s, i) for i, s in enumerate(shots)]
+
+    def IsSourceImage(self, filename: str):
+        return self.SourceImagePattern.search(filename)
 
     def GetShotsProtected(self, pShots: []):
         dt: datetime = None

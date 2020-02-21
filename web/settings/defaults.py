@@ -135,3 +135,5 @@ USED_SETTINGS = "default"
 #print("Import settings: " + USED_SETTINGS)
 
 CAMERA_ARCHIVE_NAS_PATH = "/CameraArchive"
+
+SOURCE_IMAGE_PATTARN = ".*((?!_cv).){3}\.jpg" # ending with '.jpg' bit not '_cv.jpg'
