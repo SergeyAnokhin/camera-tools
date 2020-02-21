@@ -7,13 +7,14 @@ class TrackingBox:
     ''' Or "TrackingLine" '''
     point_size = 10
 
-    def __init__(self, box_data):
+    def __init__(self, yolo_data):
         self.log = logging.getLogger(f"PROC:TRAC:TBox")
         self.helper = CommonHelper()
         self.image = []
         self.object_id = None
-        (self.w, self.h) = box_data['size']
-        self.center = box_data['center_coordinate']
+        (self.w, self.h) = yolo_data['size']
+        self.center = yolo_data['center_coordinate']
+        self.yolo_label = yolo_data['label']
         self.id = f"{self.center[0]}x{self.center[1]}"
         (self.x, self.y) = self.center
         (self.point_left_top, self.point_right_bottom) = self.TransformCenterToLimits(self.x, self.y, self.point_size, self.point_size)
@@ -32,19 +33,23 @@ class TrackingBox:
         # self.log.debug(f"ExtractBox: Box center_coordinate {self.PointToStr(self.x, self.y)} size {self.PointToStr(self.w, self.h)}")
         # self.log.debug(f"ExtractBox: Box Y {self.box_left_top[1]}:{self.box_right_bottom[1]} " + \
         #                                 f"X {self.box_left_top[0]}:{self.box_right_bottom[0]}")
-        # self.log.debug(f"ExtractBox: Image size {self.GetShape()}")
+        # self.log.debug(f"ExtractBox: Image size {(len(image), len(image[0]))}")
         result = image[
                 self.box_left_top[1]:self.box_right_bottom[1],
                 self.box_left_top[0]:self.box_right_bottom[0]]
-        # self.log.debug(f"ExtractBox: Result size {self.GetShape()}")
         self.image = result
+        # self.log.debug(f"ExtractBox: Result size {self.GetShape()}")
 
     def PointToStr(self, x, y):
         return f'{x}x{y}'
 
     def TransformCenterToLimits(self, center_x, center_y, size_height, size_width):
         ''' Transform (Center & Size) => (LeftTop & RightBottom) '''
-        pos_left_top = (center_x - size_width // 2, center_y - size_height // 2)
+        pos_left_top_x = center_x - size_width // 2
+        pos_left_top_y = center_y - size_height // 2
+        pos_left_top_x = max(pos_left_top_x, 0) # value or 0
+        pos_left_top_y = max(pos_left_top_y, 0) # value or 0
+        pos_left_top = (pos_left_top_x, pos_left_top_y)
         pos_right_bottom = (center_x + size_width // 2, center_y + size_height // 2)
         return (pos_left_top, pos_right_bottom)
 
@@ -116,7 +121,7 @@ class TrackingBox:
         return distance.euclidean(self.center, box.center)
 
     def __str__(self):
-        return f'<BOX id="{self.id}"{f" (object_id:{self.object_id})" if self.object_id!=None else ""}>'
+        return f'<BOX id="{self.id}"{f" (obj:{self.object_id} {self.yolo_label})" if self.object_id!=None else ""}>'
 
     def ToStringShort(self):
-        return f'{self.id}{f"o{self.object_id}" if self.object_id!=None else ""}'
+        return f'{self.id}{f"=o{self.object_id}" if self.object_id!=None else ""}'

@@ -1,4 +1,4 @@
-import cv2, logging
+import cv2, logging, asq
 import numpy as np
 import pprint as pp
 import pandas as pd
@@ -11,7 +11,7 @@ from Common.CommonHelper import CommonHelper
 
 # TODO : extract background for better matching 
 class TrackingProcessor(PipelineShotProcessor):
-    LastID = 0
+    LastID = -1
 
     def __init__(self, isDebug=False):
         super().__init__("TRAC")
@@ -22,6 +22,10 @@ class TrackingProcessor(PipelineShotProcessor):
     def Process(self, context: dict):
         TrackingProcessor.LastID = 0
         super().Process(context)
+
+    def GetNewObjectId(self) -> int:
+        TrackingProcessor.LastID += 1
+        return TrackingProcessor.LastID
 
     def ProcessItem(self, pShot: PipelineShot, ctx: dict):
         super().ProcessItem(pShot, ctx)
@@ -34,15 +38,15 @@ class TrackingProcessor(PipelineShotProcessor):
         if not prevPShot:
             for box in boxes:
                 meta[box.id] = {}
-                meta[box.id]['object_id'] = TrackingProcessor.LastID
-                box.object_id = TrackingProcessor.LastID
-                TrackingProcessor.LastID += 1
+                box.object_id = self.GetNewObjectId()
+                meta[box.id]['object_id'] = box.object_id
                 self.log.debug(f"Draw box: {box}")
                 box.DrawStartPoint(shot.GetImage())
             return
         boxes_last = list(self.GetTrackingBoxes(prevPShot))
 
-        boxes = self.MatchObjects(boxes, boxes_last, pShot)
+        self.MatchObjects(boxes, boxes_last)
+        self.DefineNewObjects(boxes, pShot)
 
         for box in boxes:
             # bestMatched:TrackingBox = box.CompareBox(boxes_last)
@@ -64,6 +68,13 @@ class TrackingProcessor(PipelineShotProcessor):
             if self.isDebug:
                 meta[box.id]['center'] = box.GetCenter()
 
+    def DefineNewObjects(self, boxes: [], pShot: PipelineShot):
+        # this box not matched. when len(prev_boxes) < len(boxes). New Object ?
+        for b in asq.query(boxes) \
+                .where(lambda b: b.object_id == None):
+            b.object_id = self.GetNewObjectId()
+            b.DrawStartPoint(pShot.Shot.GetImage())
+
     def CreateCorrMatrix(self, boxes: [], boxes_prev: []):
         coeffs = np.zeros((len(boxes), len(boxes_prev))) # coeff matrix: rows x columns
 
@@ -78,36 +89,25 @@ class TrackingProcessor(PipelineShotProcessor):
         rows = [b.id for b in boxes]
         matrix = np.c_[rows, coeffs]
         self.log.debug(f"Matching Coeffs matrix: \n" 
-            + f"{tabulate(matrix, headers, tablefmt='orgtbl', floatfmt='.4f')}")
+            + f"{tabulate(matrix, headers, tablefmt='orgtbl', floatfmt='.3f')}")
         return coeffs
 
-    def MatchObjects(self, boxes: [], boxes_prev: [], pShot: PipelineShot) -> []:
-        new_boxes = [] # collect new boxes with order like 'boxes_prev' based on best matched 
+    def MatchObjects(self, boxes: [], boxes_prev: []):
         coeffs = self.CreateCorrMatrix(boxes, boxes_prev)
 
-        for _ in boxes:
+        for _ in boxes: # loop len(boxes) times
             max = np.amax(coeffs)
-            if max > 0:
-                pos = np.where(coeffs == max)
-                i = pos[0][0]
-                j = pos[1][0]
-                box = boxes[i]
-                box_prev = boxes_prev[j]
-                self.log.debug(f"Max: '{max:.2f}' position: {i}x{j}. Write Object_ID: {box_prev}=>{box}")
-                box.object_id = box_prev.object_id # match
-            else:
-                # this box not matched. when len(prev_boxes) < len(boxes). New Object ?
-                box.object_id = TrackingProcessor.LastID
-                TrackingProcessor.LastID += 1
-                box.DrawStartPoint(pShot.Shot.GetImage())
-
-            new_boxes.append(boxes[i])
+            if max == 0: 
+                break # no more matching
+            pos = np.where(coeffs == max)
+            i = pos[0][0]
+            j = pos[1][0]
+            box = boxes[i]
+            box_prev = boxes_prev[j]
+            self.log.debug(f"Max: '{max:.3f}' position: {i}x{j}. Write Object_ID: {box_prev}=>{box}")
+            box.object_id = box_prev.object_id # match
             coeffs[i, :] = 0.0
             coeffs[:, j] = 0.0
-            # coeffs = np.delete(coeffs, i, 0) # remove row i
-            # coeffs = np.delete(coeffs, j, 1) # remove column j
-
-        return new_boxes
 
     def GetPreviousShot(self, pShot: PipelineShot, pShots: []) -> PipelineShot:
         index = pShot.Index

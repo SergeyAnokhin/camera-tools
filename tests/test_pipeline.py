@@ -184,8 +184,8 @@ class TestPipeline(unittest.TestCase):
         target.Process({ 'data': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
-        pipelineShots[0].Shot.Show()
-        pipelineShots[1].Shot.Show()
+        #pipelineShots[0].Shot.Show()
+        #pipelineShots[1].Shot.Show()
         self.assertEqual(15, metadata1['372x122']['angle'])
         self.assertEqual(138, metadata1['372x122']['distance'])
         self.assertEqual("372x122", metadata1['372x122']['center'])
@@ -195,7 +195,7 @@ class TestPipeline(unittest.TestCase):
 
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
-        pipelineShots[2].Shot.Show()
+        #pipelineShots[2].Shot.Show()
         self.assertEqual(10, metadata2["323x129"]['angle'])
         self.assertEqual(94, metadata2["323x129"]['distance'])
         self.assertEqual("323x129", metadata2["323x129"]['center'])
@@ -215,29 +215,29 @@ class TestPipeline(unittest.TestCase):
         # pipelineShots[0].Shot.Show()
         metadata0 = pipelineShots[0].Metadata["TRAC"]
         pp.pprint(metadata0, indent=2)
-        self.assertDictEqual(metadata0, {   '293x148': {'object_id': 0},
-                                            '350x151': {'object_id': 1},
-                                            '379x103': {'object_id': 2}})
-        pipelineShots[1].Shot.Show()
+        self.assertDictEqual(metadata0, {   '293x148': {'object_id': 1},
+                                            '350x151': {'object_id': 2},
+                                            '379x103': {'object_id': 3}})
+        #pipelineShots[1].Shot.Show()
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         self.assertDictEqual(metadata1, {   '218x168': { 'angle': -165,
                                                         'center': '218x168',
                                                         'distance': 77,
-                                                        'object_id': 0},
+                                                        'object_id': 1},
                                             '290x153': { 'angle': -178,
                                                         'center': '290x153',
                                                         'distance': 60,
-                                                        'object_id': 1},
+                                                        'object_id': 2},
                                             '349x101': { 'angle': 176,
                                                         'center': '349x101',
                                                         'distance': 30,
-                                                        'object_id': 2}})
-        pipelineShots[2].Shot.Show()
+                                                        'object_id': 3}})
+        #pipelineShots[2].Shot.Show()
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
-        # TODO must be object='1' not '2'
-        # self.assertEqual(metadata2['193x176']['object_id'], 1)
+        # TODO must be object='2' not '3'
+        # self.assertEqual(metadata2['193x176']['object_id'], 2)
 
     def test_TrackingProcessor_Day_3Person_2stay(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor_Day_3Person_2stay
@@ -255,11 +255,36 @@ class TestPipeline(unittest.TestCase):
                 title += f" B:{key}-ID{box['object_id']}"
             print(f"Shot #{i}: {pShot.Shot.filename}")
             pp.pprint(meta, indent=2)
-            pShot.Shot.Show(title)
+            #pShot.Shot.Show(title)
 
-    def test_TrackingProcessor_Morning_3Person_car(self):
-        # TODO : camera-OpenCV-data\Camera\Foscam\Morning_3Person_car
-        self.assertTrue(False)
+        # ID1 : Oli, ID2 : Fra
+        meta = pipelineShots[0].Metadata["TRAC"]
+        self.assertDictEqual(meta, {'201x281': {'object_id': 2}, '240x373': {'object_id': 1}})
+        meta = pipelineShots[1].Metadata["TRAC"]
+        self.assertDictEqual(meta, { 
+            '183x288': {    'angle': -158,
+                            'center': '183x288',
+                            'distance': 19,
+                            'object_id': 2},
+            '277x315': {    'angle': 57, 
+                            'center': '277x315',
+                            'distance': 68,
+                            'object_id': 1}})
+        meta = pipelineShots[2].Metadata["TRAC"]
+        self.assertDictEqual(meta, { 
+            '177x299': { 'angle': -118,
+               'center': '177x299',
+               'distance': 12,
+               'object_id': 2},
+            '289x305': {'angle': 39, 
+                'center': '289x305',
+                'distance': 15,
+                'object_id': 1}})
+        meta = pipelineShots[3].Metadata["TRAC"]
+        self.assertDictEqual(meta['162x285'], { 'angle': 136,
+               'center': '162x285',
+               'distance': 20,
+               'object_id': 2})
 
     def test_TrackingProcessor2(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor2
@@ -272,21 +297,23 @@ class TestPipeline(unittest.TestCase):
         shots = pipeline.GetShots()
         result = pipeline.Process(shots)
 
-        metadata1 = result[1].Metadata["TRAC"]
-        pp.pprint(metadata1, indent=2)
+        meta = result[1].Metadata["TRAC"]
+        pp.pprint(meta, indent=2)
         #result[1].Shot.Show()
-        self.assertEqual(1, len(metadata1))
-        self.assertEqual(25, metadata1[0]['angle'])
-        self.assertEqual(94, metadata1[0]['distance'])
-        self.assertEqual("289x101", metadata1[0]['center'])
+        self.assertDictEqual(meta, {
+            '289x101': {'angle': 25,
+                        'center': '289x101',
+                        'distance': 94,
+                        'object_id': 1}})
 
-        metadata2 = result[2].Metadata["TRAC"]
-        pp.pprint(metadata2, indent=2)
+        meta = result[2].Metadata["TRAC"]
+        pp.pprint(meta, indent=2)
         #result[2].Shot.Show()
-        self.assertEqual(1, len(metadata2))
-        self.assertEqual(10, metadata2[0]['angle'])
-        self.assertEqual(89, metadata2[0]['distance'])
-        self.assertEqual("377x84", metadata2[0]['center'])
+        self.assertDictEqual(meta, {
+            '377x84': { 'angle': 10,
+                        'center': '377x84',
+                        'distance': 89,
+                        'object_id': 1}})
 
     def test_TrackingProcessor_SizeError(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor_SizeError
@@ -300,8 +327,11 @@ class TestPipeline(unittest.TestCase):
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         # pipelineShots[1].Shot.Show()
-        self.assertEqual(15, metadata1[0]['angle'])
-        self.assertEqual(138, metadata1[0]['distance'])
+        self.assertDictEqual(metadata1, {
+            '436x69': {'angle': 27,
+                        'center': '436x69',
+                        'distance': 83,
+                        'object_id': 1}})
 
     def test_MailSend(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_MailSend
@@ -410,12 +440,13 @@ class TestPipeline(unittest.TestCase):
         analyse = dictEls['Analyse']
         del dictEls['Analyse']
 
+        archive = AppSettings.CAMERA_ARCHIVE_PATH.replace('\\', '/')
         expected = {
             "@timestamp": "2019-02-06T08:02:54.000Z",
             "camera": "Foscam",
             "doc": "event",
             "ext": "jpg",
-            "path": "/CameraArchive/Foscam/2019-02/06/20190206_090254_Foscam.jpg",
+            "path": archive + "/CameraArchive/Foscam/2019-02/06/20190206_090254_Foscam.jpg",
             "position": {
                 "detail": "under the roof",
                 "floor": -1,
@@ -524,8 +555,8 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(hassMD['hassio_location'], 'temp\\cv_Foscam_0.jpg')
 
         archMD = result[0].Metadata['ARCH']
-        self.assertEqual(archMD['archive_destination'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam_cv.jpeg')
-        self.assertEqual(archMD['archive_destination_orig'], '\\\\diskstation\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam.jpg')
+        self.assertEqual(archMD['archive_destination'], AppSettings.CAMERA_ARCHIVE_PATH + '\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam_cv.jpeg')
+        self.assertEqual(archMD['archive_destination_orig'], AppSettings.CAMERA_ARCHIVE_PATH + '\\CameraArchive\\Foscam\\2019-03\\28\\20190328_080122_Foscam.jpg')
 
         els = result[0].Metadata["ELSE"]
         self.assertIsNotNone(els['JSON'])

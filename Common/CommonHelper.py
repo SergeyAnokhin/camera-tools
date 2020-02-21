@@ -1,4 +1,5 @@
-import datetime, re, json, os, pytz, subprocess, sys, coloredlogs, logging
+# -*- coding: utf-8 -*-
+import datetime, re, json, os, pytz, subprocess, sys, coloredlogs, logging, html
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -157,6 +158,39 @@ class CommonHelper:
         coloredlogs.install(logger=log, isatty=True)
         coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s', isatty=True)
 
+    mapDict = {
+        "question": "&#x2754;",
+        "person": "&#x1F6B9;",
+        "handbug": "&#x1F4BC;",
+        "car": "&#x1F697;",
+        "suitcase": "&#x1F9F3;",
+        "fire hydrant": "&#x1F9EF;",
+        "skateboard": "&#x1F6F9;",
+        "dog": "&#x1F415;",
+        "bear": "&#x1F43B;",
+        "bird": "&#x1F426;",
+        "cat": "&#x1F408;",
+        "bicycle": "&#x1F6B2;",
+        "handbag": "&#x1F45C;",
+    }
+
+    def MapToConsoleEmojiOrEmpty(self, label: str, empty = " "):
+        if label in self.mapDict:
+            return html.unescape(self.mapDict[label]) + " "
+        else:
+            return empty
+
+    def MapToHtmlEmojiOrEmpty(self, label: str):
+        if label in self.mapDict:
+            return self.mapDict[label]
+        else:
+            return ""
+
+    def MapToHtmlEmojiText(self, label: str):
+        for old, new in self.mapDict.items():
+            label = label.replace(old, new)
+        return label
+        #return mapDict[label] if label in mapDict else label
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):

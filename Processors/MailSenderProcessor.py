@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 from Common.SecretConfig import SecretConfig
+from Common.CommonHelper import CommonHelper
 from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
@@ -20,6 +21,7 @@ class MailSenderProcessor(PipelineShotProcessor):
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
         self.isSimulation = isSimulation
+        self.helper = CommonHelper()
 
     def ProcessItem(self, pShot: PipelineShot, pShots: []):
         pass
@@ -82,7 +84,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
    <!-- 🚶‍ # &#128540; # &#x1F6B6; -->
     <div class="w3-container">    
         """
-        html += self.MapToEmoji(self.GetYoloLabels(ctx))
+        html += self.helper.MapToHtmlEmojiText(self.GetYoloLabels(ctx))
 
         for pShot in pShots or []:
             f = pShot.Shot.fullname
@@ -135,32 +137,6 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
 
     def GetYoloLabels(self, ctx):
         return ctx["YOLO"]["labels"] if "YOLO" in ctx and "labels" in ctx["YOLO"] else ""
-
-    mapDict = {
-        "question": "&#x2754;",
-        "person": "&#x1F6B9;",
-        "handbug": "&#x1F4BC;",
-        "car": "&#x1F697;",
-        "suitcase": "&#x1F9F3;",
-        "fire hydrant": "&#x1F9EF;",
-        "skateboard": "&#x1F6F9;",
-        "dog": "&#x1F415;",
-        "bear": "&#x1F43B;",
-        "bird": "&#x1F426;",
-    }
-
-    def MapToEmojiOrEmpty(self, label: str):
-        if label in self.mapDict:
-            return self.mapDict[label]
-        else:
-            return ""
-
-    def MapToEmoji(self, label: str):
-
-        for old, new in self.mapDict.items():
-            label = label.replace(old, new)
-        return label
-        #return mapDict[label] if label in mapDict else label
         
     def GetBodyText(self, pShots: []):
         body = ""
@@ -191,7 +167,7 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
         if 'YOLO' in shot.Metadata and 'areas' in shot.Metadata['YOLO']:
             yolo = shot.Metadata['YOLO']['areas']
             for item in yolo:
-                body += self.GetLine(f'&#x1F9E0; YOLO: {self.MapToEmojiOrEmpty(item["label"])} {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
+                body += self.GetLine(f'&#x1F9E0; YOLO: {self.helper.MapToHtmlEmojiOrEmpty(item["label"])} {item["label"]} ({item["confidence"]}) prof: {item["size"][0]}x{item["size"][1]} = {item["profile_proportion"]} @{item["center_coordinate"][0]}x{item["center_coordinate"][1]}',
                                 item["confidence"]*100, 'w3-blue')
         if 'DIFF' in shot.Metadata:
             diff = shot.Metadata['DIFF']
@@ -202,9 +178,10 @@ a{background-color:transparent}a:active,a:hover{outline-width:0}
                                 item["area"] / 2.5e2, 'w3-light-green')
         if 'TRAC' in shot.Metadata:
             trac = shot.Metadata['TRAC']
-            for key in trac:
-                body += self.GetLine(f'&#x1F9ED; TRAC angle {trac[key]["angle"]} distance {trac[key]["distance"]}',
-                    (trac[key]["angle"] + 180) / 360 * 100, 'w3-pink')
+            for val in trac.items():
+                if 'angle' in val:
+                    body += self.GetLine(f'&#x1F9ED; TRAC angle {val["angle"]} distance {val["distance"]}',
+                        (val["angle"] + 180) / 360 * 100, 'w3-pink')
         body += '</table>'
         return body
 

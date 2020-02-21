@@ -1,9 +1,9 @@
 import os, shutil
-from Processors.Processor import Processor
+from Processors.PipelineShotProcessor import PipelineShotProcessor
 from Pipeline.Model.PipelineShot import PipelineShot
 from Common.AppSettings import AppSettings
 
-class HassioProcessor(Processor):
+class HassioProcessor(PipelineShotProcessor):
     '''
         update files in hassio server
     '''

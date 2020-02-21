@@ -62,7 +62,9 @@ class YoloCamShot:
             result['confidence'] = round(box.GetConfidence(), 2)
             result['label'] = self.yolo.LABELS[box.GetClassId()]
             self.pShot.Metadata['YOLO']['areas'].append(result)
-            self.log.debug(f'- Found: {result["label"]}: {result["confidence"]} {self.helper.Progress(result["confidence"])}')
+            self.log.debug(f'- Found: {self.helper.MapToConsoleEmojiOrEmpty(result["label"], " ")}' 
+                + f'{result["label"]}: {result["confidence"]} {self.helper.Progress(result["confidence"])} ' 
+                + f'@{result["center_coordinate"]}')
 
         self.pShot.Metadata['YOLO']['labels'] = " ".join(self.GetLabelCouterStrArr())
 
