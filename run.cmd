@@ -5,17 +5,17 @@ netsh interface show interface > temp/netsh_interface_show_interface.txt
 netsh wlan show interfaces > temp/netsh_wlan_show_interfaces.txt
 
 REM create empty values
-set host_wifi_name=
-set host_net_interfaces=
+REM set host_wifi_name=
+REM set host_net_interfaces=
 
-for /f "tokens=1-5" %%a in (temp\netsh_interface_show_interface.txt) do (
-    IF %%d==Wi-Fi set host_net_interfaces=%%b:%%d
-)
+REM for /f "tokens=1-5" %%a in (temp\netsh_interface_show_interface.txt) do (
+REM     IF %%d==Wi-Fi set host_net_interfaces=%%b:%%d
+REM )
 
-for /f "tokens=1-5" %%a in (temp\netsh_wlan_show_interfaces.txt) do (
-    IF %%a==SSID set host_wifi_name=%%c %%d
-)
-echo Wi-Fi status: %host_net_interfaces%
-echo Wi-Fi Name: %host_wifi_name%
+REM for /f "tokens=1-5" %%a in (temp\netsh_wlan_show_interfaces.txt) do (
+REM     IF %%a==SSID set host_wifi_name=%%c %%d
+REM )
+REM echo Wi-Fi status: %host_net_interfaces%
+REM echo Wi-Fi Name: %host_wifi_name%
 
-python manage.py runserver localhost:8000 --settings=web.settings.dev_offline_with_docker_es
+python manage.py runserver localhost:8000 --settings=web.settings.dev_at_home

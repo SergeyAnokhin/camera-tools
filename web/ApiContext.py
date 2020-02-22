@@ -1,9 +1,13 @@
 import logging, sys, threading, datetime, locale, coloredlogs, time, os
 
 from Pipeline.ShotsPipeline import ShotsPipeline
+from Pipeline.Pipeline import Pipeline
+
 from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.ElasticSearchProvider import ElasticSearchProvider
+from Providers.DnsAdGuardProvider import DnsAdGuardProvider
+
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
 from Processors.TrackingProcessor import TrackingProcessor
@@ -12,6 +16,7 @@ from Processors.SaveToTempProcessor import SaveToTempProcessor
 from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
+from Processors.ElasticSearchDnsProcessor import ElasticSearchDnsProcessor
 
 from Common.SecretConfig import SecretConfig
 from Common.CommonHelper import CommonHelper
@@ -31,7 +36,7 @@ class ApiContext:
     Helper = CommonHelper()
     CameraArchive: CameraArchiveHelper
     ElasticSearch: ElasticSearchHelper
-    Pipeline: ShotsPipeline
+    ShotsPipeline: ShotsPipeline
 
     def __init__(self, arg):
         if not ApiContext.IsInitialized:
@@ -84,23 +89,32 @@ class ApiContext:
         ApiContext.ElasticSearch = ElasticSearchHelper()
 
         self.camera = 'Foscam'
-        self.pipeline = ShotsPipeline(self.camera, self.log)
-        self.InitPipeline()
-        ApiContext.Pipeline = self.pipeline
+        self.shotsPipeline = ShotsPipeline(self.camera, self.log)
+        self.InitShotsPipeline()
+        ApiContext.ShotsPipeline = self.shotsPipeline
+
+        self.InitDnsPipeline()
+        ApiContext.DnsPipeline = self.dnsPipeline
 
         self.log.info(f'initialization API finished @ {datetime.datetime.now()}')
 
-    def InitPipeline(self):
-        self.pipeline.providers.clear()
-        self.pipeline.processors.clear()
-        self.pipeline.providers.append(ImapShotsProvider())
-        self.pipeline.providers.append(DirectoryShotsProvider())
-        self.pipeline.processors.append(DiffContoursProcessor())
-        self.pipeline.processors.append(YoloObjDetectionProcessor())
-        self.pipeline.processors.append(TrackingProcessor())
-        self.pipeline.processors.append(SaveToTempProcessor())           
-        self.pipeline.processors.append(MailSenderProcessor())
-        self.pipeline.processors.append(HassioProcessor('temp' if self.isSimulation else None))        
-        self.pipeline.processors.append(ArchiveProcessor(self.isSimulation))
-        self.pipeline.processors.append(ElasticSearchProcessor(self.isSimulation)) 
-        self.pipeline.PreLoad()
+    def InitShotsPipeline(self):
+        self.shotsPipeline.providers.clear()
+        self.shotsPipeline.processors.clear()
+        self.shotsPipeline.providers.append(ImapShotsProvider())
+        self.shotsPipeline.providers.append(DirectoryShotsProvider())
+        self.shotsPipeline.processors.append(DiffContoursProcessor())
+        self.shotsPipeline.processors.append(YoloObjDetectionProcessor())
+        self.shotsPipeline.processors.append(TrackingProcessor())
+        self.shotsPipeline.processors.append(SaveToTempProcessor())           
+        self.shotsPipeline.processors.append(MailSenderProcessor())
+        self.shotsPipeline.processors.append(HassioProcessor('temp' if self.isSimulation else None))        
+        self.shotsPipeline.processors.append(ArchiveProcessor(self.isSimulation))
+        self.shotsPipeline.processors.append(ElasticSearchProcessor(self.isSimulation)) 
+        self.shotsPipeline.PreLoad()
+
+    def InitDnsPipeline(self):
+        self.dnsPipeline = Pipeline(self.log)
+        self.dnsPipeline.providers.append(DnsAdGuardProvider())
+        self.dnsPipeline.processors.append(ElasticSearchDnsProcessor())
+

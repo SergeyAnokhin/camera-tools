@@ -79,7 +79,10 @@ def processMoveMobilePhotos(request):
 ### API : /process/process_extract_dns_adguard_data ###
 @logit
 def processExtractDnsAdguardData(request):
-    return HttpResponse(f"processExtractDnsAdguardData")
+    context = {}
+    ApiContext.DnsPipeline.Get(context)
+    ApiContext.DnsPipeline.Process(context)
+    return HttpResponse(f"processExtractDnsAdguardData: {context['items']}")
 
 ### API : /camera_archive/archiving ###
 @logit

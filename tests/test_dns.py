@@ -1,6 +1,7 @@
 import logging, unittest, sys, datetime, os, json
 from django.conf import settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.test")
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings.dev_at_home")
 from Common.CommonHelper import CommonHelper
 from Pipeline.Pipeline import Pipeline
 from Providers.DnsAdGuardProvider import DnsAdGuardProvider
@@ -111,6 +112,8 @@ class TestDns(unittest.TestCase):
         self.assertDictEqual(generated, expected)
 
     # def test_real(self):
+    #     # python -m unittest tests.test_dns.TestDns.test_real
+
     #     pipeline = Pipeline(self.log)
     #     pipeline.providers.append(DnsAdGuardProvider())
     #     pipeline.processors.append(ElasticSearchDnsProcessor()) # isSimulation=True
@@ -118,3 +121,13 @@ class TestDns(unittest.TestCase):
     #     context = {}
     #     pipeline.Get(context)
     #     pipeline.Process(context)
+
+    # def test_dns_resolve_reverse(self):
+    #     # python -m unittest tests.test_dns.TestDns.test_dns_resolve_reverse
+    #     from dns import reversename, resolver
+    #     resolver.default_resolver = resolver.Resolver(configure=False)
+    #     resolver.default_resolver.nameservers = ['192.168.1.1'] # AppSettings.DNS_HOST
+    #     rev_name = reversename.from_address("192.168.1.16")
+    #     answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False)
+    #     print(answer)
+    #     print(answer[0].target.labels[0].decode("utf-8"))

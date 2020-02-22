@@ -11,6 +11,7 @@ class Provider:
     def Get(self, context: dict):
         self.log.info(f'<<<<<< PROVIDER: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
         data = self.GetProtected(context)
+        context['items'] = len(data)
         for i in data:
             self.PostProcess(i, context)
         self.log.info(f'<<<<<< PROVIDER: ***{self.name}*** >>>>>>>>>>>>>>>>>>>>>>>>>>>')
