@@ -121,12 +121,12 @@ def getImageFromCameraArchive(request: HttpRequest):
 @logit
 def analyseV3(request: HttpRequest):
     ### RUN
-    shots = ApiContext.Pipeline.GetShots()
+    shots = ApiContext.ShotsPipeline.GetShots()
 
     try:
         log.info(' ... wait lock ...')
         lock.acquire()
-        ApiContext.Pipeline.Process(shots)
+        ApiContext.ShotsPipeline.Process(shots)
     except Exception:
         log.error("Pipeline processing error ", exc_info=True)
         return 'Error'
