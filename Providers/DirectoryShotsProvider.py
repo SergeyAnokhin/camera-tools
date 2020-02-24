@@ -45,7 +45,7 @@ class DirectoryShotsProvider(PipelineShotProvider):
                         lambda x: 
                             self.helper.FileNameByDateRange(x, dt, self.config.camera_triggered_interval_sec)
                                 and self.helper.IsImage(x),
-                        self.config.ignore_dir))
+                        self.config.ignore_dir)) # self.log
 
         pShots = [PipelineShot(CamShot(filenames[i]), i) for i in range(len(filenames))]
         for pShot in pShots:

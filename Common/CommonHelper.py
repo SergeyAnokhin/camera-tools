@@ -102,12 +102,24 @@ class CommonHelper:
         rest = "◻️" * int(round((1 - current / total) * maxLenth))
         return f'{limitChar}{progress}{rest}{limitChar}'
 
-    def WalkFiles(self, path: str, condition, ignoreDirs: [] = None):
+    def WalkFiles(self, path: str, condition, ignoreDirs: [] = None, log: logging.Logger = None):
+        if log:
+            log.debug(f'WalkFiles: path={path}')
         for root, dirnames, filenames in os.walk(path):
+            if log:
+                log.debug(f'WalkFiles: root={root}')
+                log.debug(f'WalkFiles: dirnames={dirnames}')
+                log.debug(f'WalkFiles: filenames={filenames}')
             if ignoreDirs and self.dir_to_ignore(root, ignoreDirs):
+                if log:
+                    log.debug(f'WalkFiles:{root} ignored')
                 continue
             for filename in filenames:
+                if log:
+                    log.debug(f'WalkFiles: root={root} filename={filename}')
                 if condition(filename):
+                    if log:
+                        log.debug(f'WalkFiles: Condition: True')
                     yield os.path.join(root, filename)
 
     def dir_to_ignore(self, dir: str, ignore_dir: []):
@@ -145,7 +157,7 @@ class CommonHelper:
         }
         coloredlogs.DEFAULT_LEVEL_STYLES = {
             'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
-            'debug': {'color': 1, 'bold': True}, 
+            'debug': {'color': 2, 'bold': True}, 
             'error': {'color': 'red'}, 
             'info': {'color': 'black', 'faint': True}, 
             'warning': {'color': 'yellow'},
@@ -154,7 +166,7 @@ class CommonHelper:
             'success': {'color': 'green', 'bold': True}, 
             'verbose': {'color': 'blue'}, 
         }
-        coloredlogs.COLOREDLOGS_LEVEL_STYLES='spam=22;debug=1;verbose=34;notice=220;warning=202;success=118,bold;error=124;critical=background=red'
+        coloredlogs.COLOREDLOGS_LEVEL_STYLES='spam=22;debug=2;verbose=34;notice=220;warning=202;success=118,bold;error=124;critical=background=red'
         coloredlogs.install(logger=log, isatty=True)
         coloredlogs.install(level=logging.DEBUG, fmt='%(asctime)s|%(levelname)-.3s|%(name)-.10s: %(message)s', isatty=True)
 

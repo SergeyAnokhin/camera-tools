@@ -40,7 +40,7 @@ class TrackingProcessor(PipelineShotProcessor):
                 meta[box.id] = {}
                 box.object_id = self.GetNewObjectId()
                 meta[box.id]['object_id'] = box.object_id
-                self.log.debug(f"Draw box: {box}")
+                # self.log.debug(f"Draw box: {box}")
                 box.DrawStartPoint(shot.GetImage())
             return
         boxes_last = list(self.GetTrackingBoxes(prevPShot))
@@ -50,16 +50,16 @@ class TrackingProcessor(PipelineShotProcessor):
 
         for box in boxes:
             # bestMatched:TrackingBox = box.CompareBox(boxes_last)
+            box.DrawStartPoint(shot.GetImage())
             bestMatched:TrackingBox = query(boxes_last) \
                 .first_or_default(None, lambda b: b.object_id == box.object_id)
             if bestMatched == None:
                 self.log.debug(f" Best matchid box not found, draw ignore: Box: B{box.id}")
                 continue
             #cv2.line(shot.image,bestMatched.center,box.center,(255,0,0),3)
-            self.log.debug(f"Draw box track: {box.id} ({box.GetCenter()})  matched:{bestMatched.id} ({bestMatched.GetCenter()})")
-            self.log.debug(f"Draw line: {bestMatched.GetCenter()} => {box.GetCenter()}")
+            # self.log.debug(f"Draw box track: {box.id} ({box.GetCenter()})  matched:{bestMatched.id} ({bestMatched.GetCenter()})")
+            # self.log.debug(f"Draw line: {bestMatched.GetCenter()} => {box.GetCenter()}")
             box.DrawLine(shot.GetImage(), bestMatched)
-            box.DrawStartPoint(shot.GetImage())
             #box.id = bestMatched.id
             meta[box.id] = {}
             meta[box.id]['object_id'] = box.object_id
@@ -93,8 +93,11 @@ class TrackingProcessor(PipelineShotProcessor):
         return coeffs
 
     def MatchObjects(self, boxes: [], boxes_prev: []):
+        if len(boxes_prev) == 0:
+            self.log.debug(f"No boxes found on prev shot")
+            return
         coeffs = self.CreateCorrMatrix(boxes, boxes_prev)
-
+        
         for _ in boxes: # loop len(boxes) times
             max = np.amax(coeffs)
             if max == 0: 

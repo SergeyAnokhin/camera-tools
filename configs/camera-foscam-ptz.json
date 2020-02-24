@@ -1,5 +1,5 @@
 {
-    "path_from": "FoscamPTZ\\FI9828P_00626E68890F",
+    "path_from": "FoscamPTZ/FI9828P_00626E68890F",
     "path_to": "FoscamPTZ",
     "sensor": {
         "is_external": true,

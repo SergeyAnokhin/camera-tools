@@ -1,5 +1,5 @@
 {
-    "path_from": "Foscam\\FI9805W_C4D6553DECE1",
+    "path_from": "Foscam/FI9805W_C4D6553DECE1",
     "path_to": "Foscam",
     "sensor": {
         "is_external": true,
