@@ -36,14 +36,16 @@ class TrackingProcessor(PipelineShotProcessor):
 
         prevPShot = self.GetPreviousShot(pShot, pShots)
         if not prevPShot:
-            for box in boxes:
-                meta[box.id] = {}
-                box.object_id = self.GetNewObjectId()
-                meta[box.id]['object_id'] = box.object_id
-                # self.log.debug(f"Draw box: {box}")
-                box.DrawStartPoint(shot.GetImage())
-            return
-        boxes_last = list(self.GetTrackingBoxes(prevPShot))
+            boxes_last = []
+        else:
+            # for box in boxes:
+            #     meta[box.id] = {}
+            #     box.object_id = self.GetNewObjectId()
+            #     meta[box.id]['object_id'] = box.object_id
+            #     # self.log.debug(f"Draw box: {box}")
+            #     box.DrawStartPoint(shot.GetImage())
+            # return
+            boxes_last = list(self.GetTrackingBoxes(prevPShot))
 
         self.MatchObjects(boxes, boxes_last)
         self.DefineNewObjects(boxes, pShot)
@@ -51,6 +53,8 @@ class TrackingProcessor(PipelineShotProcessor):
         for box in boxes:
             # bestMatched:TrackingBox = box.CompareBox(boxes_last)
             box.DrawStartPoint(shot.GetImage())
+            meta[box.id] = {}
+
             bestMatched:TrackingBox = query(boxes_last) \
                 .first_or_default(None, lambda b: b.object_id == box.object_id)
             if bestMatched == None:
@@ -61,7 +65,6 @@ class TrackingProcessor(PipelineShotProcessor):
             # self.log.debug(f"Draw line: {bestMatched.GetCenter()} => {box.GetCenter()}")
             box.DrawLine(shot.GetImage(), bestMatched)
             #box.id = bestMatched.id
-            meta[box.id] = {}
             meta[box.id]['object_id'] = box.object_id
             meta[box.id]['distance'] = int(box.Distance(bestMatched))
             meta[box.id]['angle'] = int(box.angle(bestMatched))
@@ -70,9 +73,12 @@ class TrackingProcessor(PipelineShotProcessor):
 
     def DefineNewObjects(self, boxes: [], pShot: PipelineShot):
         # this box not matched. when len(prev_boxes) < len(boxes). New Object ?
+        meta = self.CreateMetadata(pShot)
         for b in asq.query(boxes) \
                 .where(lambda b: b.object_id == None):
             b.object_id = self.GetNewObjectId()
+            meta[b.id] = {}
+            meta[b.id]['object_id'] = b.object_id
             b.DrawStartPoint(pShot.Shot.GetImage())
 
     def CreateCorrMatrix(self, boxes: [], boxes_prev: []):
