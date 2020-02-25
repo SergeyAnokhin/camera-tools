@@ -276,6 +276,7 @@ class TestPipeline(unittest.TestCase):
                'center': '177x299',
                'distance': 12,
                'object_id': 2},
+            '189x247': {'object_id': 3}, # Papa
             '289x305': {'angle': 39, 
                 'center': '289x305',
                 'distance': 15,

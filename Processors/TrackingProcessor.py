@@ -53,7 +53,6 @@ class TrackingProcessor(PipelineShotProcessor):
         for box in boxes:
             # bestMatched:TrackingBox = box.CompareBox(boxes_last)
             box.DrawStartPoint(shot.GetImage())
-            meta[box.id] = {}
 
             bestMatched:TrackingBox = query(boxes_last) \
                 .first_or_default(None, lambda b: b.object_id == box.object_id)
@@ -137,4 +136,6 @@ class TrackingProcessor(PipelineShotProcessor):
             box.ExtractBox(pShot.Shot.GetImage())
             if box.id in meta and 'object_id' in meta[box.id]:
                 box.object_id = meta[box.id]['object_id']
+            else:
+                meta[box.id] = {}
             yield box
