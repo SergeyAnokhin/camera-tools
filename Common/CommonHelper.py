@@ -105,26 +105,27 @@ class CommonHelper:
     def WalkFiles(self, path: str, condition, ignoreDirs: [] = None, log: logging.Logger = None):
         if log:
             log.debug(f'WalkFiles: path={path}')
+            log.debug(f'WalkFiles: Ignore={ignoreDirs}')
         for root, dirnames, filenames in os.walk(path):
             if log:
-                log.debug(f'WalkFiles: root={root}')
-                log.debug(f'WalkFiles: dirnames={dirnames}')
-                log.debug(f'WalkFiles: filenames={filenames}')
+                log.debug(f'WalkFiles:   root={root}')
+                log.debug(f'WalkFiles:   dirnames={dirnames}')
+                log.debug(f'WalkFiles:   filenames={filenames}')
             if ignoreDirs and self.dir_to_ignore(root, ignoreDirs):
                 if log:
-                    log.debug(f'WalkFiles:{root} ignored')
+                    log.debug(f'WalkFiles: <= {root} ignored')
                 continue
             for filename in filenames:
                 if log:
-                    log.debug(f'WalkFiles: root={root} filename={filename}')
+                    log.debug(f'WalkFiles: === root={root} filename={filename}')
                 if condition(filename):
                     if log:
-                        log.debug(f'WalkFiles: Condition: True')
+                        log.debug(f'WalkFiles: === Condition: True')
                     yield os.path.join(root, filename)
 
-    def dir_to_ignore(self, dir: str, ignore_dir: []):
-        for dir in ignore_dir:
-            if dir in dir:
+    def dir_to_ignore(self, dir: str, ignore_dirs: []):
+        for ignore_dir in ignore_dirs:
+            if dir in ignore_dir:
                 return True
         return False
 
