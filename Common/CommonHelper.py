@@ -17,7 +17,7 @@ class CommonHelper:
         self.local = pytz.timezone("Europe/Paris")
 
     def get_datetime(self, input: str, is_raise_exception = True):
-        pattern = "(20\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)[_-]?(\\d\\d)"
+        pattern = "(20\\d\\d)\D?(\\d\\d)\D?(\\d\\d)\D(\\d\\d)\D?(\\d\\d)\D?(\\d\\d)"
 
         re_groups_index = re.search(pattern + "[_-](\\d)", input)
         if re_groups_index:

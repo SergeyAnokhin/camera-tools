@@ -1,4 +1,5 @@
 import logging, unittest, os, filetype
+from datetime import datetime
 from pprint import pprint
 import PIL.ExifTags # pip install pillow
 import enzyme
@@ -30,11 +31,17 @@ class TestArchPhotos(unittest.TestCase):
         files = self.helper.WalkFiles("../camera-OpenCV-data/Mobile", lambda f: True, ['Lilia'])
         for f in files:
             info = MediaInfo(f)
-            # pprint(vars(info))
+            print(info)
+
+    # def test_CopySimulation(self):
+    #     # python -m unittest tests.test_arch_photos.TestArchPhotos.test_CopySimulation
+    #     self.assertTrue(False)
 
 class MediaInfo:
 
-    def __init__(self, filename):
+    def __init__(self, filename = None):
+        if not filename:
+            return
         self.helper = CommonHelper()
         print(f'========== {filename} ==========')
         self.filename = filename
@@ -64,7 +71,7 @@ class MediaInfo:
                 }
                 # pprint(self.filename)
                 # pprint(exif['DateTimeDigitized'])
-                self.datetime_meta_create = exif['DateTimeDigitized']
+                self.datetime_meta_create = self.helper.get_datetime(exif['DateTimeDigitized'])
             else:
                 print(f"No exif data in {self.filename}")
         elif self.mediatype == 'video':
@@ -86,20 +93,27 @@ class MediaInfo:
             else:
                 dic = metadata.exportDictionary()
                 pprint(dic)
-                self.datetime_meta_create = dic['Metadata']['Creation date']
+                self.datetime_meta_create = self.helper.get_datetime(dic['Metadata']['Creation date'])
 
+        stat = os.stat(self.filename)
+        self.datetime_file_create = datetime.fromtimestamp(stat.st_ctime)
+        self.datetime_file_modif = datetime.fromtimestamp(stat.st_mtime)
+        
         # # img = PIL.Image.open(f)
         # # exif_data = img._getexif()
         # print(exif)
-    # def __str__(self):
-    #     return str(vars(self))
+    def __str__(self):
+        props = ['datetime_meta_create', 'datetime_name', 'datetime_file_create', 'datetime_file_modif']
+        dic = MediaInfo()
+        for k in props:
+            if k not in self.__dict__:
+                continue
+            v = self.__dict__[k]
+            if not v:
+                continue
+            dtStr = self.helper.ToTimeStampStr(v)
+            dic.__setattr__(k, dtStr)
 
-    # def __getattr__(self, attr):
-    #     if attr == 'helper':
-    #         return None
-    #     return self[attr]
+        return str(vars(dic))
 
-    # def test_CopySimulation(self):
-    #     # python -m unittest tests.test_arch_photos.TestArchPhotos.test_CopySimulation
-    #     self.assertTrue(False)
 
