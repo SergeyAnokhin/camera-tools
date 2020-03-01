@@ -82,7 +82,7 @@ def processExtractDnsAdguardData(request):
     context = {}
     ApiContext.DnsPipeline.Get(context)
     ApiContext.DnsPipeline.Process(context)
-    return HttpResponse(f"processExtractDnsAdguardData: {context['items']}")
+    return HttpResponse(f"processExtractDnsAdguardData: {context['count']}")
 
 ### API : /camera_archive/archiving ###
 @logit
