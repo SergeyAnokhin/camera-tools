@@ -15,6 +15,7 @@ class CommonHelper:
         self.secretConfig = SecretConfig()
         self.secretConfig.fromJsonFile()
         self.local = pytz.timezone("Europe/Paris")
+        self.log = logging.getLogger(f"HELP")
 
     def get_datetime(self, input: str, is_raise_exception = True):
         pattern = "(20\\d\\d)\D?(\\d\\d)\D?(\\d\\d)\D(\\d\\d)\D?(\\d\\d)\D?(\\d\\d)"
@@ -25,7 +26,7 @@ class CommonHelper:
 
         re_groups = re.search(pattern, input)
         if not re_groups:
-            print('Cant parse datetime in : {}'.format(input))
+            self.log.warning('Cant parse datetime in : {}'.format(input))
             if is_raise_exception:
                 raise ValueError('Cant parse datetime in file : {}'.format(input))
             else:
@@ -33,7 +34,7 @@ class CommonHelper:
         try:
             return self.RegexGroupsToDateTime(re_groups)
         except:
-            print(f'ERROR: Parse datetime with {input}')
+            self.log.error(f'ERROR: Parse datetime with {input}')
             return None
 
     def ToUtcTime(self, dt: datetime):
@@ -125,7 +126,7 @@ class CommonHelper:
 
     def dir_to_ignore(self, dir: str, ignore_dirs: []):
         for ignore_dir in ignore_dirs:
-            if dir in ignore_dir:
+            if dir.endswith(ignore_dir):
                 return True
         return False
 

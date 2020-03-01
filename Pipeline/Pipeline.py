@@ -4,10 +4,10 @@ from Processors.Processor import Processor
 
 class Pipeline:
     
-    def __init__(self, logger: logging.Logger, isSimulation=False):
+    def __init__(self, isSimulation=False):
         self.processors = []
         self.providers = []
-        self.log = logger
+        self.log = logging.getLogger(f"PIPE")
 
     def PreLoad(self):
         for processor in self.processors:
