@@ -7,9 +7,9 @@ from Processors.PipelineShotProcessor import PipelineShotProcessor
 
 class ShotsPipeline(Pipeline):
 
-    def __init__(self, camera: str, logger: logging.Logger, isSimulation=False):
-        super().__init__(logger, isSimulation)
-        self.archiver = CameraArchiveHelper(logger)
+    def __init__(self, camera: str, isSimulation=False):
+        super().__init__(isSimulation)
+        self.archiver = CameraArchiveHelper()
         self.config = self.archiver.load_configs("configs", [ camera ])[0]
 
     def PreLoadProtected(self, processor: PipelineShotProcessor):
@@ -23,7 +23,7 @@ class ShotsPipeline(Pipeline):
         return shots
 
     def Process(self, pShots: []):
-        pipelineContext = { 'data': pShots }
+        pipelineContext = { 'items': pShots }
         for processor in self.processors:
             processor.Process(pipelineContext)
             PostProcess = getattr(processor, "PostProcess", None)

@@ -27,7 +27,7 @@ class MailSenderProcessor(PipelineShotProcessor):
         pass
 
     def AfterProcess(self, ctx):
-        pShots = ctx['data']
+        pShots = ctx['items']
         subject = self.GetSubject(pShots, ctx)
 
         msg = MIMEMultipart('alternative')

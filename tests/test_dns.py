@@ -26,11 +26,11 @@ class TestDns(unittest.TestCase):
     def test_provider(self):
         # python -m unittest tests.test_dns.TestDns.test_provider
         pipeline = Pipeline(self.log)
-        pipeline.providers.append(DnsAdGuardProvider())
+        pipeline.providers.append(DnsAdGuardProvider(isSimulation=True))
 
         context = {}
         pipeline.Get(context)
-        data = context['data']
+        data = context['items']
 
         self.assertEqual(len(data), 6)
         self.assertEqual(data[5]['client'], '192.168.1.12')
@@ -74,7 +74,7 @@ class TestDns(unittest.TestCase):
         pipeline.processors.append(ElasticSearchDnsProcessor(isSimulation=True))
 
         context = {
-            "data": [provider_output]
+            "items": [provider_output]
         }
         pipeline.Process(context)
 

@@ -20,8 +20,8 @@ class Processor:
     def Process(self, context: dict):
         ''' Main Process '''
         self.log.info(f'@@@ ⏳ PROCESS: ***{self.name}*** {"(Simulation)" if self.isSimulation else ""}@@@@@@@@@@@@@@@@@@@@@@@@')
-        data = context['data']
-        for item in data:
+        items = context['items']
+        for item in items:
             self.BeforeProcessItem(item, context)
             self.ProcessItem(item, context)
         self.AfterProcess(context)
@@ -31,7 +31,8 @@ class Processor:
             context['meta'] = {}    
         if self.name not in context['meta']:
             context['meta'][self.name] = {}
-        context['meta'][self.name][item_id] = {}
+        if item_id not in context['meta'][self.name]:
+            context['meta'][self.name][item_id] = {}
         return context['meta'][self.name][item_id]
 
     def ProcessItem(self, item, context):

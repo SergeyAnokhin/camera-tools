@@ -29,7 +29,7 @@ class TrackingProcessor(PipelineShotProcessor):
 
     def ProcessItem(self, pShot: PipelineShot, ctx: dict):
         super().ProcessItem(pShot, ctx)
-        pShots = ctx['data']
+        pShots = ctx['items']
         meta = self.CreateMetadata(pShot)
         shot = pShot.Shot
         boxes = list(self.GetTrackingBoxes(pShot))

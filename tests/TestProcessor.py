@@ -7,5 +7,5 @@ class TestProcessor(Processor):
         self.Context = ctx
 
     def AfterProcess(self, ctx: dict):
-        pShots = ctx['data']
+        pShots = ctx['items']
         ctx.update(self.Context)

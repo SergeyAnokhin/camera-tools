@@ -6,8 +6,8 @@ from Common.CommonHelper import CommonHelper
 
 class CameraArchiveHelper:
 
-    def __init__(self, logger: logging.Logger, isSimulation: bool = False):
-        self.log = logger
+    def __init__(self, isSimulation: bool = False):
+        self.log = logging.getLogger(f"CAHE")
         self.isSimulation = isSimulation
 
     def load_configs(self, dir, listConfig = []):

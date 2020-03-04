@@ -10,6 +10,6 @@ class FilesWalkerProvider(Provider):
         self.ignoreDirs = ignoreDirs
         self.condition = condition if condition != None else (lambda f: True)
 
-    def GetProtected(self, context):
+    def GetProtected(self, context) -> []:
         files = self.helper.WalkFiles(self.root, self.condition, self.ignoreDirs)
-        return files
+        return list(files)

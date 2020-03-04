@@ -13,7 +13,7 @@ class DnsAdGuardProvider(Provider):
         resolver.default_resolver.nameservers = [AppSettings.DNS_HOST]
         self.encoder = DjangoJSONEncoder()
 
-    def GetProtected(self, data):
+    def GetProtected(self, data) -> []:
         if AppSettings.DNS_ADGUARD.API_QUERY_LOG.startswith("http"):
             url = f"{AppSettings.DNS_ADGUARD.API_QUERY_LOG}"
 
@@ -54,8 +54,9 @@ class DnsAdGuardProvider(Provider):
         # DNS reverse lookup
         rev_name = reversename.from_address(i["client_ip"])
         try:
-            answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False) # 
-            i["client"] = answer[0].target.labels[0].decode("utf-8") 
+            if not self.isSimulation:
+                answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False) # 
+                i["client"] = answer[0].target.labels[0].decode("utf-8") 
         except resolver.NXDOMAIN as err:
             self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
         except IndexError as err:
@@ -70,10 +71,6 @@ class DnsAdGuardProvider(Provider):
         i["elapsedMs"] = round(float(i["elapsedMs"]), 2)
         i['_index'] = f"dns-{dt:%Y.%m}"
         i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
-
-        if "data" not in context:
-            context['data'] = []    
-        context['data'].append(i)
 
     def ParseDateTime(self, oldestStr: str):
         pattern = re.compile("\.(\d{6})\d+(\D)")

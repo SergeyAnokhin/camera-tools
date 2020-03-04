@@ -111,7 +111,7 @@ class TestPipeline(unittest.TestCase):
         target = DiffContoursProcessor()
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
 
-        target.Process({ 'data': pipelineShots })
+        target.Process({ 'items': pipelineShots })
         # pp.pprint(pipelineShots[0].Metadata, indent=2)
         # pp.pprint(pipelineShots[1].Metadata, indent=2)
         # pp.pprint(pipelineShots[2].Metadata, indent=2)
@@ -157,7 +157,7 @@ class TestPipeline(unittest.TestCase):
         target = YoloObjDetectionProcessor()
         target.PreLoad()
         shots = DirectoryShotsProvider.FromDir(None, folder)
-        target.Process({ 'data': shots })
+        target.Process({ 'items': shots })
         metadata0 = shots[0].Metadata['YOLO']
         metadata1 = shots[1].Metadata['YOLO']
         metadata2 = shots[2].Metadata['YOLO']
@@ -180,8 +180,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process({ 'data': pipelineShots })
-        target.Process({ 'data': pipelineShots })
+        yolo.Process({ 'items': pipelineShots })
+        target.Process({ 'items': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         #pipelineShots[0].Shot.Show()
@@ -210,29 +210,29 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process({ 'data': pipelineShots })
-        target.Process({ 'data': pipelineShots })
+        yolo.Process({ 'items': pipelineShots })
+        target.Process({ 'items': pipelineShots })
         # pipelineShots[0].Shot.Show()
         metadata0 = pipelineShots[0].Metadata["TRAC"]
         pp.pprint(metadata0, indent=2)
-        self.assertDictEqual(metadata0, {   '293x148': {'object_id': 1},
-                                            '350x151': {'object_id': 2},
-                                            '379x103': {'object_id': 3}})
+        self.assertDictEqual(metadata0, [ {'id': '293x148', 'object_id': 1},
+                                          {'id': '350x151', 'object_id': 2},
+                                          {'id': '379x103', 'object_id': 3}])
         #pipelineShots[1].Shot.Show()
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
-        self.assertDictEqual(metadata1, {   '218x168': { 'angle': -165,
+        self.assertDictEqual(metadata1, [ {'id': '218x168', 'angle': -165,
                                                         'center': '218x168',
                                                         'distance': 77,
                                                         'object_id': 1},
-                                            '290x153': { 'angle': -178,
+                                          {'id': '290x153', 'angle': -178,
                                                         'center': '290x153',
                                                         'distance': 60,
                                                         'object_id': 2},
-                                            '349x101': { 'angle': 176,
+                                          {'id': '349x101', 'angle': 176,
                                                         'center': '349x101',
                                                         'distance': 30,
-                                                        'object_id': 3}})
+                                                        'object_id': 3}])
         #pipelineShots[2].Shot.Show()
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
@@ -246,8 +246,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process({ 'data': pipelineShots })
-        target.Process({ 'data': pipelineShots })
+        yolo.Process({ 'items': pipelineShots })
+        target.Process({ 'items': pipelineShots })
         for i, pShot in enumerate(pipelineShots):
             meta = pShot.Metadata["TRAC"]
             title = ""
@@ -323,8 +323,8 @@ class TestPipeline(unittest.TestCase):
         yolo.PreLoad()
         target = TrackingProcessor(isDebug=True)
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
-        yolo.Process({ 'data': pipelineShots })
-        target.Process({ 'data': pipelineShots })
+        yolo.Process({ 'items': pipelineShots })
+        target.Process({ 'items': pipelineShots })
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         # pipelineShots[1].Shot.Show()
