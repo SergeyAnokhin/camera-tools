@@ -267,6 +267,7 @@ class TestPipeline(unittest.TestCase):
                                         '240x373': {'id': '240x373', 'object_id': 1}})
 
         meta = pipelineShots[1].Metadata["TRAC"]
+        boxesById = {b['id'] : b for b in meta['boxes']}
         self.assertDictEqual(boxesById, { 
             '183x288': {    'angle': -158,
                             'center': '183x288',
@@ -294,7 +295,7 @@ class TestPipeline(unittest.TestCase):
                 'id': '289x305', 
                 'object_id': 1}})
 
-        meta = pipelineShots[3].Metadata["TRAC"]['boxes']
+        meta = pipelineShots[3].Metadata["TRAC"]
         boxesById = {b['id'] : b for b in meta['boxes']}
         self.assertDictEqual(boxesById['162x285'], { 'angle': 136,
                'center': '162x285',
