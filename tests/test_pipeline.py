@@ -182,26 +182,28 @@ class TestPipeline(unittest.TestCase):
         pipelineShots = DirectoryShotsProvider.FromDir(None, folder)
         yolo.Process({ 'items': pipelineShots })
         target.Process({ 'items': pipelineShots })
-        metadata1 = pipelineShots[1].Metadata["TRAC"]
-        pp.pprint(metadata1, indent=2)
+        meta = pipelineShots[1].Metadata["TRAC"]
+        pp.pprint(meta, indent=2)
         #pipelineShots[0].Shot.Show()
         #pipelineShots[1].Shot.Show()
-        self.assertEqual(15, metadata1['372x122']['angle'])
-        self.assertEqual(138, metadata1['372x122']['distance'])
-        self.assertEqual("372x122", metadata1['372x122']['center'])
-        self.assertEqual(16, metadata1['230x146']['angle'])
-        self.assertEqual(90, metadata1['230x146']['distance'])
-        self.assertEqual("230x146", metadata1['230x146']['center'])
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertEqual(15, boxesById['372x122']['angle'])
+        self.assertEqual(138, boxesById['372x122']['distance'])
+        self.assertEqual("372x122", boxesById['372x122']['center'])
+        self.assertEqual(16, boxesById['230x146']['angle'])
+        self.assertEqual(90, boxesById['230x146']['distance'])
+        self.assertEqual("230x146", boxesById['230x146']['center'])
 
-        metadata2 = pipelineShots[2].Metadata["TRAC"]
-        pp.pprint(metadata2, indent=2)
+        meta = pipelineShots[2].Metadata["TRAC"]
+        pp.pprint(meta, indent=2)
         #pipelineShots[2].Shot.Show()
-        self.assertEqual(10, metadata2["323x129"]['angle'])
-        self.assertEqual(94, metadata2["323x129"]['distance'])
-        self.assertEqual("323x129", metadata2["323x129"]['center'])
-        self.assertEqual(28, metadata2["432x89"]['angle'])
-        self.assertEqual(68, metadata2["432x89"]['distance'])
-        self.assertEqual("432x89", metadata2["432x89"]['center'])
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertEqual(10, boxesById["323x129"]['angle'])
+        self.assertEqual(94, boxesById["323x129"]['distance'])
+        self.assertEqual("323x129", boxesById["323x129"]['center'])
+        self.assertEqual(28, boxesById["432x89"]['angle'])
+        self.assertEqual(68, boxesById["432x89"]['distance'])
+        self.assertEqual("432x89", boxesById["432x89"]['center'])
 
     def test_TrackingProcessor_Day_3Person_2person_same_color(self):
         # python -m unittest tests.test_pipeline.TestPipeline.test_TrackingProcessor_Day_3Person_2person_same_color
@@ -213,26 +215,27 @@ class TestPipeline(unittest.TestCase):
         yolo.Process({ 'items': pipelineShots })
         target.Process({ 'items': pipelineShots })
         # pipelineShots[0].Shot.Show()
-        metadata0 = pipelineShots[0].Metadata["TRAC"]
+        metadata0 = pipelineShots[0].Metadata["TRAC"]['boxes']
         pp.pprint(metadata0, indent=2)
-        self.assertDictEqual(metadata0, [ {'id': '293x148', 'object_id': 1},
-                                          {'id': '350x151', 'object_id': 2},
-                                          {'id': '379x103', 'object_id': 3}])
+        self.assertListEqual([ {'id': '293x148', 'object_id': 1},
+                                {'id': '350x151', 'object_id': 2},
+                                {'id': '379x103', 'object_id': 3}], metadata0)
         #pipelineShots[1].Shot.Show()
-        metadata1 = pipelineShots[1].Metadata["TRAC"]
+        metadata1 = pipelineShots[1].Metadata["TRAC"]['boxes']
         pp.pprint(metadata1, indent=2)
-        self.assertDictEqual(metadata1, [ {'id': '218x168', 'angle': -165,
-                                                        'center': '218x168',
-                                                        'distance': 77,
-                                                        'object_id': 1},
-                                          {'id': '290x153', 'angle': -178,
-                                                        'center': '290x153',
-                                                        'distance': 60,
-                                                        'object_id': 2},
-                                          {'id': '349x101', 'angle': 176,
-                                                        'center': '349x101',
-                                                        'distance': 30,
-                                                        'object_id': 3}])
+        self.assertListEqual([ {'id': '290x153', 'angle': -178,
+                                            'center': '290x153',
+                                            'distance': 60,
+                                            'object_id': 2},
+                                {'id': '349x101', 'angle': 176,
+                                            'center': '349x101',
+                                            'distance': 30,
+                                            'object_id': 3},                                            
+                                {'id': '218x168', 'angle': -165,
+                                            'center': '218x168',
+                                            'distance': 77,
+                                            'object_id': 1}
+                                ], metadata1)
         #pipelineShots[2].Shot.Show()
         metadata2 = pipelineShots[2].Metadata["TRAC"]
         pp.pprint(metadata2, indent=2)
@@ -249,42 +252,54 @@ class TestPipeline(unittest.TestCase):
         yolo.Process({ 'items': pipelineShots })
         target.Process({ 'items': pipelineShots })
         for i, pShot in enumerate(pipelineShots):
-            meta = pShot.Metadata["TRAC"]
+            meta = pShot.Metadata["TRAC"]['boxes']
             title = ""
-            for key, box in meta.items():
-                title += f" B:{key}-ID{box['object_id']}"
+            for box in meta:
+                title += f" B:{box['id']}-ID{box['object_id']}"
             print(f"Shot #{i}: {pShot.Shot.filename}")
             pp.pprint(meta, indent=2)
             #pShot.Shot.Show(title)
 
         # ID1 : Oli, ID2 : Fra
         meta = pipelineShots[0].Metadata["TRAC"]
-        self.assertDictEqual(meta, {'201x281': {'object_id': 2}, '240x373': {'object_id': 1}})
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertDictEqual(boxesById, {'201x281': {'id': '201x281', 'object_id': 2},
+                                        '240x373': {'id': '240x373', 'object_id': 1}})
+
         meta = pipelineShots[1].Metadata["TRAC"]
-        self.assertDictEqual(meta, { 
+        self.assertDictEqual(boxesById, { 
             '183x288': {    'angle': -158,
                             'center': '183x288',
                             'distance': 19,
+                            'id': '183x288',
                             'object_id': 2},
             '277x315': {    'angle': 57, 
                             'center': '277x315',
                             'distance': 68,
+                            'id': '277x315', 
                             'object_id': 1}})
+
         meta = pipelineShots[2].Metadata["TRAC"]
-        self.assertDictEqual(meta, { 
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertDictEqual(boxesById, { 
             '177x299': { 'angle': -118,
                'center': '177x299',
                'distance': 12,
+               'id': '177x299', 
                'object_id': 2},
-            '189x247': {'object_id': 3}, # Papa
+            '189x247': {'id': '189x247', 'object_id': 3}, # Papa
             '289x305': {'angle': 39, 
                 'center': '289x305',
                 'distance': 15,
+                'id': '289x305', 
                 'object_id': 1}})
-        meta = pipelineShots[3].Metadata["TRAC"]
-        self.assertDictEqual(meta['162x285'], { 'angle': 136,
+
+        meta = pipelineShots[3].Metadata["TRAC"]['boxes']
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertDictEqual(boxesById['162x285'], { 'angle': 136,
                'center': '162x285',
                'distance': 20,
+               'id': '162x285', 
                'object_id': 2})
 
     def test_TrackingProcessor2(self):
@@ -301,19 +316,23 @@ class TestPipeline(unittest.TestCase):
         meta = result[1].Metadata["TRAC"]
         pp.pprint(meta, indent=2)
         #result[1].Shot.Show()
-        self.assertDictEqual(meta, {
+        boxesById = {b['id'] : b for b in meta['boxes']}
+        self.assertDictEqual(boxesById, {
             '289x101': {'angle': 25,
                         'center': '289x101',
                         'distance': 94,
+                        'id': '289x101',
                         'object_id': 1}})
 
         meta = result[2].Metadata["TRAC"]
         pp.pprint(meta, indent=2)
+        boxesById = {b['id'] : b for b in meta['boxes']}
         #result[2].Shot.Show()
-        self.assertDictEqual(meta, {
+        self.assertDictEqual(boxesById, {
             '377x84': { 'angle': 10,
                         'center': '377x84',
                         'distance': 89,
+                        'id': '377x84',
                         'object_id': 1}})
 
     def test_TrackingProcessor_SizeError(self):
@@ -328,10 +347,12 @@ class TestPipeline(unittest.TestCase):
         metadata1 = pipelineShots[1].Metadata["TRAC"]
         pp.pprint(metadata1, indent=2)
         # pipelineShots[1].Shot.Show()
-        self.assertDictEqual(metadata1, {
+        boxesById = {b['id'] : b for b in metadata1['boxes']}
+        self.assertDictEqual(boxesById, {
             '436x69': {'angle': 27,
                         'center': '436x69',
                         'distance': 83,
+                        'id': '436x69',
                         'object_id': 1}})
 
     def test_MailSend(self):

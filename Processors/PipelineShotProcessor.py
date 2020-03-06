@@ -11,10 +11,15 @@ class PipelineShotProcessor(Processor):
         super().__init__(name, isSimulation)
         self.helper = CommonHelper()
 
-    def CreateMetadata(self, pShot: PipelineShot):
+    def CreateMetadata(self, pShot: PipelineShot, addKey = None):
         if self.name not in pShot.Metadata:
             pShot.Metadata[self.name] = {}
-        return pShot.Metadata[self.name]
+        if not addKey:
+            return pShot.Metadata[self.name]
+        if addKey not in pShot.Metadata[self.name]:
+            pShot.Metadata[self.name][addKey] = {}
+        return pShot.Metadata[self.name][addKey]
+
 
     def BeforeProcessItem(self, pShot, ctx):
         self.log.debug(f"   === 🎞️  {pShot.Shot.filename} ======")

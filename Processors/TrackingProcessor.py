@@ -31,26 +31,20 @@ class TrackingProcessor(PipelineShotProcessor):
         super().ProcessItem(pShot, ctx)
         pShots = ctx['items']
         meta = self.CreateMetadata(pShot)
+        meta['boxes'] = []
         shot = pShot.Shot
-        boxes = list(self.GetTrackingBoxes(pShot))
+        yolo_boxes = list(self.GetYoloBoxes(pShot))
 
         prevPShot = self.GetPreviousShot(pShot, pShots)
         if not prevPShot:
             boxes_last = []
         else:
-            # for box in boxes:
-            #     meta[box.id] = {}
-            #     box.object_id = self.GetNewObjectId()
-            #     meta[box.id]['object_id'] = box.object_id
-            #     # self.log.debug(f"Draw box: {box}")
-            #     box.DrawStartPoint(shot.GetImage())
-            # return
-            boxes_last = list(self.GetTrackingBoxes(prevPShot))
+            boxes_last = list(self.GetYoloBoxes(prevPShot))
 
-        self.MatchObjects(boxes, boxes_last)
-        self.DefineNewObjects(boxes, pShot)
+        self.MatchObjects(yolo_boxes, boxes_last)
+        self.DefineNewObjects(yolo_boxes, pShot)
 
-        for box in boxes:
+        for box in yolo_boxes:
             # bestMatched:TrackingBox = box.CompareBox(boxes_last)
             box.DrawStartPoint(shot.GetImage())
 
@@ -64,26 +58,31 @@ class TrackingProcessor(PipelineShotProcessor):
             # self.log.debug(f"Draw line: {bestMatched.GetCenter()} => {box.GetCenter()}")
             box.DrawLine(shot.GetImage(), bestMatched)
             #box.id = bestMatched.id
-            meta[box.id]['object_id'] = box.object_id
-            meta[box.id]['distance'] = int(box.Distance(bestMatched))
-            meta[box.id]['angle'] = int(box.angle(bestMatched))
+            meta_box = {}
+            meta_box['id'] = box.id
+            meta_box['object_id'] = box.object_id
+            meta_box['distance'] = int(box.Distance(bestMatched))
+            meta_box['angle'] = int(box.angle(bestMatched))
             if self.isDebug:
-                meta[box.id]['center'] = box.GetCenter()
+                meta_box['center'] = box.GetCenter()
+            meta['boxes'].append(meta_box)
 
-    def DefineNewObjects(self, boxes: [], pShot: PipelineShot):
+    def DefineNewObjects(self, yolo_boxes: [], pShot: PipelineShot):
         # this box not matched. when len(prev_boxes) < len(boxes). New Object ?
         meta = self.CreateMetadata(pShot)
-        for b in asq.query(boxes) \
+        for b in asq.query(yolo_boxes) \
                 .where(lambda b: b.object_id == None):
             b.object_id = self.GetNewObjectId()
-            meta[b.id] = {}
-            meta[b.id]['object_id'] = b.object_id
+            meta_box = {}
+            meta_box['id'] = b.id
+            meta_box['object_id'] = b.object_id
+            meta['boxes'].append(meta_box)
             b.DrawStartPoint(pShot.Shot.GetImage())
 
-    def CreateCorrMatrix(self, boxes: [], boxes_prev: []):
-        coeffs = np.zeros((len(boxes), len(boxes_prev))) # coeff matrix: rows x columns
+    def CreateCorrMatrix(self, yolo_boxes: [], boxes_prev: []):
+        coeffs = np.zeros((len(yolo_boxes), len(boxes_prev))) # coeff matrix: rows x columns
 
-        for i, b in enumerate(boxes):
+        for i, b in enumerate(yolo_boxes):
             for j, b_prev in enumerate(boxes_prev):
                 coeffs[i][j] = b_prev.GetMatchingCoeff(b)
 
@@ -91,26 +90,26 @@ class TrackingProcessor(PipelineShotProcessor):
         #    self.log.debug(f"Matching Coeffs matrix: \n{pd.DataFrame(coeffs)}")
         headers = [b.ToStringShort() for b in boxes_prev]
         headers.insert(0, "Curr\\Prev") # for first column with boxes IDs
-        rows = [b.id for b in boxes]
+        rows = [b.id for b in yolo_boxes]
         matrix = np.c_[rows, coeffs]
         self.log.debug(f"Matching Coeffs matrix: \n" 
             + f"{tabulate(matrix, headers, tablefmt='orgtbl', floatfmt='.3f')}")
         return coeffs
 
-    def MatchObjects(self, boxes: [], boxes_prev: []):
+    def MatchObjects(self, yolo_boxes: [], boxes_prev: []):
         if len(boxes_prev) == 0:
             self.log.debug(f"No boxes found on prev shot")
             return
-        coeffs = self.CreateCorrMatrix(boxes, boxes_prev)
+        coeffs = self.CreateCorrMatrix(yolo_boxes, boxes_prev)
         
-        for _ in boxes: # loop len(boxes) times
+        for _ in yolo_boxes: # loop len(boxes) times
             max = np.amax(coeffs)
             if max == 0: 
                 break # no more matching
             pos = np.where(coeffs == max)
             i = pos[0][0]
             j = pos[1][0]
-            box = boxes[i]
+            box = yolo_boxes[i]
             box_prev = boxes_prev[j]
             self.log.debug(f"Max: '{max:.3f}' position: {i}x{j}. Write Object_ID: {box_prev}=>{box}")
             box.object_id = box_prev.object_id # match
@@ -124,18 +123,19 @@ class TrackingProcessor(PipelineShotProcessor):
         return query(pShots) \
             .first_or_default(None, lambda p: p.Index == index - 1) # 
 
-    def GetTrackingBoxes(self, pShot: PipelineShot) -> []:
+    def GetYoloBoxes(self, pShot: PipelineShot) -> []:
         if 'YOLO' not in pShot.Metadata or 'areas' not in pShot.Metadata['YOLO']:
             self.log.warning("No data on YOLO analysis found. Ignore tracking analysys")
             return
         yolo = pShot.Metadata['YOLO']['areas']
         meta = self.CreateMetadata(pShot)
+        boxesById = {b['id'] : b for b in meta['boxes']}
         
         for box_data in yolo:
             box = TrackingBox(box_data)
             box.ExtractBox(pShot.Shot.GetImage())
-            if box.id in meta and 'object_id' in meta[box.id]:
-                box.object_id = meta[box.id]['object_id']
-            else:
-                meta[box.id] = {}
+            if box.id in boxesById and 'object_id' in boxesById[box.id]:
+                box.object_id = boxesById[box.id]['object_id']
+            # else:
+            #     meta[box.id] = {}
             yield box
