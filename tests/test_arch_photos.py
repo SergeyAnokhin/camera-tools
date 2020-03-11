@@ -8,6 +8,7 @@ from tests.TestHelper import TestHelper
 from Pipeline.Pipeline import Pipeline
 from Providers.FilesWalkerProvider import FilesWalkerProvider
 from Processors.MediaCreationDateProcessor import MediaCreationDateProcessor
+from Processors.PhotosArrangeProcessor import PhotosArrangeProcessor
 
 class TestArchPhotos(unittest.TestCase):
 
@@ -61,8 +62,41 @@ class TestArchPhotos(unittest.TestCase):
         print(itemKey)
         self.assertEqual(expected, ctx['meta'][unitKey][itemKey][paramKey])
 
-    # def test_CopySimulation(self):
-    #     # python -m unittest tests.test_arch_photos.TestArchPhotos.test_CopySimulation
-    #     self.assertTrue(False)
+    def test_CopySimulation(self):
+        # python -m unittest tests.test_arch_photos.TestArchPhotos.test_CopySimulation
+        pipeline = Pipeline()
+        pipeline.providers.append(FilesWalkerProvider("../camera-OpenCV-data/Mobile/Lilia"))
+        pipeline.processors.append(MediaCreationDateProcessor())
+        pipeline.processors.append(PhotosArrangeProcessor('Mobile Lilia', isSimulation=True))
+
+        ctx = {}
+        pipeline.Get(ctx)
+        pipeline.Process(ctx)
+
+        files = ctx['items']
+        # for file in ctx['meta']['PHOT']:
+        #     arch_path = ctx['meta']['PHOT'][file]['arch_path']
+        #     print(f'self.assertMeta(ctx, "PHOT", "{file}", "arch_path", "{arch_path}")')
+        self.assertEqual(20, len(files))
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\18-04-29 19_01_07.png", "arch_path", "C:\\Src\\temp\\2018/18-04 Mobile Lilia\\18-04-29 19_01_07.png")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\1OTL16~B.PNG", "arch_path", "C:\\Src\\temp\\2019/19-05 Mobile Lilia\\1OTL16~B.PNG")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\1R1QVM~Q.PNG", "arch_path", "C:\\Src\\temp\\2018/18-04 Mobile Lilia\\1R1QVM~Q.PNG")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\20180223_224011.jpg", "arch_path", "C:\\Src\\temp\\2018/18-02 Mobile Lilia\\20180223_224011.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\20180730_100955.jpg", "arch_path", "C:\\Src\\temp\\2018/18-07 Mobile Lilia\\20180730_100955.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\20181031_120253.jpg", "arch_path", "C:\\Src\\temp\\2018/18-10 Mobile Lilia\\20181031_120253.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\20181031_120253_1.jpg", "arch_path", "C:\\Src\\temp\\2018/18-10 Mobile Lilia\\20181031_120253_1.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\DSC_0082.JPG", "arch_path", "C:\\Src\\temp\\2018/18-01 Mobile Lilia\\DSC_0082.JPG")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\DSC_0083.JPG", "arch_path", "C:\\Src\\temp\\2018/18-01 Mobile Lilia\\DSC_0083.JPG")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\IMG_20190208_203204.jpg", "arch_path", "C:\\Src\\temp\\2019/19-02 Mobile Lilia\\IMG_20190208_203204.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\IMG_20190208_203211.jpg", "arch_path", "C:\\Src\\temp\\2019/19-02 Mobile Lilia\\IMG_20190208_203211.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\IMG_20190623_144604.jpg", "arch_path", "C:\\Src\\temp\\2019/19-06 Mobile Lilia\\IMG_20190623_144604.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\IMG_20190623_144604_1.jpg", "arch_path", "C:\\Src\\temp\\2019/19-06 Mobile Lilia\\IMG_20190623_144604_1.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\MOV_0050.mp4", "arch_path", "C:\\Src\\temp\\2017/17-12 Mobile Lilia\\MOV_0050.mp4")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\PHOTO_20190929_150228.jpg", "arch_path", "C:\\Src\\temp\\2019/19-09 Mobile Lilia\\PHOTO_20190929_150228.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\PHOTO_20190929_154839.jpg", "arch_path", "C:\\Src\\temp\\2019/19-09 Mobile Lilia\\PHOTO_20190929_154839.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\Screenshot_20181010-135356.png", "arch_path", "C:\\Src\\temp\\2018/18-10 Mobile Lilia\\Screenshot_20181010-135356.png")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\scv_1533828457895555310231.jpg", "arch_path", "C:\\Src\\temp\\2018/18-08 Mobile Lilia\\scv_1533828457895555310231.jpg")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\VIDEO_20191224_201131.mp4", "arch_path", "C:\\Src\\temp\\2019/19-12 Mobile Lilia\\VIDEO_20191224_201131.mp4")
+        self.assertMeta(ctx, "PHOT", "../camera-OpenCV-data/Mobile/Lilia\\VID_20190216_194013.mp4", "arch_path", "C:\\Src\\temp\\2019/19-02 Mobile Lilia\\VID_20190216_194013.mp4")
 
 

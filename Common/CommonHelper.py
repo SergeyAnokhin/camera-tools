@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime, re, json, os, pytz, subprocess, sys, coloredlogs, logging, html
+import datetime, re, json, os, pytz, subprocess, sys, coloredlogs, logging, html, shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.gridspec as gridspec
@@ -138,6 +138,23 @@ class CommonHelper:
                 os.unlink(file)
                 removed.append(file)
         return removed
+
+    def EnsureMove(self, from_file: str, to_file: str, mode = 'move'):
+        self.log.info(f"EnsureMove: 💾 {from_file} => 💾 {to_file} (mode: {mode})")
+        to_path = os.path.dirname(to_file)
+        if mode != 'simulation':
+            if not os.path.exists(to_path):
+                self.log.debug(f'- create directory: 📂 {to_path}')
+                os.makedirs(to_path, exist_ok=True)
+            if os.path.isfile(from_file): # exists
+                #shutil.move(from_file, to_file)
+                if mode == 'copy':
+                    shutil.copy2(from_file, to_file)
+                else:
+                    shutil.move(from_file, to_file)
+        else:
+            if not os.path.exists(to_path):
+                self.log.debug(f'- create directory (Simulation): 📂 {to_path}')
 
     def Encode(self, message: str):
         key = self.secretConfig.image_id_decode_key.encode()

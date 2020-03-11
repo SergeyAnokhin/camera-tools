@@ -20,6 +20,7 @@ class AppSettings:
     CAMERA_LIVE_PATH           = getattr(settings, "CAMERA_LIVE_PATH", None)
     CAMERA_ARCHIVE_PATH        = getattr(settings, "CAMERA_ARCHIVE_PATH", None)
     CAMERA_ARCHIVE_NAS_PATH    = getattr(settings, "CAMERA_ARCHIVE_NAS_PATH", None)
+    PHOTO_ARCHIVE_PATH         = getattr(settings, "PHOTO_ARCHIVE_PATH", None)
     HASSIO_PATH                = getattr(settings, "HASSIO_PATH", None)
     DNS_HOST                   = getattr(settings, "DNS_HOST", None)
     SOURCE_IMAGE_PATTARN       = getattr(settings, "SOURCE_IMAGE_PATTARN", None)
