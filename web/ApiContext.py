@@ -7,6 +7,7 @@ from Providers.DirectoryShotsProvider import DirectoryShotsProvider
 from Providers.ImapShotsProvider import ImapShotsProvider
 from Providers.ElasticSearchProvider import ElasticSearchProvider
 from Providers.DnsAdGuardProvider import DnsAdGuardProvider
+from Providers.FilesWalkerProvider import FilesWalkerProvider
 
 from Processors.DiffContoursProcessor import DiffContoursProcessor
 from Processors.YoloObjDetectionProcessor import YoloObjDetectionProcessor
@@ -17,6 +18,8 @@ from Processors.MailSenderProcessor import MailSenderProcessor
 from Processors.HassioProcessor import HassioProcessor
 from Processors.ElasticSearchProcessor import ElasticSearchProcessor
 from Processors.ElasticSearchDnsProcessor import ElasticSearchDnsProcessor
+from Processors.MediaCreationDateProcessor import MediaCreationDateProcessor
+from Processors.PhotosArrangeProcessor import PhotosArrangeProcessor
 
 from Common.SecretConfig import SecretConfig
 from Common.CommonHelper import CommonHelper
@@ -96,7 +99,22 @@ class ApiContext:
         self.InitDnsPipeline()
         ApiContext.DnsPipeline = self.dnsPipeline
 
+        self.InitPhotosPipeline()
+        ApiContext.PhotosSergeyPipeline = self.photosSergeyPipeline
+        ApiContext.PhotosLiliaPipeline = self.photosLiliaPipeline
+
         self.log.info(f'initialization API finished @ {datetime.datetime.now()}')
+
+    def InitPhotosPipeline(self):
+        self.photosSergeyPipeline = Pipeline()
+        self.photosSergeyPipeline.providers.append(FilesWalkerProvider("../camera-OpenCV-data/Mobile", ['Lilia']))
+        self.photosSergeyPipeline.processors.append(MediaCreationDateProcessor())
+        self.photosSergeyPipeline.processors.append(PhotosArrangeProcessor('Mobile Sergey'))
+
+        self.photosLiliaPipeline = Pipeline()
+        self.photosLiliaPipeline.providers.append(FilesWalkerProvider("../camera-OpenCV-data/Mobile/Lilia"))
+        self.photosLiliaPipeline.processors.append(MediaCreationDateProcessor())
+        self.photosLiliaPipeline.processors.append(PhotosArrangeProcessor('Mobile Lilia'))
 
     def InitShotsPipeline(self):
         self.shotsPipeline.providers.clear()

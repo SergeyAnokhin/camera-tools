@@ -74,6 +74,15 @@ def processGetDnsData(request):
 ### API : /process/move_mobile_photos ###
 @logit
 def processMoveMobilePhotos(request):
+    ### TEST BY SMALL PIECES ### (better rollback before)
+    ctx = {}
+    ApiContext.PhotosSergeyPipeline.Get(ctx)
+    ApiContext.PhotosSergeyPipeline.Process(ctx)
+
+    ctx = {}
+    ApiContext.PhotosLiliaPipeline.Get(ctx)
+    ApiContext.PhotosLiliaPipeline.Process(ctx)
+
     return HttpResponse(f"processMoveMobilePhotos")
 
 ### API : /process/process_extract_dns_adguard_data ###
