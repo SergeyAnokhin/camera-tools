@@ -32,13 +32,16 @@ class TestDns(unittest.TestCase):
         pipeline.Get(context)
         data = context['items']
 
-        self.assertEqual(len(data), 6)
+        self.assertEqual(len(data), 7)
         self.assertEqual(data[5]['client'], '192.168.1.12')
         self.assertEqual(data[5]['client_id'], 12)
         self.assertEqual(data[5]['elapsedMs'], 12.18)
         self.assertEqual(data[5]['@timestamp'], '2020-02-14T23:17:05.783Z')
         self.assertEqual(data[5]['_index'], 'dns-2020.02')
         self.assertEqual(data[5]['_id'], '192.168.1.12@2020-02-14T23:17:05.783Z_m23.cloudmqtt.com')
+        # complex answer check : 
+        self.assertEqual(data[6]['answer'][0]['value'], '124.202.138.29')
+        self.assertEqual(data[6]['answer'][1]['value'], '175.25.50.70')
 
     def test_processor(self):
         # python -m unittest tests.test_dns.TestDns.test_processor

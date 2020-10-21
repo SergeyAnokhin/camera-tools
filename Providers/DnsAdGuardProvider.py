@@ -1,4 +1,4 @@
-import json, datetime, requests, re, pytz
+import json, datetime, requests, re, pytz, sys
 from dns import reversename, resolver
 from django.core.serializers.json import DjangoJSONEncoder
 from Providers.Provider import Provider
@@ -45,32 +45,41 @@ class DnsAdGuardProvider(Provider):
         return data
 
     def PostProcess(self, i, context: dict):
-        self.log.debug("Source: " + json.dumps(i, indent=4))
-        match = self.pattern_id.search(i["client"])
-        if match:
-            i["client_id"] = int(match.group(1))
-        i["client_ip"] = i["client"]
-
-        # DNS reverse lookup
-        rev_name = reversename.from_address(i["client_ip"])
         try:
-            if not self.isSimulation:
-                answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False) # 
-                i["client"] = answer[0].target.labels[0].decode("utf-8") 
-        except resolver.NXDOMAIN as err:
-            self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
-        except IndexError as err:
-            self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
-        
-        dt = self.ParseDateTime(i["time"])
-        del(i["time"])
-        dt = dt.astimezone(pytz.utc)
-        dtStr = self.encoder.encode(dt).strip('"')
-        i["@timestamp"] = dtStr
-        i["tags"] = ["camera_tools"]
-        i["elapsedMs"] = round(float(i["elapsedMs"]), 2)
-        i['_index'] = f"dns-{dt:%Y.%m}"
-        i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
+            match = self.pattern_id.search(i["client"])
+            if match:
+                i["client_id"] = int(match.group(1))
+            i["client_ip"] = i["client"]
+
+            # DNS reverse lookup
+            rev_name = reversename.from_address(i["client_ip"])
+            try:
+                if not self.isSimulation:
+                    answer = resolver.query(rev_name,"PTR", lifetime=60, raise_on_no_answer=False) # 
+                    i["client"] = answer[0].target.labels[0].decode("utf-8") 
+            except resolver.NXDOMAIN as err:
+                self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
+            except IndexError as err:
+                self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
+            
+            for item in i['answer']:
+                if not isinstance(item['value'], str): # simplify complex answer SRV
+                    item['value'] = str(item['value']['Target']).strip('.')
+
+            dt = self.ParseDateTime(i["time"])
+            del(i["time"])
+            dt = dt.astimezone(pytz.utc)
+            dtStr = self.encoder.encode(dt).strip('"')
+            i["@timestamp"] = dtStr
+            i["tags"] = ["camera_tools"]
+            i["elapsedMs"] = round(float(i["elapsedMs"]), 2)
+            i['_index'] = f"dns-{dt:%Y.%m}"
+            i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
+
+        except:
+            print("⚠ Unexpected error:", sys.exc_info()[0])
+            self.log.debug("Source: " + json.dumps(i, indent=4))
+            raise
 
     def ParseDateTime(self, oldestStr: str):
         oldestStr = oldestStr.replace("Z", "+00:00")

@@ -148,6 +148,140 @@
             "reason": "NotFilteredNotFound",
             "status": "NOERROR",
             "time": "2020-02-15T00:17:05.783066408+01:00"
+        },
+        {
+            "answer": [
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 22
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "124.202.138.29."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 20
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "175.25.50.70."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 22
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "124.202.138.31."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 20
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "sis.jpush.io."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 18
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "s.jpush.cn."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 25
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "easytomessage.com."
+                    }
+                },
+                {
+                    "ttl": 239,
+                    "type": "SRV",
+                    "value": {
+                        "Hdr": {
+                            "Name": "_psis._udp.jpush.cn.",
+                            "Rrtype": 33,
+                            "Class": 1,
+                            "Ttl": 239,
+                            "Rdlength": 21
+                        },
+                        "Priority": 100,
+                        "Weight": 0,
+                        "Port": 19000,
+                        "Target": "43.247.88.106."
+                    }
+                }
+            ],
+            "answer_dnssec": false,
+            "client": "192.168.1.81",
+            "elapsedMs": "0.223848",
+            "question": {
+                "class": "IN",
+                "host": "_psis._udp.jpush.cn",
+                "type": "SRV"
+            },
+            "reason": "NotFilteredNotFound",
+            "status": "NOERROR",
+            "time": "2020-10-21T16:51:09.946450271+02:00"
         }
     ],
     "oldest": "2020-02-14T22:36:28.294967515+01:00"
