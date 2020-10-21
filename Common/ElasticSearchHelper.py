@@ -28,6 +28,6 @@ class ElasticSearchHelper:
         #print('{}@{}'.format(config.camera, file.to.get_timestamp_utc()), json_data)
         es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
         res = es.index(index="cameraarchive-" + file.to.get_month_id_utc(),
-                       doc_type='doc',
+                       doc_type='_doc',
                        body=json_data,
                        id='{}@{}'.format(config.camera, file.to.get_timestamp_utc()))

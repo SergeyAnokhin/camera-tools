@@ -2,7 +2,7 @@
 from .defaults import *
 
 USED_SETTINGS = __name__
-DEBUG = True
+DEBUG = False
 ELASTICSEARCH_HOST = 'elasticsearch:9200'
 # 172.19.0.2:9300
 CAMERA_LIVE_PATH = "/mnt/Camera"

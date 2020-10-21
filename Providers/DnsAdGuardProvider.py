@@ -73,8 +73,9 @@ class DnsAdGuardProvider(Provider):
         i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
 
     def ParseDateTime(self, oldestStr: str):
-        pattern = re.compile("\.(\d{6})\d+(\D)")
-        oldest = pattern.sub(r".\1\2", oldestStr)
+        oldestStr = oldestStr.replace("Z", "+00:00")
+        pattern = re.compile("\.(\d{6})\d+") # shorter fraction
+        oldest = pattern.sub(r".\1", oldestStr)
         dt = datetime.datetime.fromisoformat(oldest)
         # dt = dt.replace(tzinfo=None)
         return dt

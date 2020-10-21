@@ -19,7 +19,7 @@ class ElasticSearchDnsProcessor(Processor):
         del(raw['_index'])
         json_data = json.dumps(raw, indent=4, sort_keys=True)
         self.log.debug(f'➕ Index document: 🆔 ID: {id}  📁 INDEX: {index}')
-        # self.log.debug(json.dumps(raw, indent=4))
+        self.log.debug(json.dumps(raw, indent=4))
         if not self.isSimulation and self.elasticsearch_host:
             es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
             es.index(index=index, doc_type='_doc', body=json_data, id=id)

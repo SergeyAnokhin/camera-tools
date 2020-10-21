@@ -74,7 +74,7 @@ class ElasticSearchProcessor(PipelineShotProcessor):
         self.log.info(f'    - path_cv: {path_cv}')
         if not self.isSimulation and self.elasticsearch_host:
             es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
-            es.index(index=index, doc_type='doc', body=json_data, id=id)
+            es.index(index=index, doc_type='_doc', body=json_data, id=id)
         else:
             if self.isSimulation:
                 self.log.debug("Simulation mode. Indexation ignored")

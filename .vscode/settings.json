@@ -13,5 +13,8 @@
     "python.testing.unittestEnabled": true,
     "python.testing.nosetestArgs": [
         "tests"
-    ]
+    ],
+    "files.associations": {
+        "*.yaml": "home-assistant"
+    }
 }
