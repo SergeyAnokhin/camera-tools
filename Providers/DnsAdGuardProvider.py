@@ -62,9 +62,10 @@ class DnsAdGuardProvider(Provider):
             except IndexError as err:
                 self.log.warning(f"Cant resolve IP: 📶 {i['client_ip']}. {err}")
             
-            for item in i['answer']:
-                if not isinstance(item['value'], str): # simplify complex answer SRV
-                    item['value'] = str(item['value']['Target']).strip('.')
+            if 'answer' in i:
+                for item in i['answer']:
+                    if not isinstance(item['value'], str): # simplify complex answer SRV
+                        item['value'] = str(item['value']['Target']).strip('.')
 
             dt = self.ParseDateTime(i["time"])
             del(i["time"])
