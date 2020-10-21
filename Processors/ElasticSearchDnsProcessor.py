@@ -1,4 +1,4 @@
-import json
+import json, sys
 from elasticsearch import Elasticsearch
 
 from Processors.Processor import Processor
@@ -19,15 +19,22 @@ class ElasticSearchDnsProcessor(Processor):
         del(raw['_index'])
         json_data = json.dumps(raw, indent=4, sort_keys=True)
         self.log.debug(f'➕ Index document: 🆔 ID: {id}  📁 INDEX: {index}')
-        self.log.debug(json.dumps(raw, indent=4))
-        if not self.isSimulation and self.elasticsearch_host:
-            es = Elasticsearch([{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
-            es.index(index=index, doc_type='_doc', body=json_data, id=id)
-        else:
-            if self.isSimulation:
-                self.log.debug("Simulation mode. Indexation ignored")
-            if not self.elasticsearch_host:
-                self.log.error("Elasticsearch host not defined. Indexation ignored")
-            self.log.debug(json_data)
-            meta = self.CreateMetadata(id, context)
-            meta['_source'] = raw
+
+        try:
+            if not self.isSimulation and self.elasticsearch_host:
+                es = Elasticsearch(
+                    [{'host': self.elasticsearch_host, 'port': self.elasticsearch_port}])
+                es.index(index=index, doc_type='_doc', body=json_data, id=id)
+            else:
+                if self.isSimulation:
+                    self.log.debug("Simulation mode. Indexation ignored")
+                if not self.elasticsearch_host:
+                    self.log.error(
+                        "Elasticsearch host not defined. Indexation ignored")
+                self.log.debug(json_data)
+                meta = self.CreateMetadata(id, context)
+                meta['_source'] = raw
+        except:
+            print("⚠ Unexpected error:", sys.exc_info()[0])
+            self.log.debug(json.dumps(raw, indent=4))
+            raise
