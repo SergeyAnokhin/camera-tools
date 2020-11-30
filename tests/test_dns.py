@@ -121,6 +121,24 @@ class TestDns(unittest.TestCase):
         dt = target.ParseDateTime(strDt)
         self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
 
+        # AdGuard:   14:24   14:24:48 30/11/2020 
+        # API:       15:24   2020-11-30T15:24:48.684883963+02:00
+        # ES Source: 13:24   2020-11-30T13:24:48.684Z
+        # Kiabana:   14:24   30/11 14:24:48
+        strDt = "2020-11-30T15:50:16.179671502+02:00"
+        target = DnsAdGuardProvider(isSimulation=True) 
+        dt = target.ParseDateTime(strDt)
+        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
+
+        strDt = "2020-11-30T02:04:02.07754+02:00"
+        target = DnsAdGuardProvider(isSimulation=True) 
+        dt = target.ParseDateTime(strDt)
+        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
+# ValueError: Invalid isoformat string: '2020-11-29T20:28:10.71069+02:00'
+# ValueError: Invalid isoformat string: '2020-11-29T02:09:52.76365+02:00'
+
+
+
     # def test_real(self):
     #     # python -m unittest tests.test_dns.TestDns.test_real
 
