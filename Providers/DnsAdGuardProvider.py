@@ -12,6 +12,9 @@ class DnsAdGuardProvider(Provider):
         resolver.default_resolver = resolver.Resolver(configure=False)
         resolver.default_resolver.nameservers = [AppSettings.DNS_HOST]
         self.encoder = DjangoJSONEncoder()
+        self.pattern6OrMoreDigits = re.compile("\.(\d{6})\d+") # .123456789 => .(123456)789
+        self.patterFloat = re.compile("(\d+\.\d+)") # 12.3456789
+
 
     def GetProtected(self, data) -> []:
         if AppSettings.DNS_ADGUARD.API_QUERY_LOG.startswith("http"):
@@ -82,11 +85,13 @@ class DnsAdGuardProvider(Provider):
             self.log.debug("Source: " + json.dumps(i, indent=4))
             raise
 
-    def ParseDateTime(self, oldestStr: str):
-        oldestStr = oldestStr.replace("Z", "+00:00")
-        pattern = re.compile("\.(\d{6})\d+") # shorter fraction
-        oldest = pattern.sub(r".\1", oldestStr)
-        dt = datetime.datetime.fromisoformat(oldest)
+    def ParseDateTime(self, datetimeStr: str):
+        datetimeStr = datetimeStr.replace("Z", "+00:00")
+        # 12.354698787984 => 12.354698 # exact 6 digit after "." and 2 before
+        #  2.354698787984 => 02.354698
+        #  2.354          => 02.354000
+        datetimeStr = self.patterFloat.sub(lambda x: '{:0>9.6f}'.format(float(x.group(1))), datetimeStr)
+        dt = datetime.datetime.fromisoformat(datetimeStr)
         # dt = dt.replace(tzinfo=None)
         return dt
 

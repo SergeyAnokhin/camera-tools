@@ -116,27 +116,36 @@ class TestDns(unittest.TestCase):
 
     def test_datetime(self):
         # python -m unittest tests.test_dns.TestDns.test_datetime
-        strDt = "2020-10-26T00:29:40.88814+01:00"
         target = DnsAdGuardProvider(isSimulation=True) 
-        dt = target.ParseDateTime(strDt)
-        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
 
+        ## Standard
         # AdGuard:   14:24   14:24:48 30/11/2020 
         # API:       15:24   2020-11-30T15:24:48.684883963+02:00
         # ES Source: 13:24   2020-11-30T13:24:48.684Z
         # Kiabana:   14:24   30/11 14:24:48
-        strDt = "2020-11-30T15:50:16.179671502+02:00"
-        target = DnsAdGuardProvider(isSimulation=True) 
+        strDt = "2020-11-30T15:24:48.684883963+02:00"
         dt = target.ParseDateTime(strDt)
-        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
+        expected = datetime.datetime(2020, 11, 30, 15, 24, 48, 684884, 
+                            tzinfo=datetime.timezone(datetime.timedelta(hours=2)))
+        self.assertEqual(dt.hour, expected.hour)
+        self.assertEqual(dt.microsecond, expected.microsecond)
+        self.assertEqual(dt.tzinfo, expected.tzinfo)
+        self.assertEqual(dt, expected)
 
+        # Short microseconds
         strDt = "2020-11-30T02:04:02.07754+02:00"
+        dt = target.ParseDateTime(strDt)
+        expected = datetime.datetime(2020, 11, 30, 2, 4, 2, 77540, 
+                            tzinfo=datetime.timezone(datetime.timedelta(hours=2)))
+        self.assertEqual(dt, expected)
+
+        # Short microseconds
+        strDt = "2020-10-26T00:29:40.88814+01:00"
         target = DnsAdGuardProvider(isSimulation=True) 
         dt = target.ParseDateTime(strDt)
-        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
-# ValueError: Invalid isoformat string: '2020-11-29T20:28:10.71069+02:00'
-# ValueError: Invalid isoformat string: '2020-11-29T02:09:52.76365+02:00'
-
+        expected = datetime.datetime(2020, 10, 26, 0, 29, 40, 888140, 
+                            tzinfo=datetime.timezone(datetime.timedelta(hours=1)))
+        self.assertEqual(dt, expected)
 
 
     # def test_real(self):
