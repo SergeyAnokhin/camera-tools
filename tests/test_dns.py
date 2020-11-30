@@ -114,6 +114,13 @@ class TestDns(unittest.TestCase):
         self.assertEqual(generated['@timestamp'], expected['@timestamp'])
         self.assertDictEqual(generated, expected)
 
+    def test_datetime(self):
+        # python -m unittest tests.test_dns.TestDns.test_datetime
+        strDt = "2020-10-26T00:29:40.88814+01:00"
+        target = DnsAdGuardProvider(isSimulation=True) 
+        dt = target.ParseDateTime(strDt)
+        self.assertEqual(dt, datetime.datetime(2020, 10, 26, 00, 29, 40, 88814))
+
     # def test_real(self):
     #     # python -m unittest tests.test_dns.TestDns.test_real
 
