@@ -52,9 +52,9 @@ class ApiContext:
 
     def InitPrivate(self):
 
-        file_error_handler = logging.FileHandler(filename='camera-tools-error.log', encoding='utf-8')
+        file_error_handler = logging.FileHandler(filename='logs/camera-tools-error.log', encoding='utf-8')
         file_error_handler.setLevel(logging.ERROR)
-        file_handler = logging.handlers.TimedRotatingFileHandler('camera-tools.log', when='midnight',
+        file_handler = logging.handlers.TimedRotatingFileHandler('logs/camera-tools.log', when='midnight',
             backupCount=7, encoding='utf-8')
         file_handler.suffix = '_%Y-%m-%d.log'
         # html_handler = HtmlLogger.HTMLRotatingFileHandler('camera-tools.html')

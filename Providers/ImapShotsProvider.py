@@ -101,5 +101,6 @@ class ImapShotsProvider(PipelineShotProvider):
         self.log.debug(f'Connection: {accountDetails}')
 
     def Disconnect(self):
+        self.imapSession.select()
         self.imapSession.close()
         self.imapSession.logout()
