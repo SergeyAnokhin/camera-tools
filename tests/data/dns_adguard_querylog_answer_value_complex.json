@@ -127,7 +127,7 @@
             "elapsedMs": "0.223848",
             "question": {
                 "class": "IN",
-                "host": "_psis._udp.jpush.cn",
+                "name": "_psis._udp.jpush.cn",
                 "type": "SRV"
             },
             "reason": "NotFilteredNotFound",
@@ -261,7 +261,7 @@
             "elapsedMs": "7.554716",
             "question": {
                 "class": "IN",
-                "host": "_psis._udp.jpush.cn",
+                "name": "_psis._udp.jpush.cn",
                 "type": "SRV"
             },
             "reason": "NotFilteredNotFound",

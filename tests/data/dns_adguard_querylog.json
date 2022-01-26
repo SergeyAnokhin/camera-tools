@@ -27,7 +27,7 @@
             "elapsedMs": "8.869936000000001",
             "question": {
                 "class": "IN",
-                "host": "www.cloudmqtt.com",
+                "name": "www.cloudmqtt.com",
                 "type": "A"
             },
             "reason": "NotFilteredNotFound",
@@ -51,7 +51,7 @@
             "elapsedMs": "20.263144",
             "question": {
                 "class": "IN",
-                "host": "m23.cloudmqtt.com",
+                "name": "m23.cloudmqtt.com",
                 "type": "A"
             },
             "reason": "NotFilteredNotFound",
@@ -75,7 +75,7 @@
             "elapsedMs": "11.733213",
             "question": {
                 "class": "IN",
-                "host": "m23.cloudmqtt.com",
+                "name": "m23.cloudmqtt.com",
                 "type": "A"
             },
             "reason": "NotFilteredNotFound",
@@ -99,7 +99,7 @@
             "elapsedMs": "22.188145",
             "question": {
                 "class": "IN",
-                "host": "m23.cloudmqtt.com",
+                "name": "m23.cloudmqtt.com",
                 "type": "A"
             },
             "reason": "NotFilteredNotFound",
@@ -123,7 +123,7 @@
             "elapsedMs": "11.859513999999999",
             "question": {
                 "class": "IN",
-                "host": "m23.cloudmqtt.com",
+                "name": "m23.cloudmqtt.com",
                 "type": "A"
             },
             "reason": "NotFilteredNotFound",
@@ -142,7 +142,7 @@
             "elapsedMs": "12.183472",
             "question": {
                 "class": "IN",
-                "host": "m23.cloudmqtt.com",
+                "name": "m23.cloudmqtt.com",
                 "type": "AAAA"
             },
             "reason": "NotFilteredNotFound",
@@ -276,7 +276,7 @@
             "elapsedMs": "0.223848",
             "question": {
                 "class": "IN",
-                "host": "_psis._udp.jpush.cn",
+                "name": "_psis._udp.jpush.cn",
                 "type": "SRV"
             },
             "reason": "NotFilteredNotFound",

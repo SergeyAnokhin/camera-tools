@@ -58,7 +58,7 @@ class TestDns(unittest.TestCase):
     "elapsedMs": 12.18,
     "question": {
         "class": "IN",
-        "host": "m23.cloudmqtt.com",
+        "name": "m23.cloudmqtt.com",
         "type": "AAAA"
     },
     "reason": "NotFilteredNotFound",
@@ -97,7 +97,7 @@ class TestDns(unittest.TestCase):
     "elapsedMs": 12.18,
     "question": {
         "class": "IN",
-        "host": "m23.cloudmqtt.com",
+        "name": "m23.cloudmqtt.com",
         "type": "AAAA"
     },
     "reason": "NotFilteredNotFound",

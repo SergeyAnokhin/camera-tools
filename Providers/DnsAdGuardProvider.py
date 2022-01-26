@@ -78,7 +78,7 @@ class DnsAdGuardProvider(Provider):
             i["tags"] = ["camera_tools"]
             i["elapsedMs"] = round(float(i["elapsedMs"]), 2)
             i['_index'] = f"dns-{dt:%Y.%m}"
-            i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["host"]}'
+            i['_id'] = f'{i["client"]}@{dtStr}_{i["question"]["name"]}'
 
         except:
             print("⚠ Unexpected error:", sys.exc_info()[0])
