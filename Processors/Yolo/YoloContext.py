@@ -30,4 +30,10 @@ class YoloContext:
         self.layers = self.net.getLayerNames()
         self.layers = [self.layers[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
 
+        # layersNames = self.net.getLayerNames()
+        # self.log.debug(f"[LOAD] Layers found: {len(layersNames)} first: {layersNames[0]}")
+        # for i in self.net.getUnconnectedOutLayers():
+        #     self.log.debug(f"[LOAD] Add Layer: {i}")
+        #     self.layers.append(layersNames[i - 1])
+
         self.isPreLoaded = True
