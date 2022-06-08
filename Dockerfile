@@ -1,5 +1,6 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8
+#FROM python:3.8-slim
+FROM python:3.7
 
 EXPOSE 8000
 
@@ -9,11 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+RUN apt-get update
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-RUN apt-get install ffmpeg libsm6 libxext6  -y
 
 WORKDIR /app
 COPY . /app
