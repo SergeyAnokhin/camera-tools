@@ -1,5 +1,3 @@
-REM SET FLASK_APP=app.py
-REM flask run --host=192.168.1.31 --port=3150
 @echo off
 netsh interface show interface > temp/netsh_interface_show_interface.txt
 netsh wlan show interfaces > temp/netsh_wlan_show_interfaces.txt
@@ -18,4 +16,4 @@ REM )
 REM echo Wi-Fi status: %host_net_interfaces%
 REM echo Wi-Fi Name: %host_wifi_name%
 
-python manage.py runserver localhost:8000 --settings=web.settings.dev_at_home
+python manage.py runserver localhost:8000 --settings=web.settings.dev_remote

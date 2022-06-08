@@ -16,5 +16,6 @@
     ],
     "files.associations": {
         "*.yaml": "home-assistant"
-    }
+    },
+    "python.pythonPath": "C:\\Progs\\anaconda3\\python.exe"
 }
