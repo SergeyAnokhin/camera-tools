@@ -1,6 +1,6 @@
 from .defaults import *
 
-USED_SETTINGS = "dev_offline"
+USED_SETTINGS = __name__
 
 ELASTICSEARCH_HOST = None
 CAMERA_LIVE_PATH = "C:\\Src\\temp\\CameraArchive"

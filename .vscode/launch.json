@@ -5,14 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File (Integrated Terminal)",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Remote Attach",
+            "name": "Python: Remote Attach (Docker)",
             "type": "python",
             "request": "attach",
             "port": 5678,
@@ -23,6 +16,44 @@
                     "remoteRoot": "."
                 }
             ]
+        },
+        {
+            "name": "Docker: Python - Django",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "python": {
+                "pathMappings": [
+                    {
+                        "localRoot": "${workspaceFolder}",
+                        "remoteRoot": "/app"
+                    }
+                ],
+                "projectType": "django"
+            }
+        },
+        {
+            "name": "Python: Attacher",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Current File (Integrated Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
         },
         {
             "name": "Python: Module",
@@ -84,20 +115,5 @@
             "program": "${file}",
             "console": "externalTerminal"
         },
-        {
-            "name": "Docker: Python - Django",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "django"
-            }
-        }
     ]
 }
