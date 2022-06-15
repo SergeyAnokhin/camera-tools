@@ -1,10 +1,14 @@
 version: '3.4'
 
 services:
-  cameratools:
-    image: cameratools
+  camera_tools:
+    # docker-compose run camera_tools bash
+    container_name: camera_tools
+    image: camera_tools
     build:
       context: .
       dockerfile: ./Dockerfile
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload --settings=web_project.envs.dev_local"]
     ports:
       - 8000:8000
+      - 5678:5678
