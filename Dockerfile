@@ -19,8 +19,8 @@ RUN python3 -m pip install --upgrade pip
 
 
 
-ENV DJANGO_SETTINGS=dev_container_offline
-RUN export DJANGO_SETTINGS_MODULE=web.settings.${DJANGO_SETTINGS}
+# ENV DJANGO_SETTINGS=dev_container_offline
+# RUN export DJANGO_SETTINGS_MODULE=web.settings.${DJANGO_SETTINGS}
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

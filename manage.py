@@ -18,5 +18,5 @@ def main():
 
 
 if __name__ == '__main__':
-    print("=== Python Code Start :: MANAGE :: Start mail()")
+    print("⚙️⚙️⚙️⚙️⚙️ Python Code Start :: MANAGE :: Start mail() ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️")
     main()

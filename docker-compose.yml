@@ -2,13 +2,59 @@ version: '3.4'
 
 services:
   camera_tools:
-    # docker-compose run camera_tools bash
+    # docker-compose run camera_tools bash 
     container_name: camera_tools
     image: camera_tools
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload --settings=web.settings.dev_at_home"]
+    # command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload --settings=web.settings.dev_at_home"]
+            # python manage.py migrate &&
+            # python manage.py create_superuser_with_password --no-input --email starOs@mail.ru --username star --preserve &&
+            # python manage.py runserver 0.0.0.0:8000 --settings=web.settings.${DJANGO_SETTINGS} "
+    command: > 
+      bash -c "echo @@@@@@@@@@ LINUX CONTAINER FROM HERE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ &&
+          mkdir -p /mnt/CameraArchive &&
+          mkdir -p /mnt/Hassio &&
+          mkdir -p /mnt/Photo &&
+          echo 📦Docker:: Mount 🗄️servers: Diskstation, Hassio &&
+          echo 📦Docker:: Using 🔧settings: web.settings.${DJANGO_SETTINGS} &&
+          mount -t cifs -o username=camera_tools,password=ver2new //192.168.1.16/CameraArchive /mnt/CameraArchive || true && 
+          mount -t cifs -o username=star,password=Ver2one2,vers=3.0 //192.168.1.36/config /mnt/Hassio || true && 
+          mount -t cifs -o username=camera_tools,password=ver2new //192.168.1.16/photo /mnt/Photo || true && 
+          export DJANGO_SETTINGS_MODULE=web.settings.${DJANGO_SETTINGS} &&
+          echo 📦Docker :: Wait for connection debugger : localhost:5678 &&
+          pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload --settings=${DJANGO_SETTINGS} "
     ports:
-      - 8000:8000
+      - 3150:8000
       - 5678:5678
+    volumes:
+    #  - .:/code
+      - ${SRC_PATH}/camera-tools:/app
+      - ${SRC_PATH}/camera-OpenCV-data:/camera-OpenCV-data
+      - ${CAMERA_LIVE_PATH}:/mnt/Camera
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+    cap_add: 
+      - DAC_READ_SEARCH # for mount smb
+      - SYS_ADMIN # for mount smb
+    environment:
+      - COMPOSE_CONVERT_WINDOWS_PATHS=1
+      - USERNAME # copy from host machine
+      - COMPUTERNAME # copy from host machine
+      # - VARIABLE_FROM_LOCAL_ENV # copy from host machine: cmd: set VARIABLE_FROM_LOCAL_ENV OK alpine: echo $VARIABLE_FROM_LOCAL_ENV
+      - VARIABLE_FROM_ENV_FILE # copy from host machine: check .env file
+      # - VARIABLE_FROM_GLOBAL_ENV # copy from host machine
+      - DJANGO_ADMIN_PASSWORD
+      - host_net_interfaces
+      - host_wifi_name
+      - docker_container=1
+    #network_mode: host
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge
