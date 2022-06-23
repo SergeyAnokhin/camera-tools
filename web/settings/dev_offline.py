@@ -7,7 +7,7 @@ CAMERA_LIVE_PATH = "C:\\Src\\temp\\CameraArchive"
 CAMERA_ARCHIVE_PATH = "C:\\Src\\camera-OpenCV-data\\Camera"
 PHOTO_ARCHIVE_PATH = "C:\\Src\\temp"
 HASSIO_PATH = None
-
+DNS_HOST = "192.168.1.1"
 ELASTICSEARCH_DSL={
     'default': {
         'hosts': '192.168.99.100:3192'
