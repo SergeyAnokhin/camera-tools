@@ -178,7 +178,7 @@ class CommonHelper:
             'critical': {'color': 'red', 'bold': True, 'background': 'black'}, 
             'debug': {'color': 2, 'bold': True}, 
             'error': {'color': 'red'}, 
-            'info': {'color': 'black', 'faint': True}, 
+            'info': {'faint': True}, 
             'warning': {'color': 'yellow'},
             'notice': {'color': 'magenta'}, 
             'spam': {'color': 'green', 'faint': True}, 

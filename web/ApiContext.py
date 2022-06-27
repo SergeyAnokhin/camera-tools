@@ -1,4 +1,11 @@
-import logging, sys, threading, datetime, locale, coloredlogs, time, os
+import logging
+import sys
+import threading
+import datetime
+import locale
+import coloredlogs
+import time
+import os
 
 from Pipeline.ShotsPipeline import ShotsPipeline
 from Pipeline.Pipeline import Pipeline
@@ -29,6 +36,7 @@ from Common import HtmlLogger
 
 from Archiver.CameraArchiveHelper import CameraArchiveHelper
 
+
 class ApiContext:
     # class ApiContextInstance:
     #     def __init__(self, arg):
@@ -52,28 +60,32 @@ class ApiContext:
 
     def InitPrivate(self):
 
-        file_error_handler = logging.FileHandler(filename='logs/camera-tools-error.log', encoding='utf-8')
+        file_error_handler = logging.FileHandler(
+            filename='logs/camera-tools-error.log', encoding='utf-8')
         file_error_handler.setLevel(logging.ERROR)
         file_handler = logging.handlers.TimedRotatingFileHandler('logs/camera-tools.log', when='midnight',
-            backupCount=7, encoding='utf-8')
+                                                                 backupCount=7, encoding='utf-8')
         file_handler.suffix = '_%Y-%m-%d.log'
         # html_handler = HtmlLogger.HTMLRotatingFileHandler('camera-tools.html')
         # html_handler.suffix = '_%Y-%m-%d_%H.html'
         # html_handler.setFormatter(HtmlLogger.HTMLFormatter())
-        locale.getpreferredencoding() #need for display emoji in terminal
+        locale.getpreferredencoding()  # need for display emoji in terminal
         stdout_handler = logging.StreamHandler(sys.stdout)
         handlers = [file_handler, stdout_handler, file_error_handler]
 
-        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s', # \t####=> %(filename)s:%(lineno)d 
-            level=logging.DEBUG, 
-            datefmt='%H:%M:%S',
-            handlers=handlers)
+        logging.basicConfig(format='%(asctime)s|%(levelname)-.3s|%(name)s: %(message)s',  # \t####=> %(filename)s:%(lineno)d
+                            level=logging.DEBUG,
+                            datefmt='%H:%M:%S',
+                            handlers=handlers)
 
         self.log = logging.getLogger("API")
         ApiContext.Log = self.log
-        self.log.info('ℹ️ |############################################################|')
-        self.log.info(f'ℹ️ |####### start API @ {str(datetime.datetime.now()) + " ":#<40}|')
-        self.log.info('ℹ️ |############################################################|')
+        self.log.info(
+            'ℹ️ |############################################################|')
+        self.log.info(
+            f'ℹ️ |####### start API @ {str(datetime.datetime.now()) + " ":#<40}|')
+        self.log.info(
+            'ℹ️ |############################################################|')
         self.log.info("USED_SETTINGS: " + AppSettings.USED_SETTINGS)
         self.Helper.installColoredLog(self.log)
 
@@ -103,18 +115,25 @@ class ApiContext:
         ApiContext.PhotosSergeyPipeline = self.photosSergeyPipeline
         ApiContext.PhotosLiliaPipeline = self.photosLiliaPipeline
 
-        self.log.info(f'initialization API finished @ {datetime.datetime.now()}')
+        self.log.info(
+            f'initialization API finished @ {datetime.datetime.now()}')
 
     def InitPhotosPipeline(self):
         self.photosSergeyPipeline = Pipeline()
-        self.photosSergeyPipeline.providers.append(FilesWalkerProvider("../camera-OpenCV-data/Mobile", ['Lilia']))
-        self.photosSergeyPipeline.processors.append(MediaCreationDateProcessor())
-        self.photosSergeyPipeline.processors.append(PhotosArrangeProcessor('Mobile Sergey'))
+        self.photosSergeyPipeline.providers.append(
+            FilesWalkerProvider("../camera-OpenCV-data/Mobile", ['Lilia']))
+        self.photosSergeyPipeline.processors.append(
+            MediaCreationDateProcessor())
+        self.photosSergeyPipeline.processors.append(
+            PhotosArrangeProcessor('Mobile Sergey'))
 
         self.photosLiliaPipeline = Pipeline()
-        self.photosLiliaPipeline.providers.append(FilesWalkerProvider("../camera-OpenCV-data/Mobile/Lilia"))
-        self.photosLiliaPipeline.processors.append(MediaCreationDateProcessor())
-        self.photosLiliaPipeline.processors.append(PhotosArrangeProcessor('Mobile Lilia'))
+        self.photosLiliaPipeline.providers.append(
+            FilesWalkerProvider("../camera-OpenCV-data/Mobile/Lilia"))
+        self.photosLiliaPipeline.processors.append(
+            MediaCreationDateProcessor())
+        self.photosLiliaPipeline.processors.append(
+            PhotosArrangeProcessor('Mobile Lilia'))
 
     def InitShotsPipeline(self):
         self.shotsPipeline.providers.clear()
@@ -124,15 +143,17 @@ class ApiContext:
         self.shotsPipeline.processors.append(DiffContoursProcessor())
         self.shotsPipeline.processors.append(YoloObjDetectionProcessor())
         self.shotsPipeline.processors.append(TrackingProcessor())
-        self.shotsPipeline.processors.append(SaveToTempProcessor())           
+        self.shotsPipeline.processors.append(SaveToTempProcessor())
         self.shotsPipeline.processors.append(MailSenderProcessor())
-        self.shotsPipeline.processors.append(HassioProcessor('temp' if self.isSimulation else None))        
-        self.shotsPipeline.processors.append(ArchiveProcessor(self.isSimulation))
-        self.shotsPipeline.processors.append(ElasticSearchProcessor(self.isSimulation)) 
+        self.shotsPipeline.processors.append(
+            HassioProcessor('temp' if self.isSimulation else None))
+        self.shotsPipeline.processors.append(
+            ArchiveProcessor(self.isSimulation))
+        self.shotsPipeline.processors.append(
+            ElasticSearchProcessor(self.isSimulation))
         self.shotsPipeline.PreLoad()
 
     def InitDnsPipeline(self):
         self.dnsPipeline = Pipeline(self.log)
         self.dnsPipeline.providers.append(DnsAdGuardProvider())
         self.dnsPipeline.processors.append(ElasticSearchDnsProcessor())
-

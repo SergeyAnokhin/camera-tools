@@ -14,17 +14,19 @@ services:
             # python manage.py runserver 0.0.0.0:8000 --settings=web.settings.${DJANGO_SETTINGS} "
     command: > 
       bash -c "echo @@@@@@@@@@ LINUX CONTAINER FROM HERE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ &&
+          echo 📦Docker:: Using 🔧settings: web.settings.${DJANGO_SETTINGS} &&
+          echo 📦Docker:: Mount 🗄️servers: Diskstation, Hassio &&
           mkdir -p /mnt/CameraArchive &&
           mkdir -p /mnt/Hassio &&
           mkdir -p /mnt/Photo &&
-          echo 📦Docker:: Mount 🗄️servers: Diskstation, Hassio &&
-          echo 📦Docker:: Using 🔧settings: web.settings.${DJANGO_SETTINGS} &&
-          mount -t cifs -o username=camera_tools,password=ver2new //${DISKSTATION_IP}/CameraArchive /mnt/CameraArchive || true && 
-          mount -t cifs -o username=star,password=Ver2one2,vers=3.0 //${HASSIO_IP}/config /mnt/Hassio || true && 
-          mount -t cifs -o username=camera_tools,password=ver2new //${DISKSTATION_IP}/photo /mnt/Photo || true && 
+          mount -t cifs -o username=camera_tools,password=${HASSIO_PASSWORD} //${DISKSTATION_IP}/CameraArchive /mnt/CameraArchive || true && 
+          mount -t cifs -o username=star,password=${DISKSTATION_PASSWORD},vers=3.0 //${HASSIO_IP}/config /mnt/Hassio || true && 
+          mount -t cifs -o username=camera_tools,password=${HASSIO_PASSWORD} //${DISKSTATION_IP}/photo /mnt/Photo || true && 
           export DJANGO_SETTINGS_MODULE=web.settings.${DJANGO_SETTINGS} &&
-          echo 📦Docker :: Wait for connection debugger : localhost:5678 &&
-          pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload --settings=${DJANGO_SETTINGS} "
+          echo 📦Docker :: Wait for connection debugger : 🔗 http://localhost:5678 &&
+          echo 🌎Start Django @ 🔗 http://localhost:3150 &&
+          pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --settings=${DJANGO_SETTINGS} "
+    #  --noreload ==> for suppress reloading python on files changing. Using for Prod?
     ports:
       - 3150:8000
       - 5678:5678

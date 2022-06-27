@@ -137,3 +137,5 @@ USED_SETTINGS = "default"
 CAMERA_ARCHIVE_NAS_PATH = "/CameraArchive"
 
 SOURCE_IMAGE_PATTARN = ".*((?!_cv).){3}\.jpg" # ending with '.jpg' bit not '_cv.jpg'
+
+DNS_HOST = "192.168.1.1"
