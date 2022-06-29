@@ -1,7 +1,10 @@
 version: '3.4'
 
 services:
-  camera_tools:
+
+  ########################
+  camera_tools: ##########
+  ########################
     # docker-compose run camera_tools bash 
     container_name: camera_tools
     image: camera_tools
@@ -57,6 +60,58 @@ services:
     networks:
       - elastic
 
+  ########################
+  elasticsearch:
+  ########################
+    container_name: Elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.0
+    environment:
+      - node.name=es01
+      - bootstrap.memory_lock=false
+      - discovery.type=single-node
+      - cluster.name=elastic-docker-mssurface
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "3192:9200"
+      - "3193:9300"
+    volumes: 
+      - ${SRC_PATH}\docker\elasticsearch\elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ${SRC_PATH}\docker\elasticsearch\log4j.properties:/usr/share/elasticsearch/config/log4j2.properties
+      - ${DATA_DRIVE}Data\Elasticsearch7:/data
+      - ${DATA_DRIVE}Logs\Elasticsearch7:/logs
+      - ${DATA_DRIVE}BackUp\Elasticsearch7:/snapshot7
+      - ${DATA_DRIVE}BackUp\Elasticsearch:/snapshot
+    networks:
+      - elastic
+
+  ########################
+  kibana:
+  ########################
+    container_name: Kibana
+    image: docker.elastic.co/kibana/kibana:7.16.0 # OK 7.11.2
+    ports:
+      - "3156:5601"
+    environment: 
+      - logging.json=false
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+
+
 networks:
   elastic:
     driver: bridge
+
+# .wslconfig:
+# [wsl2]
+# # memory=768MB   # NOK
+# memory=1GB # OK  
+# # processors=2 # Makes the WSL 2 VM use two virtual processors
+# guiApplications=false # OK
+# swap=8GB # OK
+# localhostForwarding=true # OK
